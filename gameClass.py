@@ -4,45 +4,36 @@ import towerClass
 import zombieClass
 import random
 import pygame
+from config import Config
 
 
 class Game:
-    original_frame_rate = 60
-    max_frame_rate = 90
-    min_frame_rate = 15
-    original_zoom = 1
-    original_speed = 1
-    attack_towers_types = [towerClass.ArcheryTower,
-                           towerClass.MagicTower,
-                           towerClass.BombTower]
-    effect_towers_types = [towerClass.DamageBoostTower,
-                           towerClass.AtkRateBoostTower,
-                           towerClass.RangeBoostTower]
-    zombies_types = [zombieClass.ClassicZombie,
-                     zombieClass.TankZombie,
-                     zombieClass.SpeedyZombie,
-                     zombieClass.RandomZombie,
-                     zombieClass.RandomTanky,
-                     zombieClass.RandomTanky2]
+    config = Config.get_default()
 
     def __init__(self, screen, width, height):
+        self.pause = False
         self.moving_action = None
-        self.speed = self.original_speed
         self.buildable = True
         self.moving_map = False
-        self.zoom = 1
-        self.view_center_x = 0
-        self.view_center_y = 0
-        self.tick = 0
+        self.tracking = False
+
+        self.original_zoom = self.config.general.original_zoom
+        self.zoom = self.original_zoom
+        self.time_speed = self.config.general.original_time_speed
+        self.original_frame_rate = self.config.general.original_frame_rate
         self.frame_rate = self.original_frame_rate
         self.background_col = color.DARK_GREY
 
         self.width = width
         self.height = height
         self.alpha_screen = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-        self.money_rect = pygame.Rect(self.width - 40, self.height -20, 40, 20)
+        self.money_rect = pygame.Rect(self.width - 40, self.height - 20, 40, 20)
         self.screen = screen
 
+
+        self.view_center_x = 0
+        self.view_center_y = 0
+        self.time = 0
         self.money = 1000
         self.lives = 100
         self.wave = None
@@ -64,29 +55,37 @@ class Game:
 
         self.actu_moving_action()
         self.home = towerClass.HomeTower(self)
+        self.attack_towers.add(self.home)
 
     def actu_moving_action(self):
-        self.moving_action = self.speed * self.original_frame_rate / self.frame_rate
+        self.moving_action = (
+            self.time_speed * self.original_frame_rate / self.frame_rate
+        ) * (1 - self.pause)
 
-    def change_speed(self, multiplicative):
-        self.speed *= multiplicative
+    def pausing(self):
+        self.pause = not self.pause
         self.actu_moving_action()
 
-    def change_frame_rate(self, multiplicative):
-        self.frame_rate *= multiplicative
-        self.frame_rate = max(self.min_frame_rate, self.frame_rate)
-        self.frame_rate = min(self.max_frame_rate, self.frame_rate)
+    def change_time_speed(self, multiplicative):
+        self.time_speed *= multiplicative
+        self.actu_moving_action()
+
+    def change_frame_rate(self, additional):
+        self.frame_rate += additional
+        self.frame_rate = max(self.config.general.min_frame_rate, self.frame_rate)
+        self.frame_rate = min(self.config.general.max_frame_rate, self.frame_rate)
         self.actu_moving_action()
 
     def new_attack_tower(self, x, y):
-        chosen_tower = random.choice(self.attack_towers_types)
+        chosen_tower = random.choice(self.config.types.attack_towers)(self, x, y)
         if self.transaction(chosen_tower.price):
-            chosen_tower(self, x, y)
+            self.attack_towers.add(chosen_tower)
+            self.unlock_zombies_target()
 
     def new_effect_tower(self, x, y):
-        chosen_tower = random.choice(self.effect_towers_types)
+        chosen_tower = random.choice(self.config.types.effect_towers)(self, x, y)
         if self.transaction(chosen_tower.price):
-            chosen_tower(self, x, y)
+            self.effect_towers.add(chosen_tower)
             self.unlock_zombies_target()
 
     def unlock_zombies_target(self):
@@ -95,14 +94,22 @@ class Game:
 
     def new_zombie(self):
         self.zombies.add(
-            (random.choice(self.zombies_types))(self, self.unview_x(random.randint(0, self.width)),
-                                                self.unview_y(random.randint(0, self.height))))
+            (random.choice(self.config.types.zombies)(
+                self,
+                self.unview_x(random.randint(0, self.width)),
+                self.unview_y(random.randint(0, self.height)),
+                )
+            )
+        )
 
     def print_money(self):
-        txt_surface = (pygame.font.Font(None, 50)).render(str(self.money), True, color.WHITE)
+        txt_surface = (pygame.font.Font(None, 50)).render(
+            str(self.money), True, color.WHITE
+        )
         self.screen.blit(txt_surface, (self.width - txt_surface.get_width(), 10))
 
     def display(self):
+        self.track()
         self.screen.fill(self.background_col)
         self.alpha_screen.fill(0)
         if self.selected is not None:
@@ -123,7 +130,8 @@ class Game:
         self.print_money()
 
     def actu_action(self):
-        self.tick += 1 * self.moving_action
+        if not self.pause:
+            self.time += 1 * self.time_speed / self.frame_rate * self.original_frame_rate
         for tower in self.attack_towers:
             tower.tow_attack()
         for zombie in self.zombies:
@@ -131,8 +139,15 @@ class Game:
         for attack in self.attacks:
             attack.move()
 
-    def view_move(self, x_end, y_end, zoom_end=1, speed=1):
-        self.animations.add(animationClass.ViewMove(self, x_end, y_end, zoom_end, speed))
+    def track(self):
+        if self.tracking and self.selected is not None:
+            self.view_center_x = self.selected.x
+            self.view_center_y = self.selected.y
+
+    def view_move(self, x_end, y_end, zoom_end=None, speed=1):
+        self.animations.add(
+            animationClass.ViewMove(self, x_end, y_end, zoom_end if zoom_end is not None else self.zoom , speed, tracking=True)
+        )
 
     def clean(self):
         if len(self.attacks_bin) > 0:
@@ -168,9 +183,13 @@ class Game:
         self.attack_towers_bin = self.attack_towers.copy()
         self.effect_towers_bin = self.effect_towers.copy()
         self.attacks_bin = self.attacks.copy()
+        self.animations_bin = self.animations.copy()
 
     def money_prize(self, value):
         self.money += value
+
+    def unselect(self):
+        self.selected = None
 
     def transaction(self, value):
         if self.money >= value:
@@ -191,11 +210,13 @@ class Game:
         return (y - self.height / 2) / self.zoom + self.view_center_y
 
     def game_stats(self):
-        return f"Frame rate : {self.frame_rate}\n" \
-               f"Zoom : {self.zoom}\n" \
-               f"Ticks : {self.tick}\n" \
-               f"Center : {self.view_center_x, self.view_center_y}\n" \
-               f"Towers : {len(self.attack_towers) + len(self.effect_towers)}\n" \
-               f"Zombies : {len(self.zombies)}\n" \
-               f"Money : {self.money}\n" \
-               f"Wave : {self.wave}\n"
+        return (
+            f"Frame rate : {self.frame_rate}\n"
+            f"Zoom : {self.zoom}\n"
+            f"Ticks : {self.time}\n"
+            f"Center : {self.view_center_x, self.view_center_y}\n"
+            f"Towers : {len(self.attack_towers) + len(self.effect_towers)}\n"
+            f"Zombies : {len(self.zombies)}\n"
+            f"Money : {self.money}\n"
+            f"Wave : {self.wave}\n"
+        )

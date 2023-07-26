@@ -1,4 +1,6 @@
 from printable import Printable
+from animationClass import ParticleExplosion
+from animationClass import TowerBop
 import attackClass
 import color
 import pygame
@@ -7,20 +9,24 @@ import animationClass
 
 
 class Tower(Printable):
-
-    def __init__(self, game, x, y, image, size, rng, price, life):
-        Printable.__init__(self, game, image, size, size, game.unview_x(x), game.unview_y(y))
-
-        self.range = rng
-        self.price = price
-        self.size = size
-        self.max_life = life
-        self.life = self.max_life
+    def __init__(self, game, x, y, config, color):
         self.game = game
+
+        self.type = config.type
+        self.range = config.range
+        self.price = config.price
+        self.size = config.size
+        self.max_life = config.max_life
+
+        Printable.__init__(
+            self, game, color, self.size, self.size, game.unview_x(x), game.unview_y(y)
+        )
+
+        self.life = self.max_life
+        self.alive = True
 
         self.targets = set()
         self.targets_bin = set()
-
         self.attackers = set()
         self.effecting = set()
 
@@ -41,56 +47,115 @@ class Tower(Printable):
             self.targets_bin.clear()
 
     def selected(self):
-        pygame.draw.circle(self.game.screen, color.lighter(self.game.background_col, 5), (self.view_x(), self.view_y()),
-                           self.range * self.game.zoom)
-        pygame.draw.circle(self.game.screen, color.LIGHT_GREY, (self.view_x(), self.view_y()),
-                           self.range * self.game.zoom, 1)
-        pygame.draw.rect(self.game.screen, color.RED,
-                         pygame.Rect((self.game.view_x(self.x - self.size / 2)),
-                                     self.game.view_y(self.y + self.size / 1.8), self.size * self.game.zoom,
-                                     5 * self.game.zoom))
-        pygame.draw.rect(self.game.screen, color.GREEN,
-                         pygame.Rect((self.game.view_x(self.x - self.size / 2)),
-                                     self.game.view_y(self.y + self.size / 1.8),
-                                     (self.size * self.life / self.max_life) * self.game.zoom, 5 * self.game.zoom))
+        pygame.draw.circle(
+            self.game.screen,
+            color.lighter(self.game.background_col, 5),
+            (self.view_x(), self.view_y()),
+            self.range * self.game.zoom,
+        )
+        pygame.draw.circle(
+            self.game.screen,
+            color.LIGHT_GREY,
+            (self.view_x(), self.view_y()),
+            self.range * self.game.zoom,
+            1,
+        )
+        pygame.draw.rect(
+            self.game.screen,
+            color.RED,
+            pygame.Rect(
+                (self.game.view_x(self.x - self.size / 2)),
+                self.game.view_y(self.y + self.size / 1.8),
+                self.size * self.game.zoom,
+                5 * self.game.zoom,
+            ),
+        )
+        pygame.draw.rect(
+            self.game.screen,
+            color.GREEN,
+            pygame.Rect(
+                (self.game.view_x(self.x - self.size / 2)),
+                self.game.view_y(self.y + self.size / 1.8),
+                (self.size * self.life / self.max_life) * self.game.zoom,
+                5 * self.game.zoom,
+            ),
+        )
         for target in self.targets:
             target.under_selected()
 
     def destroyed(self):
-        if self.game.selected == self:
-            self.game.selected = None
-        for effect_tower in self.effecting:
-            effect_tower.targets.discard(self)
-        self.erase_existence()
+        if self.alive:
+            self.alive = False
+            if self.game.selected == self:
+                self.game.selected = None
+            for effect_tower in self.effecting:
+                effect_tower.targets.discard(self)
+            self.destruction_animation()
+            self.erase_existence()
+
+    def destruction_animation(self):
+        self.game.animations.add(ParticleExplosion(self.game, self.x, self.y, self.color, self.size))
+
 
     def boost_affecting(self):
         for effect_tower in self.game.effect_towers:
-            effect_tower.check_boost(self, self.type)
+            effect_tower.check_boost(self, self.effect_type)
 
     def under_selected(self):
-        pygame.draw.circle(self.game.screen, color.LIGHT_GREY, (self.view_x(), self.view_y()),
-                           self.size * self.game.zoom, 1)
+        pygame.draw.circle(
+            self.game.screen,
+            color.LIGHT_GREY,
+            (self.view_x(), self.view_y()),
+            self.size * self.game.zoom,
+            1,
+        )
 
+    def __str__(self):
+        return f"Tower ({self.type}) at x: {self.x:.1f}, y: {self.y:.1f}"
+
+
+    def info(self):
+        sep = "\n\t\t\t"
+        return (f"\t\tTower   (type : {self.type})"
+                f"\nStats:"
+                f"\n\tPosition : {self.x}, {self.y}"
+                f"\n\tLife : {self.life} / Max : {self.max_life}"
+                f"\n\tRange : {self.range}"
+                f"\n\tPrice : {self.price}"
+                f"\n"
+                f"\nComplement:"
+                f"\n\tTarget(s) : {sep+sep.join(map(str,self.targets))}"
+                f"\n\tAttacker(s) : {sep+sep.join(map(str,self.attackers))}"
+                f"\n\tEffecting : {sep+sep.join(map(str,self.effecting))}"
+                f"\n\tSelected : {self.game.selected == self}"
+                f"\n\n")
 
 class AttackTower(Tower):
-    type = 2
+    effect_type = 2
 
-    def __init__(self, game, x, y, image, attack, size, rng, price, life, num_targets, damage, atk_rate):
-        Tower.__init__(self, game, x, y, image, size, rng, price, life)
-        self.game.attack_towers.add(self)
-        self.num_targets = num_targets
-        self.damage = damage
-        self.atk_rate = atk_rate
+    def __init__(self, game, x, y, config, color, attack):
+        Tower.__init__(self, game, x, y, config, color)
+
+        self.num_targets = config.num_targets
+        self.damage = config.damage
+        self.atk_rate = config.atk_rate
+
         self.attack = attack
         self.targets_lock = False
-        self.last_attack = self.game.tick
+        self.last_attack = self.game.time
+
         self.boost_affecting()
 
     def find_target(self):
-        distances = sorted([(self.dist(zombie), zombie) for zombie in
-                            self.game.zombies.difference(self.game.zombies_soon_dead).difference(
-                                self.targets).difference(self.targets_bin)],
-                           key=lambda x: x[0])
+        distances = sorted(
+            [
+                (self.dist(zombie), zombie)
+                for zombie in self.game.zombies.difference(self.game.zombies_soon_dead)
+                .difference(self.targets)
+                .difference(self.targets_bin)
+            ],
+            key=lambda x: x[0],
+        )
         for i in range(min(len(distances), self.num_targets - len(self.targets))):
             if distances[i][0] <= self.range:
                 self.targets.add(distances[i][1])
@@ -102,7 +167,8 @@ class AttackTower(Tower):
         self.check_target()
         if not self.targets_lock or len(self.targets) == 0:
             self.find_target()
-        for _ in range(1, int((self.game.tick - self.last_attack) / (self.game.original_frame_rate * self.atk_rate))):
+        if len(self.targets) != 0 and (self.game.time - self.last_attack) > self.atk_rate:
+            self.game.animations.add(TowerBop(self.game, self))
             for target in self.targets:
                 if target.life_expect > 0:
                     target.life_expect -= self.damage
@@ -114,7 +180,7 @@ class AttackTower(Tower):
                             attacker.erase_target(target)
                 else:
                     self.erase_target(target)
-            self.last_attack = self.game.tick
+            self.last_attack = self.game.time
 
     def erase_target(self, target):
         Tower.erase_target(self, target)
@@ -124,20 +190,29 @@ class AttackTower(Tower):
         self.game.attack_towers_bin.add(self)
         for zombie in self.attackers:
             zombie.target_lock = False
+            zombie.target = None
             zombie.stop = False
 
 
-class EffectTower(Tower):
-    type = 0
 
-    def __init__(self, game, x, y, image, size, rng, price, life, target_type):
-        Tower.__init__(self, game, x, y, image, size, rng, price, life)
-        self.game.effect_towers.add(self)
-        self.target_type = target_type
-        self.find_target()
-        self.affect_targets()
-        self.boost_affecting()
+
+
+class EffectTower(Tower):
+    effect_type = 0
+
+    def __init__(self, game, x, y, config, color):
+        Tower.__init__(self, game, x, y, config, color)
+
+        self.target_type = config.target_type
+        self.power_up_factor = config.power_up_factor
+
+        self.init_effecting()
         # 0 is for effect_towers | 1 is for all towers | 2 is for attack_towers
+
+    def init_effecting(self):
+        self.find_target()
+        self.signal_targets()
+        self.boost_affecting()
 
     def find_target(self):
         if self.target_type > 0:
@@ -149,7 +224,7 @@ class EffectTower(Tower):
                 if self.dist(tower) <= self.range:
                     self.targets.add(tower)
 
-    def affect_targets(self):
+    def signal_targets(self):
         for tower in self.targets:
             self.start_boost(tower)
             tower.effecting.add(self)
@@ -168,75 +243,70 @@ class EffectTower(Tower):
 
 
 class DamageBoostTower(EffectTower):
-    price = 2000
 
     def __init__(self, game, x, y):
-        self.power_up_value = 2
-        EffectTower.__init__(self, game, x, y, color.CREA2, 15, 100, 1000, 200, 2)
+        EffectTower.__init__(self, game, x, y, game.config.effect_towers.damage, color.CREA2)
 
     def start_boost(self, tower):
-        tower.damage *= self.power_up_value
+        tower.damage *= self.power_up_factor
 
     def stop_boost(self, tower):
-        tower.damage /= self.power_up_value
+        tower.damage /= self.power_up_factor
 
 
 class AtkRateBoostTower(EffectTower):
-    price = 2000
 
     def __init__(self, game, x, y):
-        self.power_up_value = 2
-        EffectTower.__init__(self, game, x, y, color.CREA1, 15, 100, 1000, 200, 2)
+        EffectTower.__init__(self, game, x, y, game.config.effect_towers.atkrate, color.CREA1)
 
     def start_boost(self, tower):
-        tower.atk_rate /= self.power_up_value
+        tower.atk_rate /= self.power_up_factor
 
     def stop_boost(self, tower):
-        tower.damage /= self.power_up_value
+        tower.damage /= self.power_up_factor
 
 
 class RangeBoostTower(EffectTower):
-    price = 2000
 
     def __init__(self, game, x, y):
-        self.power_up_value = 2
-        EffectTower.__init__(self, game, x, y, color.CREA3, 15, 100, 1000, 200, 2)
+        EffectTower.__init__(self, game, x, y, game.config.effect_towers.range, color.CREA3)
 
     def start_boost(self, tower):
-        tower.range *= self.power_up_value
+        tower.range *= self.power_up_factor
 
     def stop_boost(self, tower):
-        tower.range /= self.power_up_value
+        tower.range /= self.power_up_factor
+
+
 
 
 class HomeTower(AttackTower):
-
     def __init__(self, game):
-        AttackTower.__init__(self, game, game.width / 2, game.height / 2, color.GOLD2, attackClass.HomeAttack, 30, 100,
-                             math.inf, 500, 5, 100, .2)
+        AttackTower.__init__(self, game, game.width/2, game.height/2, game.config.attack_towers.home, color.GOLD2, attackClass.HomeAttack)
 
-    def destroyed(self):
-        Tower.destroyed(self)
+
+    def destruction_animation(self):
         self.game.animations.add(
-            animationClass.Explosion(self.game, self.x, self.y, color.GOLD2, self.game.width, 60))
+            animationClass.CircularExplosion(
+                self.game, self.x, self.y, color.GOLD2, self.game.width, 60
+            )
+        )
 
 
 class ArcheryTower(AttackTower):
-    price = 1000
 
     def __init__(self, game, x, y):
-        AttackTower.__init__(self, game, x, y, color.VIOLET, attackClass.ArcherAttack, 20, 600, 300, 200, 2, 20, .3)
+        AttackTower.__init__(self, game, x, y, game.config.attack_towers.magic, color.VIOLET, attackClass.ArcherAttack)
+
 
 
 class MagicTower(AttackTower):
-    price = 2000
 
     def __init__(self, game, x, y):
-        AttackTower.__init__(self, game, x, y, color.BLUE, attackClass.MagicAttack, 20, 400, 500, 200, 5, 50, .8)
+        AttackTower.__init__(self, game, x, y, game.config.attack_towers.magic, color.BLUE, attackClass.MagicAttack)
 
 
 class BombTower(AttackTower):
-    price = 5000
 
     def __init__(self, game, x, y):
-        AttackTower.__init__(self, game, x, y, color.BLACK, attackClass.BombAttack, 20, 700, 1000, 100, 1, 350, 2)
+        AttackTower.__init__(self, game, x, y, game.config.attack_towers.bomb, color.BLACK, attackClass.BombAttack)

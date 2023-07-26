@@ -3,7 +3,7 @@ import os
 import time
 import gameClass
 
-os.environ['SDL_VIDEO_CENTERED'] = '1'
+os.environ["SDL_VIDEO_CENTERED"] = "1"
 pygame.init()
 info = pygame.display.Info()
 
@@ -20,15 +20,14 @@ game = gameClass.Game(screen, width, height)
 last_frame = 0
 
 while running:
-
-    game.actu_action()
     game.clean()
+    game.actu_action()
     game.display()
 
-    one_loop = False
+    one_loop_done = False
 
-    while not one_loop or time.time() - last_frame < 1 / game.frame_rate:
-        one_loop = True
+    while not one_loop_done or time.time() - last_frame < 1 / game.frame_rate:
+        one_loop_done = True
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -40,13 +39,13 @@ while running:
                     for _ in range(spawn):
                         game.new_zombie()
                 elif event.key == pygame.K_p:
-                    game.change_speed(1.5)
+                    game.change_time_speed(1.5)
                 elif event.key == pygame.K_m:
-                    game.change_speed(2/3)
+                    game.change_time_speed(2 / 3)
                 elif event.key == pygame.K_u:
-                    game.change_frame_rate(1.2)
+                    game.change_frame_rate(5)
                 elif event.key == pygame.K_j:
-                    game.change_frame_rate(5/6)
+                    game.change_frame_rate(-5)
                 elif event.key == pygame.K_o:
                     game.frame_rate = game.original_frame_rate
                 elif event.key == pygame.K_h:
@@ -55,6 +54,8 @@ while running:
                     game.zoom = game.original_zoom
                 elif event.key == pygame.K_i:
                     print(game.game_stats())
+                    if game.selected is not None:
+                        print(game.selected.info())
                 elif event.key == pygame.K_z:
                     spawn *= 5
                 elif event.key == pygame.K_a:
@@ -63,26 +64,42 @@ while running:
                     game.complete_destruction()
                 elif event.key == pygame.K_DOLLAR:
                     game.money_prize(10000)
+                elif event.key == pygame.K_t:
+                    game.pausing()
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 4:
                     game.zoom = min(20, game.zoom * 1.03)
                 elif event.button == 5:
-                    game.zoom = max(.01, game.zoom / 1.03)
+                    game.zoom = max(0.01, game.zoom / 1.03)
                 elif game.buildable:
                     x, y = pygame.mouse.get_pos()
-                    for tower in game.attack_towers.union(game.effect_towers):
-                        if tower.dist_point(game.unview_x(x), game.unview_y(y)) < tower.size:
-                            game.selected = tower
-                            game.view_move(tower.x, tower.y,  game.height/(3*tower.range), 1.5)
+                    for zombie in game.zombies:
+                        if (
+                                zombie.dist_point(game.unview_x(x), game.unview_y(y))
+                                < zombie.size
+                        ):
+                            game.selected = zombie
+                            game.view_move(zombie.x, zombie.y, speed=3)
                             break
-                    else:
-                        if game.selected is None:
-                            if event.button == 1:
-                                game.new_attack_tower(x, y)
-                            elif event.button == 3:
-                                game.new_effect_tower(x, y)
-                        elif event.button == 1 or event.button == 3:
-                            game.selected = None
+                    else :
+                        for tower in game.attack_towers.union(game.effect_towers):
+                            if (
+                                    tower.dist_point(game.unview_x(x), game.unview_y(y))
+                                    < tower.size
+                            ):
+                                game.selected = tower
+                                game.view_move(
+                                    tower.x, tower.y, game.height / (3 * tower.range), 1.5
+                                )
+                                break
+                        else:
+                            if game.selected is None:
+                                if event.button == 1:
+                                    game.new_attack_tower(x, y)
+                                elif event.button == 3:
+                                    game.new_effect_tower(x, y)
+                            elif event.button == 1 or event.button == 3:
+                                game.selected = None
 
         mouse_buttons = pygame.mouse.get_pressed()
         if mouse_buttons[0]:

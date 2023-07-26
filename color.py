@@ -30,11 +30,19 @@ def mix(c1, c2):
 
 
 def darker(c, darkness=30):
-    return min(255, c[0] + darkness), min(255, c[1] + darkness), min(255, c[2] + darkness)
+    return (
+        min(255, c[0] + darkness),
+        min(255, c[1] + darkness),
+        min(255, c[2] + darkness),
+    )
 
 
 def rand_color(r_inf=0, r_sup=255, g_inf=0, g_sup=255, b_inf=0, b_sup=255):
-    return random.randint(r_inf, r_sup), random.randint(g_inf, g_sup), random.randint(b_inf, b_sup)
+    return (
+        random.randint(r_inf, r_sup),
+        random.randint(g_inf, g_sup),
+        random.randint(b_inf, b_sup),
+    )
 
 
 def lighter(c, lightness=30):
