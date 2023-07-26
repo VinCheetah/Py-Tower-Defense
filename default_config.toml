@@ -1,153 +1,154 @@
+title = "Py-Tower-Defense-Config"
 
 [general]
-original_frame_rate=60
-max_frame_rate=90
-min_frame_rate=15
-original_zoom=1
-original_time_speed=1
+    original_frame_rate=60
+    max_frame_rate=90
+    min_frame_rate=15
+    original_zoom=1
+    original_time_speed=1
 
 
 
 [attack_towers.home]
-type="Home"
-size=30
-range=100
-price=+inf
-max_life=500
-num_targets=5
-damage=100
-atk_rate=20
+    type="Home"
+    size=30
+    range=100
+    price=+inf
+    max_life=500
+    num_targets=5
+    damage=100
+    atk_rate=20
 
 
 [attack_towers.archery]
-type="Archery"
-size=20
-range=600
-price=300
-max_life=200
-num_targets=2
-damage=20
-atk_rate=25
+    type="Archery"
+    size=20
+    range=600
+    price=300
+    max_life=200
+    num_targets=2
+    damage=20
+    atk_rate=25
 
 [attack_towers.magic]
-type="Magic"
-size=20
-range=400
-price=500
-max_life=200
-num_targets=5
-damage=50
-atk_rate=60
+    type="Magic"
+    size=20
+    range=400
+    price=500
+    max_life=200
+    num_targets=5
+    damage=50
+    atk_rate=60
 
 [attack_towers.bomb]
-type="Bomb"
-size=20
-range=700
-price=1000
-max_life=100
-num_targets=1
-damage=350
-atk_rate=150
+    type="Bomb"
+    size=20
+    range=700
+    price=1000
+    max_life=100
+    num_targets=1
+    damage=350
+    atk_rate=150
 
 
 [effect_towers.damage]
-type="DamageBoost"
-size=15
-range=100
-price=1000
-max_life=200
-power_up_factor=2
-target_type=2
+    type="DamageBoost"
+    size=15
+    range=100
+    price=1000
+    max_life=200
+    power_up_factor=2
+    target_type=2
 
 [effect_towers.atkrate]
-type="AtkRateBoost"
-size=15
-range=100
-price=1000
-max_life=200
-power_up_factor=2
-target_type=2
+    type="AtkRateBoost"
+    size=15
+    range=100
+    price=1000
+    max_life=200
+    power_up_factor=2
+    target_type=2
 
 [effect_towers.range]
-type="RangeBoost"
-size=15
-range=100
-price=1000
-max_life=200
-power_up_factor=2
-target_type=2
+    type="RangeBoost"
+    size=15
+    range=100
+    price=1000
+    max_life=200
+    power_up_factor=2
+    target_type=2
 
 
 
 [zombies.classic]
-type="Classic"
-max_life=200
-speed=0.2
-range=1
-damage=10
-atk_rate=60
-size=10
-value=50
+    type="Classic"
+    max_life=200
+    speed=0.2
+    range=1
+    damage=10
+    atk_rate=60
+    size=10
+    value=50
 
 [zombies.tank]
-type="Tank"
-max_life=1000
-speed=0.1
-range=3
-damage=50
-atk_rate=120
-size=15
-value=200
+    type="Tank"
+    max_life=1000
+    speed=0.1
+    range=3
+    damage=50
+    atk_rate=120
+    size=15
+    value=200
 
 [zombies.speedy]
-type="Speedy"
-max_life=200
-speed=1
-range=2
-damage=20
-atk_rate=90
-size=13
-value=100
+    type="Speedy"
+    max_life=200
+    speed=1
+    range=2
+    damage=20
+    atk_rate=90
+    size=13
+    value=100
 
 [zombies.random]
-type="Random"
-mini_max_life=100
-maxi_max_life=3000
-mini_speed=0.2
-maxi_speed=2
-range=4
-mini_damage=5
-maxi_damage=30
-mini_atk_rate=6
-maxi_atk_rate=120
-mini_size=10
-maxi_size=30
-value=500
+    type="Random"
+    mini_max_life=100
+    maxi_max_life=3000
+    mini_speed=0.2
+    maxi_speed=2
+    range=4
+    mini_damage=5
+    maxi_damage=30
+    mini_atk_rate=6
+    maxi_atk_rate=120
+    mini_size=10
+    maxi_size=30
+    value=500
 
 
 
 
 [animation.particle_explosion]
-mini_num_particles=10
-maxi_num_particles=20
+    mini_num_particles=10
+    maxi_num_particles=20
 
 [animation.particle_explosion.particle]
-mini_life_time=20
-maxi_life_time=50
-mini_size_factor=0.2
-maxi_size_factor=0.8
-mini_color_variation=-20
-maxi_color_variation=20
-mini_speed=0.3
-maxi_speed=3
-mini_alpha=100
-maxi_alpha=255
-mini_speed_decrease=0.3
-maxi_speed_decrease=1
-mini_alpha_decrease=0.4
-maxi_alpha_decrease=1
+    mini_life_time=20
+    maxi_life_time=50
+    mini_size_factor=0.2
+    maxi_size_factor=0.8
+    mini_color_variation=-20
+    maxi_color_variation=20
+    mini_speed=0.3
+    maxi_speed=3
+    mini_alpha=100
+    maxi_alpha=255
+    mini_speed_decrease=0.3
+    maxi_speed_decrease=1
+    mini_alpha_decrease=0.4
+    maxi_alpha_decrease=1
 
 
 [animation.tower_bop]
-life_time = 20
-size_increase=0.3
+    life_time = 20
+    size_increase=0.3
