@@ -152,3 +152,12 @@ title = "Py-Tower-Defense-Config"
 [animation.tower_bop]
     life_time = 20
     size_increase=0.3
+
+
+
+
+[wave]
+
+
+
+[wave.1]

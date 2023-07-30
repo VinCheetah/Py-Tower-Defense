@@ -5,18 +5,15 @@ import gameClass
 
 os.environ["SDL_VIDEO_CENTERED"] = "1"
 pygame.init()
-info = pygame.display.Info()
 
-width, height = info.current_w, info.current_h - 50
-screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
-pygame.display.update()
+screen = pygame.display.set_mode((0, 0),pygame.RESIZABLE)
 
 pygame.display.set_caption("Tower Defense")
-# pygame.display.set_icon(pygame.image.load("tetris_icon.png"))
+pygame.display.set_icon(pygame.image.load("icon.png"))
 
 spawn = 10
 running = True
-game = gameClass.Game(screen, width, height)
+game = gameClass.Game(screen)
 last_frame = 0
 
 while running:
@@ -32,6 +29,10 @@ while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.VIDEORESIZE:
+                game.actu_dimensions()
+                game.display()
+                pygame.display.flip()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
@@ -66,6 +67,8 @@ while running:
                     game.money_prize(10000)
                 elif event.key == pygame.K_t:
                     game.pausing()
+                elif event.key == pygame.K_x:
+                    game.test = not game.test
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 4:
                     game.zoom = min(20, game.zoom * 1.03)

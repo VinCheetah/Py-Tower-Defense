@@ -10,7 +10,9 @@ from config import Config
 class Game:
     config = Config.get_default()
 
-    def __init__(self, screen, width, height):
+    def __init__(self, screen):
+        self.test = False
+
         self.pause = False
         self.moving_action = None
         self.buildable = True
@@ -24,8 +26,9 @@ class Game:
         self.frame_rate = self.original_frame_rate
         self.background_col = color.DARK_GREY
 
-        self.width = width
-        self.height = height
+        self.width = None
+        self.height = None
+        self.actu_dimensions()
         self.alpha_screen = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.money_rect = pygame.Rect(self.width - 40, self.height - 20, 40, 20)
         self.screen = screen
@@ -56,6 +59,10 @@ class Game:
         self.actu_moving_action()
         self.home = towerClass.HomeTower(self)
         self.attack_towers.add(self.home)
+
+    def actu_dimensions(self):
+        self.width = pygame.display.Info().current_w
+        self.height = pygame.display.Info().current_h
 
     def actu_moving_action(self):
         self.moving_action = (
@@ -131,7 +138,7 @@ class Game:
 
     def actu_action(self):
         if not self.pause:
-            self.time += 1 * self.time_speed / self.frame_rate * self.original_frame_rate
+            self.time += self.time_speed / self.frame_rate * self.original_frame_rate
         for tower in self.attack_towers:
             tower.tow_attack()
         for zombie in self.zombies:
