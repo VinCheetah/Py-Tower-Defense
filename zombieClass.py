@@ -1,17 +1,17 @@
-import random as rd
-
 from printable import Printable
 import color
 from math import inf
-import time
 import pygame
-from config import Config
 
+from boundedValue import BoundedValue
+from animationClass import ParticleExplosion, CircularEffect
+from math_functions import gamma
 
 class Zombie(Printable):
     def __init__(self, game, x, y, config, col):
         self.game = game
         # Zombie config
+
         self.max_life = config.max_life
         self.speed = config.speed
         self.range = config.range
@@ -21,20 +21,30 @@ class Zombie(Printable):
         self.value = config.value
         self.type = config.type
 
+        for special_parameter in config.special_parameters:
+            setattr(self, special_parameter, config[special_parameter])
+
         Printable.__init__(self, game, col, self.size, self.size, x, y)
 
         # Aux parameters
-        self.life = self.max_life
+        self.life = BoundedValue(self.max_life, 0, self.max_life)
         self.life_expect = self.max_life
         self.target_lock = False
         self.target = None
-        self.stop = False
-        self.last_atk = time.time()
+        self.tower_reach = False
+        self.pause = 0
+        self.last_atk = self.game.time
         self.attackers = set()
 
-    def find_target(self):
-        closest, dist_min = None, inf
-        for tow in self.game.attack_towers.symmetric_difference(self.game.attack_towers_bin):
+
+    def find_target(self, new_tower=None):
+        potential_towers = (
+            self.game.attack_towers.difference(self.game.attack_towers_bin)
+            if new_tower is None
+            else new_tower
+        )
+        closest, dist_min = (None, inf) if not self.target_lock else (self.target, self.dist(self.target))
+        for tow in potential_towers:
             new_dist = tow.dist(self)
             if new_dist < dist_min:
                 closest = tow
@@ -49,9 +59,9 @@ class Zombie(Printable):
             if not self.target_lock:
                 self.find_target()
             if self.target_lock:
-                if not self.stop:
+                if not self.tower_reach:
                     dist = self.target.dist(self)
-                    if dist > self.target.size + self.range:
+                    if dist > self.target.size / 2 + self.range + self.size / 2:
                         self.x += (
                             self.speed
                             * self.game.moving_action
@@ -65,14 +75,18 @@ class Zombie(Printable):
                             / dist
                         )
                     else:
-                        self.stop = True
+                        self.tower_reach = True
                         self.last_atk = self.game.time
                 else:
-                    if self.game.time - self.last_atk >= self.atk_rate:
-                        self.target.life -= self.damage
-                        if self.target.life <= 0:
-                            self.target.destroyed()
-                        self.last_atk = self.game.time
+                    self.attack()
+
+    def attack(self):
+        if self.game.time - self.last_atk >= self.atk_rate:
+            self.target.life -= self.damage
+            if self.target.life <= 0:
+                self.target.destroyed()
+            self.last_atk = self.game.time
+
 
     def selected(self):
         self.under_selected()
@@ -82,7 +96,7 @@ class Zombie(Printable):
             self.screen,
             color.LIGHT_GREY,
             (self.view_x(), self.view_y()),
-            self.size * self.game.zoom,
+            (self.size / 2 + self.range) * self.game.zoom,
             1,
         )
         pygame.draw.rect(
@@ -106,7 +120,6 @@ class Zombie(Printable):
             ),
         )
 
-
     def killed(self):
         for tower in self.attackers:
             tower.erase_target(self)
@@ -115,6 +128,13 @@ class Zombie(Printable):
         self.game.money_prize(self.value)
         if self.game.selected == self:
             self.game.selected = None
+        self.kill_animation()
+
+
+    def kill_animation(self):
+        self.game.new_animations.add(
+            ParticleExplosion(self.game, self.x, self.y, self.color, self.size)
+        )
 
     # @classmethod
     # def get_random_config(cls, config):
@@ -122,28 +142,31 @@ class Zombie(Printable):
     #         name: config.name for name in ["max_life", "speed", "range", "damage", "atk_rate", "size", "value"]
     #     })
 
-
     def __str__(self):
         return f"Zombie ({self.type}) at x: {self.x:.1f}, y: {self.y:.1f}"
 
     def info(self):
         sep = "\n\t\t\t"
-        return (f"\t\tZombie   (type : {self.type})"
-                f"\nStats:"
-                f"\n\tPosition : {self.x}, {self.y}"
-                f"\n\tLife : {self.life} / Expect : {self.life_expect} / Max : {self.max_life}"
-                f"\n\tSpeed : {self.speed}   (moving : {not self.stop})"
-                f"\n\tDamage : {self.damage}"
-                f"\n\tRange : {self.range}"
-                f"\n\tAtk_rate : {self.atk_rate}"
-                f"\n\tValue : {self.value}"
-                f"\n"
-                f"\nComplement:"
-                f"\n\tTarget : {self.target}    (lock : {self.target_lock})"
-                f"\n\tAttacker(s) : {sep+sep.join(map(str,self.attackers))}"
-                f"\n\tLast Atk : {self.last_atk}"
-                f"\n\tSelected : {self.game.selected == self}"
-                f"\n\n")
+        return (
+            f"\t\tZombie   (type : {self.type})"
+            f"\nStats:"
+            f"\n\tPosition : {self.x}, {self.y}"
+            f"\n\tIn game.zombies : {self in self.game.zombies}"
+            f"\n\tIn game.zombies_soon_dead : {self in self.game.zombies_soon_dead}"
+            f"\n\tLife : {self.life} / Expect : {self.life_expect} / Max : {self.max_life}"
+            f"\n\tSpeed : {self.speed}   (moving : {not self.tower_reach})"
+            f"\n\tDamage : {self.damage}"
+            f"\n\tRange : {self.range}"
+            f"\n\tAtk_rate : {self.atk_rate}"
+            f"\n\tValue : {self.value}"
+            f"\n"
+            f"\nComplement:"
+            f"\n\tTarget : {self.target}    (lock : {self.target_lock})"
+            f"\n\tAttacker(s) : {sep+sep.join(map(str,self.attackers))}"
+            f"\n\tLast Atk : {self.last_atk}"
+            f"\n\tSelected : {self.game.selected == self}"
+            f"\n\n"
+        ) + "\n".join((str(key) + " : " + str(getattr(self,key))) for key in self.__dict__)
 
 
 class ClassicZombie(Zombie):
@@ -166,8 +189,62 @@ class SpeedyZombie(Zombie):
 class RandomZombie(Zombie):
     def __init__(self, game, x, y):
         Zombie.__init__(
-            self, game, x, y, game.config.zombies.random, color.mix(color.GOLD, color.LIGHT_RED),
+            self,
+            game,
+            x,
+            y,
+            game.config.zombies.random,
+            color.mix(color.GOLD, color.LIGHT_RED),
         )
+
+
+class HealerZombie(Zombie):
+
+    def __init__(self, game, x, y):
+        Zombie.__init__(self, game, x, y, game.config.zombies.healer, color.GREEN_2)
+        self.last_special_atk = self.last_atk
+        self.pause_time = 0
+        self.alpha_screen = self.game.create_alpha_screen()
+
+
+    def move(self):
+        if self.life > 0 and self.game.time > self.pause_time:
+            if self.game.time - self.last_special_atk >= self.special_atk_rate:
+                self.special_attack()
+            Zombie.move(self)
+
+
+    def special_attack(self):
+        atk_made = False
+        for zombie in self.game.zombies.difference(self.game.zombies_bin):
+            if self.dist(zombie) <= self.special_range and zombie.life < zombie.life.max:
+                atk_made = True
+                zombie.life += self.special_heal
+                zombie.life_expect += self.special_heal
+                if zombie.life_expect > 0:
+                    self.game.zombies_soon_dead.discard(zombie)
+                    self.game.zombies.add(zombie)
+        if atk_made:
+            self.game.animations.add(CircularEffect(self, self.special_range))
+            self.last_special_atk = self.game.time
+            self.pause_time = self.game.time + self.special_pause
+
+
+    def selected(self):
+        pygame.draw.circle(
+            self.game.screen,
+            color.lighter(self.game.background_col, 5),
+            (self.view_x(), self.view_y()),
+            self.special_range * self.game.zoom,
+        )
+        pygame.draw.circle(
+            self.game.screen,
+            color.GREEN,
+            (self.view_x(), self.view_y()),
+            self.special_range * self.game.zoom,
+            1,
+        )
+        Zombie.selected(self)
 
 
 # class RandomTanky(Zombie):

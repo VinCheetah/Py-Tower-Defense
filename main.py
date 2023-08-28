@@ -3,10 +3,13 @@ import os
 import time
 import gameClass
 
+from boundedValue import BoundedValue
+
+
 os.environ["SDL_VIDEO_CENTERED"] = "1"
 pygame.init()
 
-screen = pygame.display.set_mode((0, 0),pygame.RESIZABLE)
+screen = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
 
 pygame.display.set_caption("Tower Defense")
 pygame.display.set_icon(pygame.image.load("icon.png"))
@@ -54,7 +57,6 @@ while running:
                 elif event.key == pygame.K_k:
                     game.zoom = game.original_zoom
                 elif event.key == pygame.K_i:
-                    print(game.game_stats())
                     if game.selected is not None:
                         print(game.selected.info())
                 elif event.key == pygame.K_z:
@@ -69,30 +71,35 @@ while running:
                     game.pausing()
                 elif event.key == pygame.K_x:
                     game.test = not game.test
+                elif event.key == pygame.K_w:
+                    game.new_wave()
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 4:
-                    game.zoom = min(20, game.zoom * 1.03)
+                    game.zoom_move(True)
                 elif event.button == 5:
-                    game.zoom = max(0.01, game.zoom / 1.03)
+                    game.zoom_move(False)
                 elif game.buildable:
                     x, y = pygame.mouse.get_pos()
                     for zombie in game.zombies:
                         if (
-                                zombie.dist_point(game.unview_x(x), game.unview_y(y))
-                                < zombie.size
+                            zombie.dist_point(game.unview_x(x), game.unview_y(y))
+                            < zombie.size * (1 - int(zombie.tower_reach) / 2)
                         ):
                             game.selected = zombie
-                            game.view_move(zombie.x, zombie.y, speed=3)
+                            game.view_move(zombie.x, zombie.y, speed=3, tracking=True)
                             break
-                    else :
+                    else:
                         for tower in game.attack_towers.union(game.effect_towers):
                             if (
-                                    tower.dist_point(game.unview_x(x), game.unview_y(y))
-                                    < tower.size
+                                tower.dist_point(game.unview_x(x), game.unview_y(y))
+                                < tower.size
                             ):
                                 game.selected = tower
                                 game.view_move(
-                                    tower.x, tower.y, game.height / (3 * tower.range), 1.5
+                                    tower.x,
+                                    tower.y,
+                                    game.height / (3 * tower.range),
+                                    1.5,
                                 )
                                 break
                         else:
@@ -111,8 +118,7 @@ while running:
                 game.moving_map = True
                 ex_pos_x = x
                 ex_pos_y = y
-            game.view_center_x -= game.unview_x(x) - game.unview_x(ex_pos_x)
-            game.view_center_y -= game.unview_y(y) - game.unview_y(ex_pos_y)
+            game.add_view_coord(game.unview_x(ex_pos_x) - game.unview_x(x), game.unview_y(ex_pos_y) - game.unview_y(y))
             if x != ex_pos_x or y != ex_pos_y:
                 game.buildable = False
             ex_pos_x = x

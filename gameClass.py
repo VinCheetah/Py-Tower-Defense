@@ -2,10 +2,11 @@ import animationClass
 import color
 import towerClass
 import zombieClass
+import wave
 import random
 import pygame
 from config import Config
-
+from boundedValue import BoundedValue
 
 class Game:
     config = Config.get_default()
@@ -20,7 +21,8 @@ class Game:
         self.tracking = False
 
         self.original_zoom = self.config.general.original_zoom
-        self.zoom = self.original_zoom
+        self.zoom = BoundedValue(self.original_zoom, self.config.general.min_zoom, self.config.general.max_zoom)
+        self.zoom_speed = self.config.general.zoom_speed
         self.time_speed = self.config.general.original_time_speed
         self.original_frame_rate = self.config.general.original_frame_rate
         self.frame_rate = self.original_frame_rate
@@ -29,13 +31,14 @@ class Game:
         self.width = None
         self.height = None
         self.actu_dimensions()
-        self.alpha_screen = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+
+
+        self.alpha_screen = self.create_alpha_screen()
         self.money_rect = pygame.Rect(self.width - 40, self.height - 20, 40, 20)
         self.screen = screen
 
-
-        self.view_center_x = 0
-        self.view_center_y = 0
+        self.view_center_x = BoundedValue(0)
+        self.view_center_y = BoundedValue(0)
         self.time = 0
         self.money = 1000
         self.lives = 100
@@ -53,6 +56,11 @@ class Game:
         self.effect_towers_bin = set()
         self.attacks_bin = set()
         self.animations_bin = set()
+
+        self.new_animations = set()
+
+
+        self.set_map_parameters(self.config.general)
 
         self.selected = None
 
@@ -77,6 +85,9 @@ class Game:
         self.time_speed *= multiplicative
         self.actu_moving_action()
 
+    def create_alpha_screen(self):
+        return pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+
     def change_frame_rate(self, additional):
         self.frame_rate += additional
         self.frame_rate = max(self.config.general.min_frame_rate, self.frame_rate)
@@ -87,24 +98,65 @@ class Game:
         chosen_tower = random.choice(self.config.types.attack_towers)(self, x, y)
         if self.transaction(chosen_tower.price):
             self.attack_towers.add(chosen_tower)
-            self.unlock_zombies_target()
+            self.check_zombies_target([chosen_tower])
+        else:
+            del chosen_tower
 
     def new_effect_tower(self, x, y):
         chosen_tower = random.choice(self.config.types.effect_towers)(self, x, y)
         if self.transaction(chosen_tower.price):
             self.effect_towers.add(chosen_tower)
-            self.unlock_zombies_target()
+            chosen_tower.init_effecting()
+            self.check_zombies_target([chosen_tower])
+        else:
+            del chosen_tower
 
-    def unlock_zombies_target(self):
+    def check_zombies_target(self, new_tower=None):
         for zombie in self.zombies:
-            zombie.target_lock = False
+            zombie.find_target(new_tower)
+
+    def zoom_move(self, closer):
+        self.zoom *= (self.zoom_speed if closer else 1 / self.zoom_speed)
+        self.view_center_x.set_extremum(-self.max_x + self.width / 2 / self.zoom, self.max_x - self.width / 2 / self.zoom)
+        self.view_center_y.set_extremum(-self.max_y + self.height / 2 / self.zoom, self.max_y - self.height / 2 / self.zoom)
+
+
+    def set_map_parameters(self, config):
+        if "max_x" in config:
+            self.max_x = config["max_x"]
+        if "max_y" in config:
+            self.max_y = config["max_y"]
+
+        if "min_zoom" in config:
+            self.zoom.min = max(config["min_zoom"], self.width / (2 * self.max_x), self.height / (2 * self.max_y))
+        if "max_zoom" in config:
+            self.zoom.max = config["max_zoom"]
+        if "max_x" in config:
+            self.view_center_x.set_extremum(-self.max_x + self.width / 2 / self.zoom, self.max_x - self.width / 2 / self.zoom)
+        if "max_y" in config:
+            self.view_center_y.set_extremum(-self.max_y + self.height / 2 / self.zoom, self.max_y - self.height / 2 / self.zoom)
+
+        # for attr in ["max_x", "max_y", "max_zoom", "min_zoom"]:
+        #     if attr in config:
+        #         self.
+        #         if attr == "min_zoom":
+        #             self.view_center_x.max =
+        #             print(self.zoom)
+        #             self.zoom.min = max(config[attr], self.width / (2 * self.max_x), self.height / (2 * self.max_y))
+        #         else:
+        #             self
+        #             setattr(self, attr, config[attr])
+
+
+
 
     def new_zombie(self):
         self.zombies.add(
-            (random.choice(self.config.types.zombies)(
-                self,
-                self.unview_x(random.randint(0, self.width)),
-                self.unview_y(random.randint(0, self.height)),
+            (
+                random.choice(self.config.types.zombies)(
+                    self,
+                    self.unview_x(random.randint(0, self.width)),
+                    self.unview_y(random.randint(0, self.height)),
                 )
             )
         )
@@ -125,12 +177,12 @@ class Game:
                 if self.selected in zombie.attackers:
                     zombie.under_selected()
 
+        for att in self.attacks:
+            att.print_game()
         for tow in self.attack_towers.union(self.effect_towers):
             tow.print_game()
         for zom in self.zombies:
             zom.print_game()
-        for att in self.attacks:
-            att.print_game()
         for ani in self.animations:
             ani.anime()
         self.screen.blit(self.alpha_screen, (0, 0))
@@ -148,13 +200,31 @@ class Game:
 
     def track(self):
         if self.tracking and self.selected is not None:
-            self.view_center_x = self.selected.x
-            self.view_center_y = self.selected.y
+            self.set_view_coord(self.selected.x, self.selected.y)
 
-    def view_move(self, x_end, y_end, zoom_end=None, speed=1):
+    def add_view_coord(self, x, y):
+        self.view_center_x += x
+        self.view_center_y += y
+
+    def set_view_coord(self, x, y):
+        self.view_center_x.set_value(x)
+        self.view_center_y.set_value(y)
+
+    def view_move(self, x_end, y_end, zoom_end=None, speed=1, tracking=False):
         self.animations.add(
-            animationClass.ViewMove(self, x_end, y_end, zoom_end if zoom_end is not None else self.zoom , speed, tracking=True)
+            animationClass.ViewMove(
+                self,
+                x_end,
+                y_end,
+                zoom_end if zoom_end is not None else self.zoom,
+                speed,
+                tracking=tracking,
+            )
         )
+
+    def new_wave(self):
+        self.num_wave += 1
+        self.wave = wave.Wave(self)
 
     def clean(self):
         if len(self.attacks_bin) > 0:
@@ -181,6 +251,10 @@ class Game:
                 self.animations.discard(animation)
                 del animation
             self.animations_bin.clear()
+        if len(self.new_animations) > 0:
+            for animation in self.new_animations:
+                self.animations.add(animation)
+            self.new_animations.clear()
         for tower in self.attack_towers:
             tower.clean()
 
@@ -226,4 +300,4 @@ class Game:
             f"Zombies : {len(self.zombies)}\n"
             f"Money : {self.money}\n"
             f"Wave : {self.wave}\n"
-        )
+        ) + "\nCOMPLETE DESCRIPTION\n"+"\n".join((str(key) + " : " + str(getattr(self,key))) for key in self.__dict__)

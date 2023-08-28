@@ -7,6 +7,13 @@ title = "Py-Tower-Defense-Config"
     original_zoom=1
     original_time_speed=1
 
+    max_zoom=20
+    min_zoom=0.01
+    zoom_speed=1.03
+
+    max_x=inf
+    max_y=inf
+
 
 
 [attack_towers.home]
@@ -26,7 +33,7 @@ title = "Py-Tower-Defense-Config"
     range=600
     price=300
     max_life=200
-    num_targets=2
+    num_targets=10
     damage=20
     atk_rate=25
 
@@ -36,7 +43,7 @@ title = "Py-Tower-Defense-Config"
     range=400
     price=500
     max_life=200
-    num_targets=5
+    num_targets=3
     damage=50
     atk_rate=60
 
@@ -125,7 +132,20 @@ title = "Py-Tower-Defense-Config"
     maxi_size=30
     value=500
 
-
+[zombies.healer]
+    type="Healer"
+    max_life=400
+    speed=0.30
+    range=2
+    damage=25
+    atk_rate=100
+    size=18
+    value=1000
+        special_parameters=["special_atk_rate", "special_range", "special_heal", "special_pause"]
+        special_atk_rate=80
+        special_range=150
+        special_heal=200
+        special_pause=40
 
 
 [animation.particle_explosion]
@@ -153,6 +173,10 @@ title = "Py-Tower-Defense-Config"
     life_time = 20
     size_increase=0.3
 
+[animation.circular_effect]
+    alpha=40
+    life_time=35
+
 
 
 
@@ -161,3 +185,12 @@ title = "Py-Tower-Defense-Config"
 
 
 [wave.1]
+max_x=1000
+max_y=1000
+min_zoom=0.5
+max_zoom=5
+
+[wave.2-99]
+max_x=1500
+max_y=1500
+min_zoom=0.4

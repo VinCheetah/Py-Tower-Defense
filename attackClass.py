@@ -26,11 +26,10 @@ class Attack(printable.Printable):
                 self.speed * self.game.moving_action * (self.target.y - self.y) / dist
             )
 
-
     def attack_over(self):
         self.game.attacks_bin.add(self)
         self.target.life -= self.origin.damage
-        if self.target.life <= 0:
+        if self.target.life == 0:
             self.target.killed()
 
 
@@ -58,7 +57,7 @@ class BombAttack(Attack):
         Attack.attack_over(self)
         self.game.animations.add(
             animationClass.CircularExplosion(
-                self.game, self.x, self.y, color.RED, self.range, 10, self
+                self.game, self.x, self.y, color.RED, self.range, 10, self.origin
             )
         )
 

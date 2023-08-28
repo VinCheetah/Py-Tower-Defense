@@ -8,10 +8,9 @@ from collections import UserDict
 
 
 class Config(UserDict):
-
     def __getattr__(self, attr):
         if attr in self.data and isinstance(self.data[attr], collections.abc.Mapping):
-                return Config(**self.data[attr])
+            return Config(**self.data[attr])
         return self.get_val(attr)
 
     def __repr__(self):
@@ -26,35 +25,40 @@ class Config(UserDict):
     @classmethod
     def add_complement(cls, config):
         config["types"] = {
-           "attack_towers": [
-            towerClass.ArcheryTower,
-            towerClass.MagicTower,
-            towerClass.BombTower,
+            "attack_towers": [
+                towerClass.ArcheryTower,
+                towerClass.MagicTower,
+                towerClass.BombTower,
             ],
             "effect_towers": [
-            towerClass.DamageBoostTower,
-            towerClass.AtkRateBoostTower,
-            towerClass.RangeBoostTower,
+                towerClass.DamageBoostTower,
+                towerClass.AtkRateBoostTower,
+                towerClass.RangeBoostTower,
             ],
             "zombies": [
-            zombieClass.ClassicZombie,
-            zombieClass.TankZombie,
-            zombieClass.SpeedyZombie,
-            zombieClass.RandomZombie,
-            #zombieClass.RandomTanky,
-            #zombieClass.RandomTanky2,
-            ]
+                zombieClass.ClassicZombie,
+                zombieClass.TankZombie,
+                zombieClass.SpeedyZombie,
+                zombieClass.RandomZombie,
+                zombieClass.HealerZombie
+                # zombieClass.RandomTanky,
+                # zombieClass.RandomTanky2,
+            ],
         }
         return cls(config)
-
 
     def get_val(self, name, integer_only=False):
         if name in self.data:
             return self.data[name]
-        elif "mini_"+name in self.data and "maxi_"+name in self.data:
-            return (random.randint if integer_only else random.uniform)(self.data["mini_" + name], self.data["maxi_" + name])
+        elif "mini_" + name in self.data and "maxi_" + name in self.data:
+            return (random.randint if integer_only else random.uniform)(
+                self.data["mini_" + name], self.data["maxi_" + name]
+            )
+        elif name == "special_parameters":
+            return []
         else:
             raise AttributeError(name)
+
 
 # DEFAULT = Config(
 #     {
