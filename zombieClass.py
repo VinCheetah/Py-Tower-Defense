@@ -1,18 +1,17 @@
-from printable import Printable
-import color
-from math import inf
 import pygame
+import color
 
+from math import inf
+from printable import Printable
 from boundedValue import BoundedValue
 from animationClass import ParticleExplosion, CircularEffect
-from math_functions import gamma
+
 
 class Zombie(Printable):
-    def __init__(self, game, x, y, config, col):
+    def __init__(self, game, x, y, config):
         self.game = game
         # Zombie config
 
-        self.max_life = config.max_life
         self.speed = config.speed
         self.range = config.range
         self.damage = config.damage
@@ -24,18 +23,18 @@ class Zombie(Printable):
         for special_parameter in config.special_parameters:
             setattr(self, special_parameter, config[special_parameter])
 
-        Printable.__init__(self, game, col, self.size, self.size, x, y)
+        Printable.__init__(self, game, config.color, self.size, x, y)
 
         # Aux parameters
-        self.life = BoundedValue(self.max_life, 0, self.max_life)
-        self.life_expect = self.max_life
+        max_life = config.max_life
+        self.life = BoundedValue(max_life, 0, max_life)
+        self.life_expect = max_life
         self.target_lock = False
         self.target = None
         self.tower_reach = False
         self.pause = 0
         self.last_atk = self.game.time
         self.attackers = set()
-
 
     def find_target(self, new_tower=None):
         potential_towers = (
@@ -61,18 +60,18 @@ class Zombie(Printable):
             if self.target_lock:
                 if not self.tower_reach:
                     dist = self.target.dist(self)
-                    if dist > self.target.size / 2 + self.range + self.size / 2:
+                    if dist > self.target.size + self.range + self.size:
                         self.x += (
-                            self.speed
-                            * self.game.moving_action
-                            * (self.target.x - self.x)
-                            / dist
+                                self.speed
+                                * self.game.moving_action
+                                * (self.target.x - self.x)
+                                / dist
                         )
                         self.y += (
-                            self.speed
-                            * self.game.moving_action
-                            * (self.target.y - self.y)
-                            / dist
+                                self.speed
+                                * self.game.moving_action
+                                * (self.target.y - self.y)
+                                / dist
                         )
                     else:
                         self.tower_reach = True
@@ -87,7 +86,6 @@ class Zombie(Printable):
                 self.target.destroyed()
             self.last_atk = self.game.time
 
-
     def selected(self):
         self.under_selected()
 
@@ -96,16 +94,16 @@ class Zombie(Printable):
             self.screen,
             color.LIGHT_GREY,
             (self.view_x(), self.view_y()),
-            (self.size / 2 + self.range) * self.game.zoom,
+            (self.size + self.range) * self.game.zoom,
             1,
         )
         pygame.draw.rect(
             self.game.screen,
             color.RED,
             pygame.Rect(
-                (self.game.view_x(self.x - self.size / 2)),
-                self.game.view_y(self.y + self.size / 1.8),
-                self.size * self.game.zoom,
+                (self.game.view_x(self.x - self.size)),
+                self.game.view_y(self.y + self.size * 2 / 1.8),
+                2 * self.size * self.game.zoom,
                 3 * self.game.zoom,
             ),
         )
@@ -113,9 +111,9 @@ class Zombie(Printable):
             self.game.screen,
             color.GREEN,
             pygame.Rect(
-                (self.game.view_x(self.x - self.size / 2)),
-                self.game.view_y(self.y + self.size / 1.8),
-                (self.size * self.life / self.max_life) * self.game.zoom,
+                (self.game.view_x(self.x - self.size)),
+                self.game.view_y(self.y + self.size * 2 / 1.8),
+                (2 * self.size * self.life / self.life.max) * self.game.zoom,
                 3 * self.game.zoom,
             ),
         )
@@ -130,11 +128,8 @@ class Zombie(Printable):
             self.game.selected = None
         self.kill_animation()
 
-
     def kill_animation(self):
-        self.game.new_animations.add(
-            ParticleExplosion(self.game, self.x, self.y, self.color, self.size)
-        )
+        self.game.new_animations.add(ParticleExplosion(self))
 
     # @classmethod
     # def get_random_config(cls, config):
@@ -153,7 +148,7 @@ class Zombie(Printable):
             f"\n\tPosition : {self.x}, {self.y}"
             f"\n\tIn game.zombies : {self in self.game.zombies}"
             f"\n\tIn game.zombies_soon_dead : {self in self.game.zombies_soon_dead}"
-            f"\n\tLife : {self.life} / Expect : {self.life_expect} / Max : {self.max_life}"
+            f"\n\tLife : {self.life} / Expect : {self.life_expect} / Max : {self.life.max}"
             f"\n\tSpeed : {self.speed}   (moving : {not self.tower_reach})"
             f"\n\tDamage : {self.damage}"
             f"\n\tRange : {self.range}"
@@ -162,57 +157,46 @@ class Zombie(Printable):
             f"\n"
             f"\nComplement:"
             f"\n\tTarget : {self.target}    (lock : {self.target_lock})"
-            f"\n\tAttacker(s) : {sep+sep.join(map(str,self.attackers))}"
+            f"\n\tAttacker(s) : {sep + sep.join(map(str, self.attackers))}"
             f"\n\tLast Atk : {self.last_atk}"
             f"\n\tSelected : {self.game.selected == self}"
             f"\n\n"
-        ) + "\n".join((str(key) + " : " + str(getattr(self,key))) for key in self.__dict__)
+        ) + "\n".join((str(key) + " : " + str(getattr(self, key))) for key in self.__dict__)
 
 
 class ClassicZombie(Zombie):
     def __init__(self, game, x, y):
-        Zombie.__init__(self, game, x, y, game.config.zombies.classic, color.GREEN)
+        Zombie.__init__(self, game, x, y, game.config.zombies.classic)
 
 
 class TankZombie(Zombie):
     def __init__(self, game, x, y):
-        Zombie.__init__(self, game, x, y, game.config.zombies.tank, color.DARK_GREEN)
+        Zombie.__init__(self, game, x, y, game.config.zombies.tank)
 
 
 class SpeedyZombie(Zombie):
     def __init__(self, game, x, y):
-        Zombie.__init__(
-            self, game, x, y, game.config.zombies.speedy, color.lighter(color.GREEN, 70)
-        )
+        Zombie.__init__(self, game, x, y, game.config.zombies.speedy)
 
 
 class RandomZombie(Zombie):
     def __init__(self, game, x, y):
-        Zombie.__init__(
-            self,
-            game,
-            x,
-            y,
-            game.config.zombies.random,
-            color.mix(color.GOLD, color.LIGHT_RED),
-        )
+        Zombie.__init__(self, game, x, y, game.config.zombies.random)
 
 
 class HealerZombie(Zombie):
 
     def __init__(self, game, x, y):
-        Zombie.__init__(self, game, x, y, game.config.zombies.healer, color.GREEN_2)
+        Zombie.__init__(self, game, x, y, game.config.zombies.healer)
         self.last_special_atk = self.last_atk
         self.pause_time = 0
         self.alpha_screen = self.game.create_alpha_screen()
-
 
     def move(self):
         if self.life > 0 and self.game.time > self.pause_time:
             if self.game.time - self.last_special_atk >= self.special_atk_rate:
                 self.special_attack()
             Zombie.move(self)
-
 
     def special_attack(self):
         atk_made = False
@@ -229,7 +213,6 @@ class HealerZombie(Zombie):
             self.last_special_atk = self.game.time
             self.pause_time = self.game.time + self.special_pause
 
-
     def selected(self):
         pygame.draw.circle(
             self.game.screen,
@@ -245,7 +228,6 @@ class HealerZombie(Zombie):
             1,
         )
         Zombie.selected(self)
-
 
 # class RandomTanky(Zombie):
 #     def __init__(self, game, x, y):

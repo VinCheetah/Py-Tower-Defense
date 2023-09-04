@@ -4,14 +4,17 @@ import color
 
 
 class Printable(pygame.sprite.Sprite):
-    def __init__(self, game, image, width, height, x, y):
+    def __init__(self, game, color, size, x, y):
         # Initialise la classe Sprite
         super().__init__()
         self.game = game
         self.screen = self.game.screen
-        self.color = image
-        self.width = width
-        self.height = height
+        self.color = color
+
+        self.size = size
+
+        # self.width = width
+        # self.height = height
 
         # self.image = pygame.transform.scale(pygame.image.load(image), (im_long, im_larg))
         # self.rect = self.image.get_rect()
@@ -26,13 +29,13 @@ class Printable(pygame.sprite.Sprite):
             self.screen,
             self.color,
             (self.view_x(), self.view_y()),
-            max(1, self.game.zoom * self.width // 2),
+            max(1, self.game.zoom * self.size),
         )
         pygame.draw.circle(
             self.screen,
             color.BLACK,
             (self.view_x(), self.view_y()),
-            max(1, self.game.zoom * self.width // 2) + 1,
+            max(1, self.game.zoom * self.size) + 1,
             1,
         )
 

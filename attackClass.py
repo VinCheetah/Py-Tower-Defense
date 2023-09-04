@@ -7,7 +7,7 @@ import animationClass
 
 class Attack(printable.Printable):
     def __init__(self, game, target, origin, col, speed):
-        printable.Printable.__init__(self, game, col, 5, 5, origin.x, origin.y)
+        printable.Printable.__init__(self, game, col, 5, origin.x, origin.y)
         self.game = game
         self.speed = speed
         self.target = target
@@ -55,18 +55,11 @@ class BombAttack(Attack):
 
     def attack_over(self):
         Attack.attack_over(self)
-        self.game.animations.add(
-            animationClass.CircularExplosion(
-                self.game, self.x, self.y, color.RED, self.range, 10, self.origin
-            )
-        )
+        self.game.animations.add(animationClass.CircularExplosion(self))
 
     def damaging(self):
         for potential_target in self.game.zombies:
-            if (
-                self.target.dist(potential_target) <= self.range
-                and potential_target != self.target
-            ):
+            if (self.target.dist(potential_target) <= self.range and potential_target != self.target):
                 potential_target.life_expect -= self.origin.damage
                 potential_target.life -= self.origin.damage
                 if potential_target.life <= 0:

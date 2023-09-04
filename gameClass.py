@@ -8,8 +8,15 @@ import pygame
 from config import Config
 from boundedValue import BoundedValue
 
+
 class Game:
     config = Config.get_default()
+    recognize_dico = {
+        "zombie": zombieClass.Zombie,
+        "tower": towerClass.Tower,
+        "attack_tower": towerClass.AttackTower,
+        "effect_tower": towerClass.EffectTower
+    }
 
     def __init__(self, screen):
         self.test = False
@@ -31,7 +38,6 @@ class Game:
         self.width = None
         self.height = None
         self.actu_dimensions()
-
 
         self.alpha_screen = self.create_alpha_screen()
         self.money_rect = pygame.Rect(self.width - 40, self.height - 20, 40, 20)
@@ -59,7 +65,6 @@ class Game:
 
         self.new_animations = set()
 
-
         self.set_map_parameters(self.config.general)
 
         self.selected = None
@@ -74,8 +79,8 @@ class Game:
 
     def actu_moving_action(self):
         self.moving_action = (
-            self.time_speed * self.original_frame_rate / self.frame_rate
-        ) * (1 - self.pause)
+                                     self.time_speed * self.original_frame_rate / self.frame_rate
+                             ) * (1 - self.pause)
 
     def pausing(self):
         self.pause = not self.pause
@@ -117,9 +122,10 @@ class Game:
 
     def zoom_move(self, closer):
         self.zoom *= (self.zoom_speed if closer else 1 / self.zoom_speed)
-        self.view_center_x.set_extremum(-self.max_x + self.width / 2 / self.zoom, self.max_x - self.width / 2 / self.zoom)
-        self.view_center_y.set_extremum(-self.max_y + self.height / 2 / self.zoom, self.max_y - self.height / 2 / self.zoom)
-
+        self.view_center_x.set_extremum(-self.max_x + self.width / 2 / self.zoom,
+                                        self.max_x - self.width / 2 / self.zoom)
+        self.view_center_y.set_extremum(-self.max_y + self.height / 2 / self.zoom,
+                                        self.max_y - self.height / 2 / self.zoom)
 
     def set_map_parameters(self, config):
         if "max_x" in config:
@@ -132,9 +138,11 @@ class Game:
         if "max_zoom" in config:
             self.zoom.max = config["max_zoom"]
         if "max_x" in config:
-            self.view_center_x.set_extremum(-self.max_x + self.width / 2 / self.zoom, self.max_x - self.width / 2 / self.zoom)
+            self.view_center_x.set_extremum(-self.max_x + self.width / 2 / self.zoom,
+                                            self.max_x - self.width / 2 / self.zoom)
         if "max_y" in config:
-            self.view_center_y.set_extremum(-self.max_y + self.height / 2 / self.zoom, self.max_y - self.height / 2 / self.zoom)
+            self.view_center_y.set_extremum(-self.max_y + self.height / 2 / self.zoom,
+                                            self.max_y - self.height / 2 / self.zoom)
 
         # for attr in ["max_x", "max_y", "max_zoom", "min_zoom"]:
         #     if attr in config:
@@ -146,9 +154,6 @@ class Game:
         #         else:
         #             self
         #             setattr(self, attr, config[attr])
-
-
-
 
     def new_zombie(self):
         self.zombies.add(
@@ -300,4 +305,9 @@ class Game:
             f"Zombies : {len(self.zombies)}\n"
             f"Money : {self.money}\n"
             f"Wave : {self.wave}\n"
-        ) + "\nCOMPLETE DESCRIPTION\n"+"\n".join((str(key) + " : " + str(getattr(self,key))) for key in self.__dict__)
+        ) + "\nCOMPLETE DESCRIPTION\n" + "\n".join(
+            (str(key) + " : " + str(getattr(self, key))) for key in self.__dict__)
+
+    def recognize(self, object, potential_class):
+        print(type(self.recognize_dico.get(potential_class)))
+        return isinstance(object, self.recognize_dico.get(potential_class))

@@ -8,13 +8,14 @@ class Canon:
     def __init__(self, origin, rotation=0):
         self.origin = origin
         self.game = self.origin.game
+        self.config = self.game.config.towers.canon
         self.center_x = self.origin.x
         self.center_y = self.origin.y
         self.original_rotation = rotation
         self.rotation = self.original_rotation
         self.rotation_speed = 0.03
         self.width = pi / 4
-        self.color = color.mix(self.origin.color, (200, 200, 200))
+        self.color = color.mix(self.origin.color, self.config.mix_color)
         self.target = None
         self.target_lock = False
         self.adjusted_aim = False
@@ -23,7 +24,6 @@ class Canon:
         self.length = 2
         self.width2 = 1
         self.inactive = True
-        self.target_theta = 0
 
     def new_target(self, target):
         self.inactive = False
@@ -47,7 +47,6 @@ class Canon:
 
     def aim(self):
         target_theta = self.angle()
-        self.target_theta = target_theta
         if 10 * self.rotation_speed * self.game.moving_action < (self.rotation - target_theta) % (2 * pi) < pi:
             self.rotation -= self.rotation_speed * self.game.moving_action
         elif 10 * self.rotation_speed * self.game.moving_action < (self.rotation - target_theta) % (2 * pi):
@@ -100,8 +99,8 @@ class Canon:
 
 
     def transform(self, points):
-        return tuple((self.game.view_x(self.center_x + p[0] * self.origin.size / 2),
-                      self.game.view_y(self.center_y + p[1] * self.origin.size / 2)) for p in points)
+        return tuple((self.game.view_x(self.center_x + p[0] * self.origin.size),
+                      self.game.view_y(self.center_y + p[1] * self.origin.size)) for p in points)
 
     def trapeze(self, bigger=False):
         return self.transform(self.shape(bigger))

@@ -1,6 +1,8 @@
 import towerClass
 import zombieClass
+import attackClass
 import toml
+import color
 import collections.abc
 import random
 
@@ -8,6 +10,8 @@ from collections import UserDict
 
 
 class Config(UserDict):
+
+    library=[]
     def __getattr__(self, attr):
         if attr in self.data and isinstance(self.data[attr], collections.abc.Mapping):
             return Config(**self.data[attr])
@@ -49,6 +53,10 @@ class Config(UserDict):
 
     def get_val(self, name, integer_only=False):
         if name in self.data:
+            if isinstance(self.data[name], str) and self.data[name] in color.__dict__:
+                return getattr(color, self.data[name])
+            if name == "attack" and self.data[name] in attackClass.__dict__:
+                return getattr(attackClass, self.data[name])
             return self.data[name]
         elif "mini_" + name in self.data and "maxi_" + name in self.data:
             return (random.randint if integer_only else random.uniform)(

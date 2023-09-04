@@ -11,7 +11,7 @@ from canon import  Canon
 
 
 class Tower(Printable):
-    def __init__(self, game, x, y, config, color):
+    def __init__(self, game, x, y, config):
         self.game = game
 
         self.type = config.type
@@ -20,9 +20,7 @@ class Tower(Printable):
         self.size = config.size
         self.max_life = config.max_life
 
-        Printable.__init__(
-            self, game, color, self.size, self.size, game.unview_x(x), game.unview_y(y)
-        )
+        Printable.__init__(self, game, config.color, self.size, game.unview_x(x), game.unview_y(y))
 
         self.life = BoundedValue(self.max_life, 0, self.max_life)
         self.alive = True
@@ -72,9 +70,9 @@ class Tower(Printable):
             self.game.screen,
             color.RED,
             pygame.Rect(
-                (self.game.view_x(self.x - self.size / 2)),
-                self.game.view_y(self.y + self.size / 1.8),
-                self.size * self.game.zoom,
+                (self.game.view_x(self.x - self.size)),
+                self.game.view_y(self.y + self.size * 2 / 1.8),
+                2 * self.size * self.game.zoom,
                 5 * self.game.zoom,
             ),
         )
@@ -82,9 +80,9 @@ class Tower(Printable):
             self.game.screen,
             color.GREEN,
             pygame.Rect(
-                (self.game.view_x(self.x - self.size / 2)),
-                self.game.view_y(self.y + self.size / 1.8),
-                (self.size * self.life / self.max_life) * self.game.zoom,
+                (self.game.view_x(self.x - self.size)),
+                self.game.view_y(self.y + self.size * 2 / 1.8),
+                (2 * self.size * self.life / self.max_life) * self.game.zoom,
                 5 * self.game.zoom,
             ),
         )
@@ -105,9 +103,7 @@ class Tower(Printable):
             self.erase_existence()
 
     def destruction_animation(self):
-        self.game.animations.add(
-            animationClass.ParticleExplosion(self.game, self.x, self.y, self.color, self.size)
-        )
+        self.game.animations.add(animationClass.ParticleExplosion(self))
 
     def boost_affecting(self):
         for effect_tower in self.game.effect_towers:
@@ -121,7 +117,7 @@ class Tower(Printable):
             self.game.screen,
             color.LIGHT_GREY,
             (self.view_x(), self.view_y()),
-            self.size * self.game.zoom,
+            2 * self.size * self.game.zoom,
             1,
         )
 
@@ -149,26 +145,25 @@ class Tower(Printable):
     def print_game(self):
         for animation in self.animations:
             animation.anime()
-        self.width = self.size
         Printable.print_game(self)
 
 
 class AttackTower(Tower):
     effect_type = 2
 
-    def __init__(self, game, x, y, config, color, attack):
-        Tower.__init__(self, game, x, y, config, color)
+    def __init__(self, game, x, y, config):
+        Tower.__init__(self, game, x, y, config)
 
         self.num_targets = config.num_targets
         self.damage = config.damage
         self.atk_rate = config.atk_rate
 
-        self.active_canons = set()
         random_angle = random.random() * 2 * pi
-        self.inactive_canons = set(Canon(self,random_angle + 2 * i * pi / self.num_targets) for i in range(self.num_targets))
+        self.active_canons = set()
+        self.inactive_canons = set(Canon(self, random_angle + 2 * i * pi / self.num_targets) for i in range(self.num_targets))
         self.active_canons_bin = set()
 
-        self.attack = attack
+        self.attack = config.attack
         self.targets_lock = False
         self.last_attack = self.game.time
 
@@ -251,8 +246,8 @@ class AttackTower(Tower):
 class EffectTower(Tower):
     effect_type = 0
 
-    def __init__(self, game, x, y, config, color):
-        Tower.__init__(self, game, x, y, config, color)
+    def __init__(self, game, x, y, config):
+        Tower.__init__(self, game, x, y, config)
 
         self.target_type = config.target_type
         self.power_up_factor = config.power_up_factor
@@ -303,9 +298,7 @@ class EffectTower(Tower):
 
 class DamageBoostTower(EffectTower):
     def __init__(self, game, x, y):
-        EffectTower.__init__(
-            self, game, x, y, game.config.effect_towers.damage, color.CREA2
-        )
+        EffectTower.__init__(self, game, x, y, game.config.effect_towers.damage)
 
     def start_boost(self, tower):
         tower.damage *= self.power_up_factor
@@ -316,9 +309,7 @@ class DamageBoostTower(EffectTower):
 
 class AtkRateBoostTower(EffectTower):
     def __init__(self, game, x, y):
-        EffectTower.__init__(
-            self, game, x, y, game.config.effect_towers.atkrate, color.CREA1
-        )
+        EffectTower.__init__(self, game, x, y, game.config.effect_towers.atkrate)
 
     def start_boost(self, tower):
         tower.atk_rate /= self.power_up_factor
@@ -329,9 +320,7 @@ class AtkRateBoostTower(EffectTower):
 
 class RangeBoostTower(EffectTower):
     def __init__(self, game, x, y):
-        EffectTower.__init__(
-            self, game, x, y, game.config.effect_towers.range, color.CREA3
-        )
+        EffectTower.__init__(self, game, x, y, game.config.effect_towers.range)
 
     def start_boost(self, tower):
         tower.range *= self.power_up_factor
@@ -342,63 +331,36 @@ class RangeBoostTower(EffectTower):
 
 class HomeTower(AttackTower):
     def __init__(self, game):
-        AttackTower.__init__(
-            self,
-            game,
-            game.width / 2,
-            game.height / 2,
-            game.config.attack_towers.home,
-            color.GOLD2,
-            attackClass.HomeAttack,
-        )
+        AttackTower.__init__(self, game, game.width / 2, game.height / 2, game.config.attack_towers.home)
         self.alpha_screen = self.game.create_alpha_screen()
 
     def destruction_animation(self):
-        self.game.animations.add(
-            animationClass.CircularExplosion(
-                self.game, self.x, self.y, color.GOLD2, self.game.width, 60, self
-            )
-        )
+        self.game.animations.add(animationClass.CircularExplosion(self))
 
 
 class ArcheryTower(AttackTower):
     def __init__(self, game, x, y):
-        AttackTower.__init__(
-            self,
-            game,
-            x,
-            y,
-            game.config.attack_towers.archery,
-            color.VIOLET,
-            attackClass.ArcherAttack,
-        )
+        AttackTower.__init__(self, game, x, y, game.config.attack_towers.archery)
 
 
 class MagicTower(AttackTower):
     def __init__(self, game, x, y):
-        AttackTower.__init__(
-            self,
-            game,
-            x,
-            y,
-            game.config.attack_towers.magic,
-            color.BLUE,
-            attackClass.MagicAttack,
-        )
+        AttackTower.__init__(self, game, x, y, game.config.attack_towers.magic)
 
 
 class BombTower(AttackTower):
     def __init__(self, game, x, y):
-        AttackTower.__init__(
-            self,
-            game,
-            x,
-            y,
-            game.config.attack_towers.bomb,
-            color.BLACK,
-            attackClass.BombAttack,
-        )
+        AttackTower.__init__(self, game, x, y, game.config.attack_towers.bomb)
         self.alpha_screen = self.game.create_alpha_screen()
+
+
+    def damaging(self):
+        for potential_target in self.game.zombies:
+            if (self.target.dist(potential_target) <= self.range and potential_target != self.target):
+                potential_target.life_expect -= self.origin.damage
+                potential_target.life -= self.origin.damage
+                if potential_target.life <= 0:
+                    potential_target.killed()
 
 
 

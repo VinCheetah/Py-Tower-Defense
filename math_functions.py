@@ -12,6 +12,12 @@ def root(x):
 def decreasing_root(x):
     return math.sqrt(1-x)
 
+def power(x, n=5):
+    return x ** n
+
+def decreasing_power(x, n=5):
+    return power(1 - x, n)
+
 def cube(x):
     return x ** 3
 
@@ -43,14 +49,20 @@ def exp(x):
     return math.exp(x)
 
 
-def ql(x):
+def ql_1_4(x):
     if x <= 1/4:
         return root(4 * x)
     else:
         return decreasing_square((x - 1/4) * 4 / 3)
 
+def ql_1_4_bis(x):
+    if x <= 1/4:
+        return square(4*x)
+    else:
+        return decreasing_root((x - 1/4) * 4 / 3)
+
 def print_graph(fun):
-    from matplotlib import pyplot as plt
+    import matplotlib.pyplot as plt
     import numpy
 
     X = numpy.linspace(0,1,1000)
@@ -58,4 +70,3 @@ def print_graph(fun):
     plt.plot(X,Y)
     plt.show()
 
-#print_graph(ql)
