@@ -102,6 +102,16 @@ title = "Py-Tower-Defense-Config"
     power_up_factor=2
     target_type=2
 
+[effect_towers.canon_speed]
+    type="CanonSpeedBoost"
+    color="CREA4"
+    size=15
+    range=100
+    price=1500
+    max_life=200
+    power_up_factor=2
+    target_type=2
+
 
 
 [zombies.classic]
@@ -200,7 +210,7 @@ title = "Py-Tower-Defense-Config"
 
 [animation.particle_explosion_zombie]
     mini_num_particles=8
-    maxi_num_particles=14
+    maxi_num_particles=140
 
 [animation.particle_explosion_zombie.particle]
     mini_life_time=20
@@ -213,9 +223,9 @@ title = "Py-Tower-Defense-Config"
     maxi_speed=3
     mini_alpha=100
     maxi_alpha=255
-    mini_speed_decrease=0.3
+    mini_speed_decrease=0.8
     maxi_speed_decrease=1
-    mini_alpha_decrease=0.4
+    mini_alpha_decrease=0.6
     maxi_alpha_decrease=1
 
 

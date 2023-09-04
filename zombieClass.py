@@ -38,7 +38,7 @@ class Zombie(Printable):
 
     def find_target(self, new_tower=None):
         potential_towers = (
-            self.game.attack_towers.difference(self.game.attack_towers_bin)
+            self.game.attack_towers.difference(self.game.attack_towers_bin).union(self.game.effect_towers.difference(self.game.effect_towers_bin))
             if new_tower is None
             else new_tower
         )

@@ -308,6 +308,5 @@ class Game:
         ) + "\nCOMPLETE DESCRIPTION\n" + "\n".join(
             (str(key) + " : " + str(getattr(self, key))) for key in self.__dict__)
 
-    def recognize(self, object, potential_class):
-        print(type(self.recognize_dico.get(potential_class)))
-        return isinstance(object, self.recognize_dico.get(potential_class))
+    def recognize(self, obj, potential_class):
+        return isinstance(obj, self.recognize_dico.get(potential_class))

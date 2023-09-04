@@ -13,7 +13,6 @@ class Canon:
         self.center_y = self.origin.y
         self.original_rotation = rotation
         self.rotation = self.original_rotation
-        self.rotation_speed = 0.03
         self.width = pi / 4
         self.color = color.mix(self.origin.color, self.config.mix_color)
         self.target = None
@@ -47,10 +46,10 @@ class Canon:
 
     def aim(self):
         target_theta = self.angle()
-        if 10 * self.rotation_speed * self.game.moving_action < (self.rotation - target_theta) % (2 * pi) < pi:
-            self.rotation -= self.rotation_speed * self.game.moving_action
-        elif 10 * self.rotation_speed * self.game.moving_action < (self.rotation - target_theta) % (2 * pi):
-            self.rotation += self.rotation_speed * self.game.moving_action
+        if 10 * self.origin.canon_speed * self.game.moving_action < (self.rotation - target_theta) % (2 * pi) < pi:
+            self.rotation -= self.origin.canon_speed * self.game.moving_action
+        elif 10 * self.origin.canon_speed * self.game.moving_action < (self.rotation - target_theta) % (2 * pi):
+            self.rotation += self.origin.canon_speed * self.game.moving_action
         else:
             self.rotation = target_theta
             self.attack()
@@ -107,10 +106,10 @@ class Canon:
 
     def rotate_home(self):
         target_theta = self.original_rotation
-        if 3 * self.rotation_speed * self.game.time_speed < (self.rotation - target_theta) % (2 * pi) < pi:
-            self.rotation -= self.rotation_speed * self.game.moving_action
-        elif 3 * self.rotation_speed * self.game.time_speed < (self.rotation - target_theta) % (2 * pi):
-            self.rotation += self.rotation_speed * self.game.moving_action
+        if 3 * self.origin.canon_speed * self.game.time_speed < (self.rotation - target_theta) % (2 * pi) < pi:
+            self.rotation -= self.origin.canon_speed * self.game.moving_action
+        elif 3 * self.origin.canon_speed * self.game.time_speed < (self.rotation - target_theta) % (2 * pi):
+            self.rotation += self.origin.canon_speed * self.game.moving_action
         else:
             self.rotation = target_theta
             self.inactive = True

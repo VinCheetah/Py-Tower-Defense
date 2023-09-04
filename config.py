@@ -38,6 +38,7 @@ class Config(UserDict):
                 towerClass.DamageBoostTower,
                 towerClass.AtkRateBoostTower,
                 towerClass.RangeBoostTower,
+                towerClass.CanonSpeedBoostTower
             ],
             "zombies": [
                 zombieClass.ClassicZombie,

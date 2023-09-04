@@ -126,8 +126,8 @@ class Particle:
     def move(self):
         self.x += self.speed * self.x_move * self.game.moving_action
         self.y += self.speed * self.y_move * self.game.moving_action
-        self.speed = self.original_speed * (1 - self.speed_decrease * self.life_time / self.original_life_time)
-        self.alpha = self.original_alpha * (1 - self.alpha_decrease * self.life_time / self.original_life_time)
+        self.speed = self.original_speed * (1 - self.speed_decrease * (1 - self.life_time / self.original_life_time))
+        self.alpha = self.original_alpha * (1 - self.alpha_decrease * (1 - self.life_time / self.original_life_time))
         self.life_time -= self.game.moving_action
 
     def display(self):
