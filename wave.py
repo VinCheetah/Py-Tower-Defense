@@ -17,12 +17,16 @@ class Wave:
         return self
 
     def find_config(self):
+        config = {}
         for key in self.wave_config:
             key_split = list(map(int, key.split('-')))
-            if len(key_split) == 1 and key_split[0] == self.num:
-                return self.wave_config[key]
             if len(key_split) == 2 and key_split[0] <= self.num <= key_split[1]:
-                return self.wave_config[key]
+                config |= self.wave_config[key]
+        for key in self.wave_config:
+            if key.isnumeric() and int(key) == self.num:
+                config |= self.wave_config[key]
+        return config
+
 
     def over(self):
         self.game.new_wave()

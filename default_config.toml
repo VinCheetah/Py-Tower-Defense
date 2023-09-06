@@ -190,7 +190,7 @@ title = "Py-Tower-Defense-Config"
 
 [animation.particle_explosion]
     mini_num_particles=10
-    maxi_num_particles=20
+    maxi_num_particles=80
 
 [animation.particle_explosion.particle]
     mini_life_time=20
@@ -200,30 +200,30 @@ title = "Py-Tower-Defense-Config"
     mini_color_variation=-20
     maxi_color_variation=20
     mini_speed=0.3
-    maxi_speed=3
+    maxi_speed=4
     mini_alpha=100
     maxi_alpha=255
-    mini_speed_decrease=0.3
+    mini_speed_decrease=0.7
     maxi_speed_decrease=1
     mini_alpha_decrease=0.4
     maxi_alpha_decrease=1
 
 [animation.particle_explosion_zombie]
     mini_num_particles=8
-    maxi_num_particles=140
+    maxi_num_particles=30
 
 [animation.particle_explosion_zombie.particle]
     mini_life_time=20
-    maxi_life_time=50
+    maxi_life_time=40
     mini_size_factor=0.2
     maxi_size_factor=0.5
     mini_color_variation=-20
     maxi_color_variation=20
     mini_speed=0.3
-    maxi_speed=3
+    maxi_speed=2
     mini_alpha=100
     maxi_alpha=255
-    mini_speed_decrease=0.8
+    mini_speed_decrease=0.7
     maxi_speed_decrease=1
     mini_alpha_decrease=0.6
     maxi_alpha_decrease=1
@@ -253,7 +253,12 @@ max_y=1000
 min_zoom=0.5
 max_zoom=5
 
-[wave.2-99]
+[wave.2-10]
 max_x=1500
 max_y=1500
 min_zoom=0.4
+
+[wave.5]
+max_x=2000
+
+[wave.2]
