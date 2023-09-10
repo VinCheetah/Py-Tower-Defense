@@ -6,7 +6,6 @@ title = "Py-Tower-Defense-Config"
     min_frame_rate=15
     original_zoom=1
     original_time_speed=1
-
     max_zoom=20
     min_zoom=0.01
     zoom_speed=1.03
@@ -238,27 +237,49 @@ title = "Py-Tower-Defense-Config"
     life_time=35
 
 
+[animation.show_text]
+    life_time=150
+    pop_life_time=30
+    shade_life_time=50
+    color="WHITE"
+
+
 
 
 
 
 
 [wave]
+auto_wave=false
+
+
+[wave.1-inf]
+continuous_spawn=true
+continuous_spawning_weight_classic=1
+
+mini_continuous_spawning_rest_time = 40
+maxi_continuous_spawning_rest_time = 100
+
+life_time= 3000
+
+
+
 
 
 
 [wave.1]
-max_x=1000
-max_y=1000
+max_coord=1000
 min_zoom=0.5
 max_zoom=5
+continuous_spawning_rest_time=5
 
 [wave.2-10]
 max_x=1500
-max_y=1500
+max_y=1000
 min_zoom=0.4
 
 [wave.5]
-max_x=2000
+max_x=1800
+max_y=1200
 
 [wave.2]

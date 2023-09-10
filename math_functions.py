@@ -1,5 +1,11 @@
 import math
 
+def linear(x):
+    return x
+
+def decreasing_linear(x):
+    return 1 - x
+
 def square(x):
     return x**2
 

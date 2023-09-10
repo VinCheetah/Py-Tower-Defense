@@ -9,14 +9,27 @@ from config import Config
 from boundedValue import BoundedValue
 
 
+
+
 class Game:
     config = Config.get_default()
     recognize_dico = {
         "zombie": zombieClass.Zombie,
         "tower": towerClass.Tower,
         "attack_tower": towerClass.AttackTower,
-        "effect_tower": towerClass.EffectTower
+        "effect_tower": towerClass.EffectTower,
+        "classic": zombieClass.ClassicZombie,
     }
+
+    def god_function(function):
+        def wrapper(*args):
+            self = args[0]
+            if self.god_mode_active:
+                function(*args)
+            else:
+                self.print_text("God Mode Required")
+
+        return wrapper
 
     def __init__(self, screen):
         self.test = False
@@ -26,11 +39,13 @@ class Game:
         self.buildable = True
         self.moving_map = False
         self.tracking = False
+        self.god_mode_active = False
 
         self.original_zoom = self.config.general.original_zoom
         self.zoom = BoundedValue(self.original_zoom, self.config.general.min_zoom, self.config.general.max_zoom)
         self.zoom_speed = self.config.general.zoom_speed
         self.time_speed = self.config.general.original_time_speed
+        self.auto_wave = self.config.wave.auto_wave
         self.original_frame_rate = self.config.general.original_frame_rate
         self.frame_rate = self.original_frame_rate
         self.background_col = color.DARK_GREY
@@ -50,6 +65,8 @@ class Game:
         self.lives = 100
         self.wave = None
         self.num_wave = 0
+        self.screen_ratio = self.width / self.height
+
 
         self.zombies = set()
         self.attack_towers = set()
@@ -78,14 +95,17 @@ class Game:
         self.height = pygame.display.Info().current_h
 
     def actu_moving_action(self):
-        self.moving_action = (
-                                     self.time_speed * self.original_frame_rate / self.frame_rate
-                             ) * (1 - self.pause)
+        self.moving_action = (self.time_speed * self.original_frame_rate / self.frame_rate) * (1 - self.pause)
 
+    @god_function
     def pausing(self):
-        self.pause = not self.pause
-        self.actu_moving_action()
+        if self.god_mode_active:
+            self.pause = not self.pause
+            self.actu_moving_action()
+        else:
+            self.print_text("God Mode Required")
 
+    @god_function
     def change_time_speed(self, multiplicative):
         self.time_speed *= multiplicative
         self.actu_moving_action()
@@ -107,6 +127,7 @@ class Game:
         else:
             del chosen_tower
 
+    @god_function
     def new_effect_tower(self, x, y):
         chosen_tower = random.choice(self.config.types.effect_towers)(self, x, y)
         if self.transaction(chosen_tower.price):
@@ -122,49 +143,60 @@ class Game:
 
     def zoom_move(self, closer):
         self.zoom *= (self.zoom_speed if closer else 1 / self.zoom_speed)
+        if not self.god_mode_active:
+            self.active_map_parameters()
+
+
+
+    def set_map_parameters(self, config):
+        if "max_coord" in config:
+            self.max_x = config["max_coord"]
+            self.max_y = self.max_x / self.screen_ratio
+        else:
+            if "max_x" in config:
+                self.max_x = config["max_x"]
+            if "max_y" in config:
+                self.max_y = config["max_y"]
+        if "min_zoom" in config:
+            self.min_zoom = max(config["min_zoom"], self.width / (2 * self.max_x), self.height / (2 * self.max_y))
+        if "max_zoom" in config:
+            self.max_zoom = config["max_zoom"]
+
+        if not self.god_mode_active:
+            self.active_map_parameters()
+
+
+    def active_map_parameters(self):
+        self.zoom.set_extremum(self.min_zoom, self.max_zoom)
         self.view_center_x.set_extremum(-self.max_x + self.width / 2 / self.zoom,
                                         self.max_x - self.width / 2 / self.zoom)
         self.view_center_y.set_extremum(-self.max_y + self.height / 2 / self.zoom,
                                         self.max_y - self.height / 2 / self.zoom)
 
-    def set_map_parameters(self, config):
-        if "max_x" in config:
-            self.max_x = config["max_x"]
-        if "max_y" in config:
-            self.max_y = config["max_y"]
-
-        if "min_zoom" in config:
-            self.zoom.min = max(config["min_zoom"], self.width / (2 * self.max_x), self.height / (2 * self.max_y))
-        if "max_zoom" in config:
-            self.zoom.max = config["max_zoom"]
-        if "max_x" in config:
-            self.view_center_x.set_extremum(-self.max_x + self.width / 2 / self.zoom,
-                                            self.max_x - self.width / 2 / self.zoom)
-        if "max_y" in config:
-            self.view_center_y.set_extremum(-self.max_y + self.height / 2 / self.zoom,
-                                            self.max_y - self.height / 2 / self.zoom)
-
-        # for attr in ["max_x", "max_y", "max_zoom", "min_zoom"]:
-        #     if attr in config:
-        #         self.
-        #         if attr == "min_zoom":
-        #             self.view_center_x.max =
-        #             print(self.zoom)
-        #             self.zoom.min = max(config[attr], self.width / (2 * self.max_x), self.height / (2 * self.max_y))
-        #         else:
-        #             self
-        #             setattr(self, attr, config[attr])
-
-    def new_zombie(self):
-        self.zombies.add(
-            (
-                random.choice(self.config.types.zombies)(
-                    self,
-                    self.unview_x(random.randint(0, self.width)),
-                    self.unview_y(random.randint(0, self.height)),
+    @god_function
+    def spawn_random_zombie(self, number=1):
+        for _ in range(number):
+            self.spawn_zombie(
+                    random.choice(self.config.types.zombies)(self,
+                        self.unview_x(random.randint(0, self.width)),
+                        self.unview_y(random.randint(0, self.height)),
+                    )
                 )
-            )
-        )
+
+    def print_text(self, text):
+        self.animations.add(animationClass.ShowText(self, text))
+
+
+    def god_mode(self):
+        self.god_mode_active = not self.god_mode_active
+        if self.god_mode_active:
+            self.print_text("God Mode Activated")
+            self.zoom.unbound()
+            self.view_center_x.unbound()
+            self.view_center_y.unbound()
+        else:
+            self.print_text("God Mode Deactivated")
+            self.active_map_parameters()
 
     def print_money(self):
         txt_surface = (pygame.font.Font(None, 50)).render(
@@ -196,6 +228,8 @@ class Game:
     def actu_action(self):
         if not self.pause:
             self.time += self.time_speed / self.frame_rate * self.original_frame_rate
+        if self.wave is not None:
+            self.wave.action()
         for tower in self.attack_towers:
             tower.tow_attack()
         for zombie in self.zombies:
@@ -227,9 +261,21 @@ class Game:
             )
         )
 
+    @god_function
+    def delete_selected(self):
+        if self.selected is not None:
+            if self.recognize(self.selected, "tower"):
+                self.selected.destroyed()
+            elif self.recognize(self.selected, "zombie"):
+                self.selected.killed()
+
+    def spawn_zombie(self, zombie):
+        self.zombies.add(zombie)
+
     def new_wave(self):
         self.num_wave += 1
         self.wave = wave.Wave(self)
+        self.print_text("Wave " + str(self.num_wave) + " ... ")
 
     def clean(self):
         if len(self.attacks_bin) > 0:
@@ -271,6 +317,7 @@ class Game:
         self.attacks_bin = self.attacks.copy()
         self.animations_bin = self.animations.copy()
 
+    @god_function
     def money_prize(self, value):
         self.money += value
 

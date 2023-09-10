@@ -1,13 +1,12 @@
 import pygame
+pygame.init()
 import os
 import time
 import gameClass
 
-from boundedValue import BoundedValue
 
 
 os.environ["SDL_VIDEO_CENTERED"] = "1"
-pygame.init()
 
 screen = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
 
@@ -41,7 +40,7 @@ while running:
                     running = False
                 elif event.key == pygame.K_SPACE:
                     for _ in range(spawn):
-                        game.new_zombie()
+                        game.spawn_random_zombie()
                 elif event.key == pygame.K_p:
                     game.change_time_speed(1.5)
                 elif event.key == pygame.K_m:
@@ -63,6 +62,8 @@ while running:
                     spawn *= 5
                 elif event.key == pygame.K_a:
                     spawn //= 5
+                elif event.key == pygame.K_g:
+                    game.god_mode()
                 elif event.key == pygame.K_c:
                     game.complete_destruction()
                 elif event.key == pygame.K_DOLLAR:
@@ -73,6 +74,8 @@ while running:
                     game.test = not game.test
                 elif event.key == pygame.K_w:
                     game.new_wave()
+                elif event.key == pygame.K_BACKSPACE:
+                    game.delete_selected()
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 4:
                     game.zoom_move(True)

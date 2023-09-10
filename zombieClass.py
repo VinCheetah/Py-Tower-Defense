@@ -1,7 +1,8 @@
 import pygame
 import color
+import random
 
-from math import inf
+from math import inf, isinf, pi, cos, sin
 from printable import Printable
 from boundedValue import BoundedValue
 from animationClass import ParticleExplosion, CircularEffect
@@ -35,6 +36,18 @@ class Zombie(Printable):
         self.pause = 0
         self.last_atk = self.game.time
         self.attackers = set()
+
+    @classmethod
+    def out_of_view(cls, game):
+        if not isinf(game.max_x) and not isinf(game.max_y):
+            angle = random.random() * 2 * pi
+            longeur = (game.max_x ** 2 + game.max_y ** 2) ** .5
+            x = min(max(longeur * cos(angle), - game.max_x), game.max_x)
+            y = min(max(longeur * sin(angle), - game.max_y), game.max_y)
+            return cls(game, x, y)
+
+        else:
+            print("Can't spawn out of view zombie on infinite map")
 
     def find_target(self, new_tower=None):
         potential_towers = (
@@ -228,6 +241,9 @@ class HealerZombie(Zombie):
             1,
         )
         Zombie.selected(self)
+
+
+
 
 # class RandomTanky(Zombie):
 #     def __init__(self, game, x, y):

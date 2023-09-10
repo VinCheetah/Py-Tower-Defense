@@ -241,3 +241,45 @@ class CircularEffect:
             self.game.screen.blit(self.screen, (0, 0))
         else:
             self.game.animations_bin.add(self)
+
+
+class ShowText(Animation):
+
+    policy = "Arial"
+    max_size = 100
+    fonts_size = dict(
+        (str(size), pygame.font.SysFont("Arial", size)) for size in range(1, 101)
+    )
+
+    def __init__(self, game, text):
+        self.game = game
+        self.config = self.game.config.animation.show_text
+        self.text = text
+        self.original_life_time = self.config.life_time
+        self.life_time = self.original_life_time
+        self.pop_life_time = self.config.pop_life_time
+        self.shade_life_time = self.config.shade_life_time
+        self.color = self.config.color
+
+        self.size = min(self.max_size, 2 * self.max_size - len(text))
+        self.font = self.fonts_size[str(self.size)]
+
+    def anime(self):
+        self.life_time -= self.game.moving_action
+        if self.life_time >= 0:
+            if self.life_time >= self.original_life_time - self.pop_life_time:
+                avancement = (self.original_life_time - self.life_time) / self.pop_life_time
+                text = self.fonts_size[str(max(1, int(self.size * math_functions.linear(avancement))))].render(self.text, True, self.color)
+            elif self.life_time <= self.shade_life_time:
+                avancement = 1 - self.life_time / self.shade_life_time
+                text = self.font.render(self.text, True, self.color)
+                text.set_alpha(int(math_functions.decreasing_square(avancement) * 255))
+            else:
+                text = self.font.render(self.text, True, self.color)
+
+            text_rect = text.get_rect()
+            text_rect.center = self.game.width // 2, self.game.height // 2
+            self.game.screen.blit(text, text_rect)
+        else:
+            self.over()
+

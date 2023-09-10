@@ -32,7 +32,6 @@ class Tower(Printable):
         self.animations = set()
         self.animations_bin = set()
 
-        self.temp = 0
 
     def check_target(self):
         for target in self.targets:
@@ -179,7 +178,7 @@ class AttackTower(Tower):
                 .difference(self.targets_bin) if self.dist(zombie) <= self.range
             ],
             key=lambda x: x[0],
-        ) + sorted([(self.dist(zombie), zombie) for zombie in self.targets])
+        ) + sorted([(self.dist(zombie), zombie) for zombie in self.targets], key=lambda x: x[0])
         for i in range(min(len(distances), len(self.inactive_canons))):
             self.targets.add(distances[i][1])
             canon = self.inactive_canons.pop()
@@ -229,7 +228,6 @@ class AttackTower(Tower):
             zombie.tower_reach = False
 
     def print_game(self):
-        self.temp += 1
         for canon in self.inactive_canons:
             canon.print_game()
         for canon in self.active_canons:
