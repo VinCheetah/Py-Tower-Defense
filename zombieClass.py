@@ -41,9 +41,9 @@ class Zombie(Printable):
     def out_of_view(cls, game):
         if not isinf(game.max_x) and not isinf(game.max_y):
             angle = random.random() * 2 * pi
-            longeur = (game.max_x ** 2 + game.max_y ** 2) ** .5
-            x = min(max(longeur * cos(angle), - game.max_x), game.max_x)
-            y = min(max(longeur * sin(angle), - game.max_y), game.max_y)
+            longeur = (game.max_x**2 + game.max_y**2) ** 0.5
+            x = min(max(longeur * cos(angle), -game.max_x), game.max_x)
+            y = min(max(longeur * sin(angle), -game.max_y), game.max_y)
             return cls(game, x, y)
 
         else:
@@ -51,11 +51,17 @@ class Zombie(Printable):
 
     def find_target(self, new_tower=None):
         potential_towers = (
-            self.game.attack_towers.difference(self.game.attack_towers_bin).union(self.game.effect_towers.difference(self.game.effect_towers_bin))
+            self.game.attack_towers.difference(self.game.attack_towers_bin).union(
+                self.game.effect_towers.difference(self.game.effect_towers_bin)
+            )
             if new_tower is None
             else new_tower
         )
-        closest, dist_min = (None, inf) if not self.target_lock else (self.target, self.dist(self.target))
+        closest, dist_min = (
+            (None, inf)
+            if not self.target_lock
+            else (self.target, self.dist(self.target))
+        )
         for tow in potential_towers:
             new_dist = tow.dist(self)
             if new_dist < dist_min:
@@ -75,16 +81,16 @@ class Zombie(Printable):
                     dist = self.target.dist(self)
                     if dist > self.target.size + self.range + self.size:
                         self.x += (
-                                self.speed
-                                * self.game.moving_action
-                                * (self.target.x - self.x)
-                                / dist
+                            self.speed
+                            * self.game.moving_action
+                            * (self.target.x - self.x)
+                            / dist
                         )
                         self.y += (
-                                self.speed
-                                * self.game.moving_action
-                                * (self.target.y - self.y)
-                                / dist
+                            self.speed
+                            * self.game.moving_action
+                            * (self.target.y - self.y)
+                            / dist
                         )
                     else:
                         self.tower_reach = True
@@ -174,7 +180,9 @@ class Zombie(Printable):
             f"\n\tLast Atk : {self.last_atk}"
             f"\n\tSelected : {self.game.selected == self}"
             f"\n\n"
-        ) + "\n".join((str(key) + " : " + str(getattr(self, key))) for key in self.__dict__)
+        ) + "\n".join(
+            (str(key) + " : " + str(getattr(self, key))) for key in self.__dict__
+        )
 
 
 class ClassicZombie(Zombie):
@@ -198,7 +206,6 @@ class RandomZombie(Zombie):
 
 
 class HealerZombie(Zombie):
-
     def __init__(self, game, x, y):
         Zombie.__init__(self, game, x, y, game.config.zombies.healer)
         self.last_special_atk = self.last_atk
@@ -214,7 +221,10 @@ class HealerZombie(Zombie):
     def special_attack(self):
         atk_made = False
         for zombie in self.game.zombies.difference(self.game.zombies_bin):
-            if self.dist(zombie) <= self.special_range and zombie.life < zombie.life.max:
+            if (
+                self.dist(zombie) <= self.special_range
+                and zombie.life < zombie.life.max
+            ):
                 atk_made = True
                 zombie.life += self.special_heal
                 zombie.life_expect += self.special_heal
@@ -241,8 +251,6 @@ class HealerZombie(Zombie):
             1,
         )
         Zombie.selected(self)
-
-
 
 
 # class RandomTanky(Zombie):

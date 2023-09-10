@@ -1,9 +1,9 @@
 import pygame
+
 pygame.init()
 import os
 import time
 import gameClass
-
 
 
 os.environ["SDL_VIDEO_CENTERED"] = "1"
@@ -84,10 +84,9 @@ while running:
                 elif game.buildable:
                     x, y = pygame.mouse.get_pos()
                     for zombie in game.zombies:
-                        if (
-                            zombie.dist_point(game.unview_x(x), game.unview_y(y))
-                            < zombie.size * (1 - int(zombie.tower_reach) / 2)
-                        ):
+                        if zombie.dist_point(
+                            game.unview_x(x), game.unview_y(y)
+                        ) < zombie.size * (1 - int(zombie.tower_reach) / 2):
                             game.selected = zombie
                             game.view_move(zombie.x, zombie.y, speed=3, tracking=True)
                             break
@@ -121,7 +120,10 @@ while running:
                 game.moving_map = True
                 ex_pos_x = x
                 ex_pos_y = y
-            game.add_view_coord(game.unview_x(ex_pos_x) - game.unview_x(x), game.unview_y(ex_pos_y) - game.unview_y(y))
+            game.add_view_coord(
+                game.unview_x(ex_pos_x) - game.unview_x(x),
+                game.unview_y(ex_pos_y) - game.unview_y(y),
+            )
             if x != ex_pos_x or y != ex_pos_y:
                 game.buildable = False
             ex_pos_x = x

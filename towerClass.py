@@ -7,7 +7,7 @@ import color
 import pygame
 from math import pi
 from boundedValue import BoundedValue
-from canon import  Canon
+from canon import Canon
 
 
 class Tower(Printable):
@@ -20,7 +20,9 @@ class Tower(Printable):
         self.size = config.size
         self.max_life = config.max_life
 
-        Printable.__init__(self, game, config.color, self.size, game.unview_x(x), game.unview_y(y))
+        Printable.__init__(
+            self, game, config.color, self.size, game.unview_x(x), game.unview_y(y)
+        )
 
         self.life = BoundedValue(self.max_life, 0, self.max_life)
         self.alive = True
@@ -31,7 +33,6 @@ class Tower(Printable):
         self.effecting = set()
         self.animations = set()
         self.animations_bin = set()
-
 
     def check_target(self):
         for target in self.targets:
@@ -138,7 +139,10 @@ class Tower(Printable):
             f"\n\tAttacker(s) : {sep+sep.join(map(str,self.attackers))}"
             f"\n\tEffecting : {sep+sep.join(map(str,self.effecting))}"
             f"\n\tSelected : {self.game.selected == self}"
-            f"\n\n" + "\n".join((str(key) + " : " + str(getattr(self,key))) for key in self.__dict__)
+            f"\n\n"
+            + "\n".join(
+                (str(key) + " : " + str(getattr(self, key))) for key in self.__dict__
+            )
         )
 
     def print_game(self):
@@ -159,8 +163,11 @@ class AttackTower(Tower):
 
         random_angle = random.random() * 2 * pi
         self.active_canons = set()
-        self.canon_speed = .03
-        self.inactive_canons = set(Canon(self, random_angle + 2 * i * pi / self.num_targets) for i in range(self.num_targets))
+        self.canon_speed = 0.03
+        self.inactive_canons = set(
+            Canon(self, random_angle + 2 * i * pi / self.num_targets)
+            for i in range(self.num_targets)
+        )
         self.active_canons_bin = set()
 
         self.attack = config.attack
@@ -175,10 +182,13 @@ class AttackTower(Tower):
                 (self.dist(zombie), zombie)
                 for zombie in self.game.zombies.difference(self.game.zombies_soon_dead)
                 .difference(self.targets)
-                .difference(self.targets_bin) if self.dist(zombie) <= self.range
+                .difference(self.targets_bin)
+                if self.dist(zombie) <= self.range
             ],
             key=lambda x: x[0],
-        ) + sorted([(self.dist(zombie), zombie) for zombie in self.targets], key=lambda x: x[0])
+        ) + sorted(
+            [(self.dist(zombie), zombie) for zombie in self.targets], key=lambda x: x[0]
+        )
         for i in range(min(len(distances), len(self.inactive_canons))):
             self.targets.add(distances[i][1])
             canon = self.inactive_canons.pop()
@@ -219,7 +229,6 @@ class AttackTower(Tower):
         Tower.erase_target(self, target)
         self.targets_lock = False
 
-
     def erase_existence(self):
         self.game.attack_towers_bin.add(self)
         for zombie in self.attackers:
@@ -252,7 +261,7 @@ class EffectTower(Tower):
         self.power_up_factor = config.power_up_factor
         self.alpha_screen = self.game.create_alpha_screen()
 
-        #self.init_effecting()
+        # self.init_effecting()
         # 0 is for effect_towers | 1 is for all towers | 2 is for attack_towers
 
     def animate_boost(self):
@@ -327,8 +336,8 @@ class RangeBoostTower(EffectTower):
     def stop_boost(self, tower):
         tower.range /= self.power_up_factor
 
-class CanonSpeedBoostTower(EffectTower):
 
+class CanonSpeedBoostTower(EffectTower):
     def __init__(self, game, x, y):
         EffectTower.__init__(self, game, x, y, game.config.effect_towers.canon_speed)
 
@@ -341,7 +350,9 @@ class CanonSpeedBoostTower(EffectTower):
 
 class HomeTower(AttackTower):
     def __init__(self, game):
-        AttackTower.__init__(self, game, game.width / 2, game.height / 2, game.config.attack_towers.home)
+        AttackTower.__init__(
+            self, game, game.width / 2, game.height / 2, game.config.attack_towers.home
+        )
         self.alpha_screen = self.game.create_alpha_screen()
 
     def destruction_animation(self):
@@ -363,15 +374,13 @@ class BombTower(AttackTower):
         AttackTower.__init__(self, game, x, y, game.config.attack_towers.bomb)
         self.alpha_screen = self.game.create_alpha_screen()
 
-
     def damaging(self):
         for potential_target in self.game.zombies:
-            if (self.target.dist(potential_target) <= self.range and potential_target != self.target):
+            if (
+                self.target.dist(potential_target) <= self.range
+                and potential_target != self.target
+            ):
                 potential_target.life_expect -= self.origin.damage
                 potential_target.life -= self.origin.damage
                 if potential_target.life <= 0:
                     potential_target.killed()
-
-
-
-

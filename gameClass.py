@@ -9,8 +9,6 @@ from config import Config
 from boundedValue import BoundedValue
 
 
-
-
 class Game:
     config = Config.get_default()
     recognize_dico = {
@@ -42,7 +40,11 @@ class Game:
         self.god_mode_active = False
 
         self.original_zoom = self.config.general.original_zoom
-        self.zoom = BoundedValue(self.original_zoom, self.config.general.min_zoom, self.config.general.max_zoom)
+        self.zoom = BoundedValue(
+            self.original_zoom,
+            self.config.general.min_zoom,
+            self.config.general.max_zoom,
+        )
         self.zoom_speed = self.config.general.zoom_speed
         self.time_speed = self.config.general.original_time_speed
         self.auto_wave = self.config.wave.auto_wave
@@ -66,7 +68,6 @@ class Game:
         self.wave = None
         self.num_wave = 0
         self.screen_ratio = self.width / self.height
-
 
         self.zombies = set()
         self.attack_towers = set()
@@ -95,7 +96,9 @@ class Game:
         self.height = pygame.display.Info().current_h
 
     def actu_moving_action(self):
-        self.moving_action = (self.time_speed * self.original_frame_rate / self.frame_rate) * (1 - self.pause)
+        self.moving_action = (
+            self.time_speed * self.original_frame_rate / self.frame_rate
+        ) * (1 - self.pause)
 
     @god_function
     def pausing(self):
@@ -142,11 +145,9 @@ class Game:
             zombie.find_target(new_tower)
 
     def zoom_move(self, closer):
-        self.zoom *= (self.zoom_speed if closer else 1 / self.zoom_speed)
+        self.zoom *= self.zoom_speed if closer else 1 / self.zoom_speed
         if not self.god_mode_active:
             self.active_map_parameters()
-
-
 
     def set_map_parameters(self, config):
         if "max_coord" in config:
@@ -158,34 +159,41 @@ class Game:
             if "max_y" in config:
                 self.max_y = config["max_y"]
         if "min_zoom" in config:
-            self.min_zoom = max(config["min_zoom"], self.width / (2 * self.max_x), self.height / (2 * self.max_y))
+            self.min_zoom = max(
+                config["min_zoom"],
+                self.width / (2 * self.max_x),
+                self.height / (2 * self.max_y),
+            )
         if "max_zoom" in config:
             self.max_zoom = config["max_zoom"]
 
         if not self.god_mode_active:
             self.active_map_parameters()
 
-
     def active_map_parameters(self):
         self.zoom.set_extremum(self.min_zoom, self.max_zoom)
-        self.view_center_x.set_extremum(-self.max_x + self.width / 2 / self.zoom,
-                                        self.max_x - self.width / 2 / self.zoom)
-        self.view_center_y.set_extremum(-self.max_y + self.height / 2 / self.zoom,
-                                        self.max_y - self.height / 2 / self.zoom)
+        self.view_center_x.set_extremum(
+            -self.max_x + self.width / 2 / self.zoom,
+            self.max_x - self.width / 2 / self.zoom,
+        )
+        self.view_center_y.set_extremum(
+            -self.max_y + self.height / 2 / self.zoom,
+            self.max_y - self.height / 2 / self.zoom,
+        )
 
     @god_function
     def spawn_random_zombie(self, number=1):
         for _ in range(number):
             self.spawn_zombie(
-                    random.choice(self.config.types.zombies)(self,
-                        self.unview_x(random.randint(0, self.width)),
-                        self.unview_y(random.randint(0, self.height)),
-                    )
+                random.choice(self.config.types.zombies)(
+                    self,
+                    self.unview_x(random.randint(0, self.width)),
+                    self.unview_y(random.randint(0, self.height)),
                 )
+            )
 
     def print_text(self, text):
         self.animations.add(animationClass.ShowText(self, text))
-
 
     def god_mode(self):
         self.god_mode_active = not self.god_mode_active
@@ -344,16 +352,21 @@ class Game:
 
     def game_stats(self):
         return (
-            f"Frame rate : {self.frame_rate}\n"
-            f"Zoom : {self.zoom}\n"
-            f"Ticks : {self.time}\n"
-            f"Center : {self.view_center_x, self.view_center_y}\n"
-            f"Towers : {len(self.attack_towers) + len(self.effect_towers)}\n"
-            f"Zombies : {len(self.zombies)}\n"
-            f"Money : {self.money}\n"
-            f"Wave : {self.wave}\n"
-        ) + "\nCOMPLETE DESCRIPTION\n" + "\n".join(
-            (str(key) + " : " + str(getattr(self, key))) for key in self.__dict__)
+            (
+                f"Frame rate : {self.frame_rate}\n"
+                f"Zoom : {self.zoom}\n"
+                f"Ticks : {self.time}\n"
+                f"Center : {self.view_center_x, self.view_center_y}\n"
+                f"Towers : {len(self.attack_towers) + len(self.effect_towers)}\n"
+                f"Zombies : {len(self.zombies)}\n"
+                f"Money : {self.money}\n"
+                f"Wave : {self.wave}\n"
+            )
+            + "\nCOMPLETE DESCRIPTION\n"
+            + "\n".join(
+                (str(key) + " : " + str(getattr(self, key))) for key in self.__dict__
+            )
+        )
 
     def recognize(self, obj, potential_class):
         return isinstance(obj, self.recognize_dico.get(potential_class))

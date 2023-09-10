@@ -4,7 +4,6 @@ from math import pi, cos, sin, atan
 
 
 class Canon:
-
     def __init__(self, origin, rotation=0):
         self.origin = origin
         self.game = self.origin.game
@@ -40,15 +39,21 @@ class Canon:
         if x > 0:
             return atan(y / x)
         elif x < 0:
-            return atan(y / x) + (pi if y >= 0 else - pi)
+            return atan(y / x) + (pi if y >= 0 else -pi)
         else:
             return 0 if y == 0 else pi / 2
 
     def aim(self):
         target_theta = self.angle()
-        if 10 * self.origin.canon_speed * self.game.moving_action < (self.rotation - target_theta) % (2 * pi) < pi:
+        if (
+            10 * self.origin.canon_speed * self.game.moving_action
+            < (self.rotation - target_theta) % (2 * pi)
+            < pi
+        ):
             self.rotation -= self.origin.canon_speed * self.game.moving_action
-        elif 10 * self.origin.canon_speed * self.game.moving_action < (self.rotation - target_theta) % (2 * pi):
+        elif 10 * self.origin.canon_speed * self.game.moving_action < (
+            self.rotation - target_theta
+        ) % (2 * pi):
             self.rotation += self.origin.canon_speed * self.game.moving_action
         else:
             self.rotation = target_theta
@@ -58,7 +63,9 @@ class Canon:
         if (self.game.time - self.last_attack) > self.origin.atk_rate:
             if self.target.life_expect > 0:
                 self.target.life_expect -= self.origin.damage
-                self.game.attacks.add(self.origin.attack(self.game, self.target, self.origin))
+                self.game.attacks.add(
+                    self.origin.attack(self.game, self.target, self.origin)
+                )
                 if self.target.life_expect <= 0:
                     self.game.zombies_soon_dead.add(self.target)
                     for attacker in self.target.attackers:
@@ -92,23 +99,37 @@ class Canon:
         theta4 = self.rotation - self.width / 4 - epsilon / 2
         p1 = cos(theta1), sin(theta1)
         p2 = cos(theta2), sin(theta2)
-        p3 = cos(theta3) * (self.length2 + epsilon), sin(theta3) * (self.length2 + epsilon)
-        p4 = cos(theta4) * (self.length2 + epsilon), sin(theta4) * (self.length2 + epsilon)
+        p3 = cos(theta3) * (self.length2 + epsilon), sin(theta3) * (
+            self.length2 + epsilon
+        )
+        p4 = cos(theta4) * (self.length2 + epsilon), sin(theta4) * (
+            self.length2 + epsilon
+        )
         return p1, p2, p3, p4
 
-
     def transform(self, points):
-        return tuple((self.game.view_x(self.center_x + p[0] * self.origin.size),
-                      self.game.view_y(self.center_y + p[1] * self.origin.size)) for p in points)
+        return tuple(
+            (
+                self.game.view_x(self.center_x + p[0] * self.origin.size),
+                self.game.view_y(self.center_y + p[1] * self.origin.size),
+            )
+            for p in points
+        )
 
     def trapeze(self, bigger=False):
         return self.transform(self.shape(bigger))
 
     def rotate_home(self):
         target_theta = self.original_rotation
-        if 3 * self.origin.canon_speed * self.game.time_speed < (self.rotation - target_theta) % (2 * pi) < pi:
+        if (
+            3 * self.origin.canon_speed * self.game.time_speed
+            < (self.rotation - target_theta) % (2 * pi)
+            < pi
+        ):
             self.rotation -= self.origin.canon_speed * self.game.moving_action
-        elif 3 * self.origin.canon_speed * self.game.time_speed < (self.rotation - target_theta) % (2 * pi):
+        elif 3 * self.origin.canon_speed * self.game.time_speed < (
+            self.rotation - target_theta
+        ) % (2 * pi):
             self.rotation += self.origin.canon_speed * self.game.moving_action
         else:
             self.rotation = target_theta

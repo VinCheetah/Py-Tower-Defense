@@ -20,7 +20,6 @@ class Animation:
 
 
 class CircularExplosion(Animation):
-
     def __init__(self, origin):
         self.game = origin.game
         self.config = self.game.config.animation.circular_explosion
@@ -48,20 +47,29 @@ class CircularExplosion(Animation):
         self.screen.fill(0)
         self.life_time -= self.game.moving_action
         if self.life_time > self.disappear_life_time:
-            avancement = 1 - (self.life_time - self.disappear_life_time) / self.expansion_life_time
-            pygame.draw.circle(self.screen, self.color + tuple([255]),
-                               (self.game.view_x(self.x), self.game.view_y(self.y)),
-                               self.size * math_functions.root(avancement) * self.game.zoom)
+            avancement = (
+                1
+                - (self.life_time - self.disappear_life_time) / self.expansion_life_time
+            )
+            pygame.draw.circle(
+                self.screen,
+                self.color + tuple([255]),
+                (self.game.view_x(self.x), self.game.view_y(self.y)),
+                self.size * math_functions.root(avancement) * self.game.zoom,
+            )
         elif self.life_time >= 0:
             if not self.exploded:
                 self.explosion()
                 self.exploded = True
 
             avancement = 1 - self.life_time / self.disappear_life_time
-            pygame.draw.circle(self.screen,
-                               self.color + tuple([int(255 * math_functions.decreasing_cube(avancement))]),
-                               (self.game.view_x(self.x), self.game.view_y(self.y)),
-                               self.size * self.game.zoom)
+            pygame.draw.circle(
+                self.screen,
+                self.color
+                + tuple([int(255 * math_functions.decreasing_cube(avancement))]),
+                (self.game.view_x(self.x), self.game.view_y(self.y)),
+                self.size * self.game.zoom,
+            )
         else:
             self.over()
         self.game.screen.blit(self.screen, (0, 0))
@@ -110,8 +118,16 @@ class Particle:
         self.life_time = self.original_life_time
         self.size = self.config.get_val("size_factor") * origin.size
         self.color = tuple(
-            min(255, max(0, color_comp + self.config.get_val("color_variation", integer_only=True))) for color_comp in
-            origin.color)
+            min(
+                255,
+                max(
+                    0,
+                    color_comp
+                    + self.config.get_val("color_variation", integer_only=True),
+                ),
+            )
+            for color_comp in origin.color
+        )
         self.original_speed = self.config.get_val("speed")
         self.original_alpha = self.config.get_val("alpha")
         self.speed = self.original_speed
@@ -126,8 +142,12 @@ class Particle:
     def move(self):
         self.x += self.speed * self.x_move * self.game.moving_action
         self.y += self.speed * self.y_move * self.game.moving_action
-        self.speed = self.original_speed * (1 - self.speed_decrease * (1 - self.life_time / self.original_life_time))
-        self.alpha = self.original_alpha * (1 - self.alpha_decrease * (1 - self.life_time / self.original_life_time))
+        self.speed = self.original_speed * (
+            1 - self.speed_decrease * (1 - self.life_time / self.original_life_time)
+        )
+        self.alpha = self.original_alpha * (
+            1 - self.alpha_decrease * (1 - self.life_time / self.original_life_time)
+        )
         self.life_time -= self.game.moving_action
 
     def display(self):
@@ -150,7 +170,10 @@ class ParticleExplosion(Animation):
             self.config = self.game.config.animation.particle_explosion_zombie
         else:
             self.config = self.game.config.animation.particle_explosion
-        self.particles = set(Particle(self, origin) for _ in range(self.config.get_val("num_particles", integer_only=True)))
+        self.particles = set(
+            Particle(self, origin)
+            for _ in range(self.config.get_val("num_particles", integer_only=True))
+        )
         self.particles_bin = set()
         self.type = "ParticleExplosion"
 
@@ -191,14 +214,14 @@ class TowerBop:
         if self.life_time >= 0:
             avancement = 1 - self.life_time / self.original_life_time
             self.origin.size = self.original_size * (
-                        1 + self.size_increase * math_functions.inverse_mid_square(avancement))
+                1 + self.size_increase * math_functions.inverse_mid_square(avancement)
+            )
         else:
             self.origin.size = self.original_size
             self.game.animations_bin.add(self)
 
 
 class CircularEffect:
-
     def __init__(self, origin, size):
         self.game = origin.game
         self.screen = origin.alpha_screen
@@ -236,7 +259,8 @@ class CircularEffect:
                 self.screen,
                 color.mix(self.color, color.GREY) + tuple([min(255, self.alpha * 2)]),
                 (self.game.view_x(self.x), self.game.view_y(self.y)),
-                self.size * self.game.zoom * avancement, int(4 * self.game.zoom)
+                self.size * self.game.zoom * avancement,
+                int(4 * self.game.zoom),
             )
             self.game.screen.blit(self.screen, (0, 0))
         else:
@@ -244,7 +268,6 @@ class CircularEffect:
 
 
 class ShowText(Animation):
-
     policy = "Arial"
     max_size = 100
     fonts_size = dict(
@@ -268,8 +291,12 @@ class ShowText(Animation):
         self.life_time -= self.game.moving_action
         if self.life_time >= 0:
             if self.life_time >= self.original_life_time - self.pop_life_time:
-                avancement = (self.original_life_time - self.life_time) / self.pop_life_time
-                text = self.fonts_size[str(max(1, int(self.size * math_functions.linear(avancement))))].render(self.text, True, self.color)
+                avancement = (
+                    self.original_life_time - self.life_time
+                ) / self.pop_life_time
+                text = self.fonts_size[
+                    str(max(1, int(self.size * math_functions.linear(avancement))))
+                ].render(self.text, True, self.color)
             elif self.life_time <= self.shade_life_time:
                 avancement = 1 - self.life_time / self.shade_life_time
                 text = self.font.render(self.text, True, self.color)
@@ -282,4 +309,3 @@ class ShowText(Animation):
             self.game.screen.blit(text, text_rect)
         else:
             self.over()
-

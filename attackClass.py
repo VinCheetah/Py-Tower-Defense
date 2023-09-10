@@ -59,7 +59,10 @@ class BombAttack(Attack):
 
     def damaging(self):
         for potential_target in self.game.zombies:
-            if (self.target.dist(potential_target) <= self.range and potential_target != self.target):
+            if (
+                self.target.dist(potential_target) <= self.range
+                and potential_target != self.target
+            ):
                 potential_target.life_expect -= self.origin.damage
                 potential_target.life -= self.origin.damage
                 if potential_target.life <= 0:

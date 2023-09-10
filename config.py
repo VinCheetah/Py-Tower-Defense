@@ -10,8 +10,8 @@ from collections import UserDict
 
 
 class Config(UserDict):
+    library = []
 
-    library=[]
     def __getattr__(self, attr):
         if attr in self.data and isinstance(self.data[attr], collections.abc.Mapping):
             return Config(**self.data[attr])
@@ -38,7 +38,7 @@ class Config(UserDict):
                 towerClass.DamageBoostTower,
                 towerClass.AtkRateBoostTower,
                 towerClass.RangeBoostTower,
-                towerClass.CanonSpeedBoostTower
+                towerClass.CanonSpeedBoostTower,
             ],
             "zombies": [
                 zombieClass.ClassicZombie,

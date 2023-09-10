@@ -3,15 +3,11 @@ from math import inf
 
 class InvalidExtremum(Exception):
     """Raised when extremums are not valid"""
+
     pass
 
 
-
-
-
-
 class BoundedValue(object):
-
     def __init__(self, value, minimum=-inf, maximum=inf):
         self.__setattr__("min", minimum, check=False)
         self.__setattr__("max", maximum, check=False)
@@ -45,7 +41,6 @@ class BoundedValue(object):
     def unbound(self):
         self.set_extremum(-inf, inf)
 
-
     def __setattr__(self, key, value, check=True):
         if key == "value":
             super().__setattr__(key, min(max(value, self.min), self.max))
@@ -61,13 +56,13 @@ class BoundedValue(object):
         return self.value
 
     def __neg__(self):
-        return - self.value
+        return -self.value
 
     def __abs__(self):
         return abs(self.value)
 
     def __invert__(self):
-        return ~ self.value
+        return ~self.value
 
     def __add__(self, other):
         return self.value + other
@@ -145,4 +140,3 @@ class BoundedValue(object):
 
     def __str__(self):
         return f"{self.value}   (min : {self.min}, max : {self.max})"
-

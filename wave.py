@@ -1,6 +1,7 @@
 import random
 from config import Config
 
+
 class Wave:
     def __init__(self, game):
         self.game = game
@@ -19,15 +20,11 @@ class Wave:
 
         print(self.spawn_list)
 
-
     def init_continuous_spawning(self):
-
         for key in self.config:
             if key.startswith("continuous_spawning_weight_"):
                 self.continuous_spawning_zombies.append(key[27:])
                 self.continuous_spawning_weights.append(self.config[key])
-
-
 
     def init_spawn_list(self):
         spawn_list = []
@@ -39,14 +36,15 @@ class Wave:
         return spawn_list
 
     def continuous_spawning_choice(self):
-        return random.choices(self.continuous_spawning_zombies, self.continuous_spawning_weights)[0]
-
+        return random.choices(
+            self.continuous_spawning_zombies, self.continuous_spawning_weights
+        )[0]
 
     def find_config(self):
         config = {}
         for key in self.wave_config:
             try:
-                key_split = list(map(float, key.split('-')))
+                key_split = list(map(float, key.split("-")))
                 if len(key_split) == 2 and key_split[0] <= self.num <= key_split[1]:
                     config |= self.wave_config[key]
             except:
@@ -56,7 +54,6 @@ class Wave:
                 config |= self.wave_config[key]
         return Config(config)
 
-
     def action(self):
         self.life_time -= self.game.moving_action
         if self.life_time >= 0:
@@ -64,7 +61,6 @@ class Wave:
                 self.spawn(self.spawn_list.pop()[1])
         else:
             self.over()
-
 
     def spawn(self, zombie):
         self.game.spawn_zombie(self.game.recognize_dico[zombie].out_of_view(self.game))
