@@ -41,9 +41,11 @@ class Zombie(Printable):
     def out_of_view(cls, game):
         if not isinf(game.max_x) and not isinf(game.max_y):
             angle = random.random() * 2 * pi
-            longeur = (game.max_x**2 + game.max_y**2) ** 0.5
-            x = min(max(longeur * cos(angle), -game.max_x), game.max_x)
-            y = min(max(longeur * sin(angle), -game.max_y), game.max_y)
+            longeur = (game.max_x**2 + game.max_y**2) ** 0.5 + 20
+            # x = min(max(longeur * cos(angle), -game.max_x), game.max_x)  Spawn au bords
+            # y = min(max(longeur * sin(angle), -game.max_y), game.max_y)  Spawn au bords
+            x = longeur * cos(angle)
+            y = longeur * sin(angle)
             return cls(game, x, y)
 
         else:

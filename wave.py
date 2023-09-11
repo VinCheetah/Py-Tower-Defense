@@ -16,9 +16,7 @@ class Wave:
         self.continuous_spawning_weights = []
         self.init_continuous_spawning()
         self.spawn_list = self.init_spawn_list()
-        self.zombies = []
 
-        print(self.spawn_list)
 
     def init_continuous_spawning(self):
         for key in self.config:
@@ -43,12 +41,11 @@ class Wave:
     def find_config(self):
         config = {}
         for key in self.wave_config:
-            try:
-                key_split = list(map(float, key.split("-")))
-                if len(key_split) == 2 and key_split[0] <= self.num <= key_split[1]:
+            key_split = key.split("-")
+            if key_split[1] == "":
+                key_split[1] = "inf"
+            if len(key_split) == 2 and float(key_split[0]) <= self.num <= float(key_split[1]):
                     config |= self.wave_config[key]
-            except:
-                pass
         for key in self.wave_config:
             if key.isnumeric() and int(key) == self.num:
                 config |= self.wave_config[key]
