@@ -28,7 +28,7 @@ class Wave:
         spawn_list = []
         if self.config.continuous_spawn:
             fictive_time = 0
-            while fictive_time < self.life_time:
+            while fictive_time <= self.life_time:
                 spawn_list.append((fictive_time, self.continuous_spawning_choice()))
                 fictive_time += self.config.continuous_spawning_rest_time
         return spawn_list
@@ -42,9 +42,7 @@ class Wave:
         config = {}
         for key in self.wave_config:
             key_split = key.split("-")
-            if key_split[1] == "":
-                key_split[1] = "inf"
-            if len(key_split) == 2 and float(key_split[0]) <= self.num <= float(key_split[1]):
+            if len(key_split) == 2 and float(key_split[0]) <= self.num <= float(key_split[1] if key_split[1] != "" else "inf"):
                     config |= self.wave_config[key]
         for key in self.wave_config:
             if key.isnumeric() and int(key) == self.num:

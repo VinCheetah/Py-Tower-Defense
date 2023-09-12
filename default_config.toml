@@ -253,12 +253,17 @@ title = "Py-Tower-Defense-Config"
 auto_wave=false
 
 
-[wave.1-inf]
+[wave.1-]
 continuous_spawn=true
 continuous_spawning_weight_classic=1
 
-mini_continuous_spawning_rest_time = 40
-maxi_continuous_spawning_rest_time = 100
+min_zoom=0.1
+max_zoom=5
+
+max_coord = 3000
+
+mini_continuous_spawning_rest_time = 30
+maxi_continuous_spawning_rest_time = 300
 
 life_time= 3000
 
@@ -268,10 +273,10 @@ life_time= 3000
 
 
 [wave.1]
-max_coord=1000
-min_zoom=0.5
-max_zoom=5
-continuous_spawning_rest_time=5
+max_coord=600
+life_time=1000
+continuous_spawning_rest_time=500
+
 
 [wave.2-10]
 max_x=1500
@@ -281,5 +286,3 @@ min_zoom=0.4
 [wave.5]
 max_x=1800
 max_y=1200
-
-[wave.2]

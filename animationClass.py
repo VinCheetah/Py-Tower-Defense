@@ -273,8 +273,11 @@ class ShowText(Animation):
     fonts_size = dict(
         (str(size), pygame.font.SysFont("Arial", size)) for size in range(1, 101)
     )
+    texts = []
 
     def __init__(self, game, text):
+        self.texts.append(self)
+
         self.game = game
         self.config = self.game.config.animation.show_text
         self.text = text
@@ -305,7 +308,8 @@ class ShowText(Animation):
                 text = self.font.render(self.text, True, self.color)
 
             text_rect = text.get_rect()
-            text_rect.center = self.game.width // 2, self.game.height // 2
+            text_rect.center = self.game.width // 2, self.game.height // 2 + self.texts.index(self) * 100
             self.game.screen.blit(text, text_rect)
         else:
             self.over()
+            self.texts.pop(0)

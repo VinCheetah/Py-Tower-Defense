@@ -325,7 +325,6 @@ class Game:
         self.attacks_bin = self.attacks.copy()
         self.animations_bin = self.animations.copy()
 
-    @god_function
     def money_prize(self, value):
         self.money += value
 
