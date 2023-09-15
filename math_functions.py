@@ -73,6 +73,13 @@ def exp(x):
     return math.exp(x)
 
 
+def linear_bump(x):
+    if x <= .5:
+        return linear(x * 2)
+    else:
+        return decreasing_linear((x-.5) * 2)
+
+
 def ql_1_4(x):
     if x <= 1 / 4:
         return root(4 * x)

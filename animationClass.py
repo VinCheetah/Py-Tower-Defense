@@ -313,3 +313,22 @@ class ShowText(Animation):
         else:
             self.over()
             self.texts.pop(0)
+
+
+class UpgradableTower(Animation):
+
+    def __init__(self, origin):
+        self.game = origin.game
+        self.config = self.game.config.animation.upgradable_tower
+        self.color = color.mix(self.config.color, origin.color)
+        self.origin_size = origin.size
+        self.size = self.config.size
+        self.time = self.config.time
+        self.x = origin.x
+        self.y = origin.y
+        self.alpha = 100
+        self.life_time = 0
+
+    def anime(self):
+        self.life_time += self.game.moving_action
+        pygame.draw.circle(self.game.screen, self.color + tuple([self.alpha]), (self.game.view_x(self.x), self.game.view_y(self.y)), int(self.game.zoom * (self.origin_size - self.size * math_functions.linear_bump(self.life_time % self.time / self.time))), int(5 * self.game.zoom))

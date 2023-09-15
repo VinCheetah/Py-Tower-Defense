@@ -76,6 +76,9 @@ while running:
                     game.new_wave()
                 elif event.key == pygame.K_BACKSPACE:
                     game.delete_selected()
+                elif event.key == pygame.K_y:
+                    game.selected.experience_reward(1000000)
+                    game.print_text("Exp Boost")
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 4:
                     game.zoom_move(True)

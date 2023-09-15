@@ -27,6 +27,14 @@ class Tower(Printable):
         self.life = BoundedValue(self.max_life, 0, self.max_life)
         self.alive = True
 
+        self.level = 1
+
+        self.experience_booster = 1
+
+        self.upgradable_animation = None
+        self.experience = BoundedValue(0, 0, self.level ** 2 * config.experience_level)
+        #self.experience = BoundedValue(0, 0, self.level ** 2 * self.config.experience_level)
+
         self.targets = set()
         self.targets_bin = set()
         self.attackers = set()
@@ -91,6 +99,20 @@ class Tower(Printable):
         for target in self.game.zombies_soon_dead:
             if self in target.attackers:
                 target.under_selected()
+
+    def upgrade(self):
+        if self.experience.max == self.experience and self.game.transaction(self.new_level_price):
+            self.level += 1
+            self.experience.set_value(0)
+            self.experience.set_extremum(0, self.level ** 2 * self.config.experience_level)
+
+    def experience_reward(self, amount):
+        self.experience += amount * self.experience_booster
+        if self.experience.max == self.experience:
+            if self.upgradable_animation is None:
+                self.upgradable_animation = animationClass.UpgradableTower(self)
+                self.game.animations.add(self.upgradable_animation)
+
 
     def destroyed(self):
         if self.alive:

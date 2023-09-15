@@ -32,6 +32,7 @@ title = "Py-Tower-Defense-Config"
     num_targets=5
     damage=100
     atk_rate=20
+experience_level=100
 
 
 [attack_towers.archery]
@@ -123,6 +124,7 @@ title = "Py-Tower-Defense-Config"
     atk_rate=60
     size=10
     value=50
+
 
 [zombies.tank]
     type="Tank"
@@ -244,8 +246,11 @@ title = "Py-Tower-Defense-Config"
     color="WHITE"
 
 
+[animation.upgradable_tower]
 
-
+color="BLUE"
+size=30
+time=200
 
 
 
