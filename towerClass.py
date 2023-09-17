@@ -21,6 +21,9 @@ class Tower(Printable):
         self.size = config.size
         self.max_life = config.max_life
 
+
+        self.animation = []
+
         Printable.__init__(
             self, game, config.color, self.size, game.unview_x(x), game.unview_y(y)
         )
@@ -30,9 +33,10 @@ class Tower(Printable):
 
         self.level = 1
 
+        self.level_memory = []
+
         self.experience_booster = 1
 
-        self.upgradable_animation = None
         self.experience = BoundedValue(0, 0, self.level ** 2 * config.experience_level)
 
         self.targets = set()
@@ -40,10 +44,11 @@ class Tower(Printable):
         self.attackers = set()
         self.effecting = set()
         self.animations = set()
+        self.post_animations = set()
         self.animations_bin = set()
 
+        self.upgradable_animation = False
 
-        #BAR
         self.life_bar_height = config.life_bar_height
         self.exp_bar_height = config.exp_bar_height
         self.bar_length = config.bar_length
@@ -103,6 +108,26 @@ class Tower(Printable):
                                      (self.bar_length * self.size - 2 * self.border_x) * self.game.zoom,
                                      self.life_bar_height * self.game.zoom))
 
+        pygame.draw.circle(self.game.screen,
+                           self.color_missing_life_bar,
+                    (self.game.view_x(self.x + self.size * self.bar_length / 2),
+                           self.game.view_y(self.y + self.size * self.bar_y - self.bar_height / 2 + self.border_y + self.life_bar_height / 2)),
+                           self.life_bar_height / 2 * self.game.zoom)
+
+
+        pygame.draw.circle(self.game.screen,
+                           self.color_life_bar,
+                    (self.game.view_x(self.x - self.size * self.bar_length / 2),
+                           self.game.view_y(self.y + self.size * self.bar_y - self.bar_height / 2 + self.border_y + self.life_bar_height / 2)),
+                           self.life_bar_height / 2 * self.game.zoom)
+
+
+        pygame.draw.circle(self.game.screen,
+                           self.color_life_bar,
+                    (self.game.view_x(self.x - self.size * self.bar_length / 2 + self.size * self.bar_length * self.life / self.life.max),
+                           self.game.view_y(self.y + self.size * self.bar_y - self.bar_height / 2 + self.border_y + self.life_bar_height / 2)),
+                           self.life_bar_height / 2 * self.game.zoom)
+
         pygame.draw.rect(self.game.screen,
                          self.color_exp_bar,
                          pygame.Rect(self.game.view_x(self.x - self.size * self.bar_length / 2 + self.border_x),
@@ -117,56 +142,42 @@ class Tower(Printable):
                                      (self.bar_length * self.size - 2 * self.border_x) * self.game.zoom * self.life / self.life.max,
                                      self.life_bar_height * self.game.zoom))
 
+
+        pygame.draw.circle(self.game.screen,
+                           self.color_exp_bar,
+                    (self.game.view_x(self.x - self.size * self.bar_length / 2),
+                           self.game.view_y(self.y + self.size * self.bar_y - self.bar_height / 2 + 1.5 * self.border_y + self.life_bar_height + self.exp_bar_height / 2)),
+                           self.exp_bar_height / 2 * self.game.zoom)
+
+
+        pygame.draw.circle(self.game.screen,
+                           self.color_exp_bar,
+                    (self.game.view_x(self.x - self.size * self.bar_length / 2 + self.size * self.bar_length * self.experience / self.experience.max),
+                           self.game.view_y(self.y + self.size * self.bar_y - self.bar_height / 2 + 1.5 * self.border_y + self.life_bar_height + self.exp_bar_height / 2)),
+                           self.exp_bar_height / 2 * self.game.zoom)
+
     def selected(self):
+        pygame.draw.circle(
+            self.game.screen,
+            color.lighter(self.game.background_color, 5),
+            (self.view_x(), self.view_y()),
+            self.range * self.game.zoom,
+        )
+        pygame.draw.circle(
+            self.game.screen,
+            color.LIGHT_GREY,
+            (self.view_x(), self.view_y()),
+            self.range * self.game.zoom,
+            1,
+        )
+
         self.bar()
-        # pygame.draw.circle(
-        #     self.game.screen,
-        #     color.lighter(self.game.background_color, 5),
-        #     (self.view_x(), self.view_y()),
-        #     self.range * self.game.zoom,
-        # )
-        # pygame.draw.circle(
-        #     self.game.screen,
-        #     color.LIGHT_GREY,
-        #     (self.view_x(), self.view_y()),
-        #     self.range * self.game.zoom,
-        #     1,
-        # )
-        # pygame.draw.rect(
-        #     self.game.screen,
-        #     color.RED,
-        #     pygame.Rect(
-        #         (self.game.view_x(self.x - self.size)),
-        #         self.game.view_y(self.y + self.size * 2 / 1.8),
-        #         2 * self.size * self.game.zoom,
-        #         5 * self.game.zoom,
-        #     ),
-        # )
-        # pygame.draw.rect(
-        #     self.game.screen,
-        #     color.GREEN,
-        #     pygame.Rect(
-        #         (self.game.view_x(self.x - self.size)),
-        #         self.game.view_y(self.y + self.size * 2 / 1.8),
-        #         (2 * self.size * self.life / self.life.max) * self.game.zoom,
-        #         5 * self.game.zoom,
-        #     ),
-        # )
-        # pygame.draw.rect(
-        #     self.game.screen,
-        #     color.BLUE,
-        #     pygame.Rect(
-        #         self.game.view_x(self.x - self.size),
-        #         self.game.view_y(self.y + self.size * 2 / 1.8) + 5 * self.game.zoom,
-        #         (2 * self.size * self.experience / self.experience.max) * self.game.zoom,
-        #         self.game.zoom.value
-        #     )
-        # )
-        # for target in self.targets:
-        #     target.under_selected()
-        # for target in self.game.zombies_soon_dead:
-        #     if self in target.attackers:
-        #         target.under_selected()
+
+        for target in self.targets:
+            target.under_selected()
+        for target in self.game.zombies_soon_dead:
+            if self in target.attackers:
+                target.under_selected()
 
     def upgrade(self):
         if self.experience.max == self.experience and self.game.transaction(self.new_level_price):
@@ -177,9 +188,9 @@ class Tower(Printable):
     def experience_reward(self, amount):
         self.experience += amount * self.experience_booster
         if self.experience.max == self.experience:
-            if self.upgradable_animation is None:
-                self.upgradable_animation = animationClass.UpgradableTower(self)
-                self.game.animations.add(self.upgradable_animation)
+            if not self.upgradable_animation:
+                self.upgradable_animation = True
+                self.post_animations.add(animationClass.UpgradableTower(self))
 
 
     def destroyed(self):
@@ -239,6 +250,11 @@ class Tower(Printable):
         for animation in self.animations:
             animation.anime()
         Printable.print_game(self)
+        for animation in self.post_animations:
+            animation.anime()
+
+    def get_super(self):
+        return super()
 
 
 class AttackTower(Tower):

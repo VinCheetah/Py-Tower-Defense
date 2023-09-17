@@ -72,7 +72,6 @@ def darker_absolute(c, darkness=1.3):
 
 def lighter_compensative(c, lightness=30):
     comp = max(255, c[0] + lightness) + max(255, c[1] + lightness) + max(255, c[2] + lightness) - 765
-    print(comp)
     return (
         min(255, c[0] + lightness + comp),
         min(255, c[1] + lightness + comp),
@@ -80,7 +79,6 @@ def lighter_compensative(c, lightness=30):
     )
 
 def darker_compensative(c, darkness=30):
-    comp = - min(0, c[0] - darkness)
     comp = - min(0, c[0] - darkness) - min(0, c[1] - darkness) - min(0, c[2] - darkness)
     return (
         max(0, c[0] - darkness - comp),

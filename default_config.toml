@@ -207,10 +207,10 @@ experience=20
     size=18
     value=1000
         special_parameters=["special_atk_rate", "special_range", "special_heal", "special_pause"]
-        special_atk_rate=80
+        special_atk_rate=180
         special_range=150
         special_heal=200
-        special_pause=40
+        special_pause=80
 experience=50
 
 [attack]

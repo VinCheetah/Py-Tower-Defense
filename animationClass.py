@@ -269,7 +269,7 @@ class CircularEffect:
 
 class ShowText(Animation):
     policy = "Arial"
-    max_size = 100
+    max_size = 40
     fonts_size = dict(
         (str(size), pygame.font.SysFont("Arial", size)) for size in range(1, 101)
     )
@@ -316,14 +316,13 @@ class ShowText(Animation):
 
 
 class UpgradableTower(Animation):
-    
-    func = math_functions.square_bump
+
+    func = staticmethod(math_functions.ql_1_4)
 
     def __init__(self, origin):
         self.game = origin.game
+        self.origin = origin
         self.config = self.game.config.animation.upgradable_tower
-        self.color = origin.color
-        self.origin_size = origin.size
         self.size = self.config.size
         self.time = self.config.time
         self.x = origin.x
@@ -333,16 +332,16 @@ class UpgradableTower(Animation):
         self.num_shade = self.config.num_shade
         self.max_lightness = self.config.max_lightness
 
-    # def anime(self):
-        # self.life_time += self.game.moving_action
-        # pygame.draw.circle(self.game.screen, self.color + tuple([self.alpha]), (self.game.view_x(self.x), self.game.view_y(self.y)), int(self.game.zoom * (self.origin_size - self.size * math_functions.linear_bump(self.life_time % self.time / self.time))), int(5 * self.game.zoom))
+
 
     def anime(self):
         self.life_time += self.game.moving_action
         advancement = self.life_time % self.time / self.time
-        for i in range(self.num_shade):
-            pygame.draw.circle(self.game.screen, color.lighter_compensative(self.color, i / self.num_shade * self.max_lightness), (self.game.view_x(self.x), self.game.view_y(self.y)), int(self.game.zoom * (min(self.origin_size, self.origin_size * self.func(advancement) + (1 - i / self.num_shade) * self.size))))
-        for i in range(self.num_shade):
-            pygame.draw.circle(self.game.screen, color.lighter_compensative(self.color, (1 - i / self.num_shade) * self.max_lightness), (self.game.view_x(self.x), self.game.view_y(self.y)), int(self.game.zoom * (min(self.origin_size, self.origin_size * self.func(advancement) - i / self.num_shade * self.size))))
+        for shade in range(self.num_shade):
+            pygame.draw.circle(self.game.screen, color.lighter_compensative(self.origin.color, shade / self.num_shade * self.max_lightness), (self.game.view_x(self.x), self.game.view_y(self.y)), int(self.game.zoom * (min(self.origin.size, (2 * self.size + self.origin.size) * (self.func)(advancement) - shade / self.num_shade * self.size))))
+        for shade in range(self.num_shade):
+            pygame.draw.circle(self.game.screen, color.lighter_compensative(self.origin.color, (1 - shade / self.num_shade) * self.max_lightness), (self.game.view_x(self.x), self.game.view_y(self.y)), int(self.game.zoom * (min(self.origin.size, (2 * self.size + self.origin.size) * (self.func)(advancement) - (1 + shade / self.num_shade) * self.size))))
+
+
 
 
