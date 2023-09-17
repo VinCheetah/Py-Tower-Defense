@@ -40,20 +40,18 @@ class Game:
         self.god_mode_active = False
 
         self.original_zoom = self.config.general.original_zoom
-        self.zoom = BoundedValue(
-            self.original_zoom,
-            self.config.general.min_zoom,
-            self.config.general.max_zoom,
-        )
+        self.min_zoom = self.config.general.min_zoom
+        self.max_zoom = self.config.general.max_zoom
+        self.zoom = BoundedValue(self.original_zoom, self.min_zoom, self.max_zoom)
         self.zoom_speed = self.config.general.zoom_speed
         self.time_speed = self.config.general.original_time_speed
         self.auto_wave = self.config.wave.auto_wave
+        self.background_color = self.config.general.background_color
         self.original_frame_rate = self.config.general.original_frame_rate
         self.frame_rate = self.original_frame_rate
-        self.background_col = color.DARK_GREY
 
-        self.width = None
-        self.height = None
+        self.width = 0
+        self.height = 0
         self.actu_dimensions()
 
         self.alpha_screen = self.create_alpha_screen()
@@ -214,7 +212,7 @@ class Game:
 
     def display(self):
         self.track()
-        self.screen.fill(self.background_col)
+        self.screen.fill(self.background_color)
         self.alpha_screen.fill(0)
         if self.selected is not None:
             self.selected.selected()

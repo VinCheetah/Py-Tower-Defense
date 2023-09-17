@@ -5,7 +5,6 @@ import os
 import time
 import gameClass
 
-
 os.environ["SDL_VIDEO_CENTERED"] = "1"
 
 screen = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
@@ -39,8 +38,7 @@ while running:
                 if event.key == pygame.K_ESCAPE:
                     running = False
                 elif event.key == pygame.K_SPACE:
-                    for _ in range(spawn):
-                        game.spawn_random_zombie()
+                    game.spawn_random_zombie(spawn)
                 elif event.key == pygame.K_p:
                     game.change_time_speed(1.5)
                 elif event.key == pygame.K_m:
@@ -88,7 +86,7 @@ while running:
                     x, y = pygame.mouse.get_pos()
                     for zombie in game.zombies:
                         if zombie.dist_point(
-                            game.unview_x(x), game.unview_y(y)
+                                game.unview_x(x), game.unview_y(y)
                         ) < zombie.size * (1 - int(zombie.tower_reach) / 2):
                             game.selected = zombie
                             game.view_move(zombie.x, zombie.y, speed=3, tracking=True)
@@ -96,8 +94,8 @@ while running:
                     else:
                         for tower in game.attack_towers.union(game.effect_towers):
                             if (
-                                tower.dist_point(game.unview_x(x), game.unview_y(y))
-                                < tower.size
+                                    tower.dist_point(game.unview_x(x), game.unview_y(y))
+                                    < tower.size
                             ):
                                 game.selected = tower
                                 game.view_move(

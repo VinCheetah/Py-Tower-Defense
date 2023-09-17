@@ -10,6 +10,8 @@ title = "Py-Tower-Defense-Config"
     min_zoom=0.01
     zoom_speed=1.03
 
+    background_color="DARK_GREY"
+
     max_x=inf
     max_y=inf
 
@@ -19,6 +21,18 @@ title = "Py-Tower-Defense-Config"
     mix_color="LIGHT_GREY"
 
 
+[towers]
+
+    bar_y=1.5
+    life_bar_height=6
+    exp_bar_height=1
+    bar_length=2
+    color_bar="BLACK"
+    color_life_bar="GREEN"
+    color_missing_life_bar="RED"
+    color_exp_bar="BLUE"
+    border_x=0
+    border_y=1
 
 
 [attack_towers.home]
@@ -46,6 +60,8 @@ experience_level=100
     num_targets=10
     damage=20
     atk_rate=25
+experience_level=100
+
 
 [attack_towers.magic]
     type="Magic"
@@ -58,6 +74,8 @@ experience_level=100
     num_targets=3
     damage=50
     atk_rate=60
+experience_level=100
+
 
 [attack_towers.bomb]
     type="Bomb"
@@ -70,6 +88,8 @@ experience_level=100
     num_targets=1
     damage=350
     atk_rate=150
+experience_level=100
+
 
 
 [effect_towers.damage]
@@ -81,6 +101,8 @@ experience_level=100
     max_life=200
     power_up_factor=2
     target_type=2
+experience_level=100
+
 
 [effect_towers.atkrate]
     type="AtkRateBoost"
@@ -91,6 +113,8 @@ experience_level=100
     max_life=200
     power_up_factor=2
     target_type=2
+experience_level=100
+
 
 [effect_towers.range]
     type="RangeBoost"
@@ -101,6 +125,8 @@ experience_level=100
     max_life=200
     power_up_factor=2
     target_type=2
+experience_level=100
+
 
 [effect_towers.canon_speed]
     type="CanonSpeedBoost"
@@ -111,6 +137,8 @@ experience_level=100
     max_life=200
     power_up_factor=2
     target_type=2
+experience_level=100
+
 
 
 
@@ -124,6 +152,7 @@ experience_level=100
     atk_rate=60
     size=10
     value=50
+experience=5
 
 
 [zombies.tank]
@@ -136,6 +165,7 @@ experience_level=100
     atk_rate=120
     size=15
     value=200
+experience=10
 
 [zombies.speedy]
     type="Speedy"
@@ -147,6 +177,7 @@ experience_level=100
     atk_rate=90
     size=13
     value=100
+experience=10
 
 [zombies.random]
     type="Random"
@@ -163,6 +194,7 @@ experience_level=100
     mini_size=10
     maxi_size=30
     value=500
+experience=20
 
 [zombies.healer]
     type="Healer"
@@ -179,6 +211,7 @@ experience_level=100
         special_range=150
         special_heal=200
         special_pause=40
+experience=50
 
 [attack]
 
@@ -247,10 +280,10 @@ experience_level=100
 
 
 [animation.upgradable_tower]
-
-color="BLUE"
-size=30
-time=200
+    size=15
+    time=300
+    num_shade=50
+    max_lightness=60
 
 
 

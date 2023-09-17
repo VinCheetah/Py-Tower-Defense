@@ -47,7 +47,7 @@ class CircularExplosion(Animation):
         self.screen.fill(0)
         self.life_time -= self.game.moving_action
         if self.life_time > self.disappear_life_time:
-            avancement = (
+            advancement = (
                 1
                 - (self.life_time - self.disappear_life_time) / self.expansion_life_time
             )
@@ -55,18 +55,18 @@ class CircularExplosion(Animation):
                 self.screen,
                 self.color + tuple([255]),
                 (self.game.view_x(self.x), self.game.view_y(self.y)),
-                self.size * math_functions.root(avancement) * self.game.zoom,
+                self.size * math_functions.root(advancement) * self.game.zoom,
             )
         elif self.life_time >= 0:
             if not self.exploded:
                 self.explosion()
                 self.exploded = True
 
-            avancement = 1 - self.life_time / self.disappear_life_time
+            advancement = 1 - self.life_time / self.disappear_life_time
             pygame.draw.circle(
                 self.screen,
                 self.color
-                + tuple([int(255 * math_functions.decreasing_cube(avancement))]),
+                + tuple([int(255 * math_functions.decreasing_cube(advancement))]),
                 (self.game.view_x(self.x), self.game.view_y(self.y)),
                 self.size * self.game.zoom,
             )
@@ -212,9 +212,9 @@ class TowerBop:
     def anime(self):
         self.life_time -= self.game.moving_action
         if self.life_time >= 0:
-            avancement = 1 - self.life_time / self.original_life_time
+            advancement = 1 - self.life_time / self.original_life_time
             self.origin.size = self.original_size * (
-                1 + self.size_increase * math_functions.inverse_mid_square(avancement)
+                1 + self.size_increase * math_functions.inverse_mid_square(advancement)
             )
         else:
             self.origin.size = self.original_size
@@ -240,8 +240,8 @@ class CircularEffect:
         self.life_time -= self.game.moving_action
         if self.life_time >= 0:
             self.screen.fill(0)
-            avancement = 1 - self.life_time / self.original_life_time
-            self.alpha = int(self.original_alpha * math_functions.ql_1_4(avancement))
+            advancement = 1 - self.life_time / self.original_life_time
+            self.alpha = int(self.original_alpha * math_functions.ql_1_4(advancement))
 
             pygame.draw.circle(
                 self.screen,
@@ -259,7 +259,7 @@ class CircularEffect:
                 self.screen,
                 color.mix(self.color, color.GREY) + tuple([min(255, self.alpha * 2)]),
                 (self.game.view_x(self.x), self.game.view_y(self.y)),
-                self.size * self.game.zoom * avancement,
+                self.size * self.game.zoom * advancement,
                 int(4 * self.game.zoom),
             )
             self.game.screen.blit(self.screen, (0, 0))
@@ -294,16 +294,16 @@ class ShowText(Animation):
         self.life_time -= self.game.moving_action
         if self.life_time >= 0:
             if self.life_time >= self.original_life_time - self.pop_life_time:
-                avancement = (
+                advancement = (
                     self.original_life_time - self.life_time
                 ) / self.pop_life_time
                 text = self.fonts_size[
-                    str(max(1, int(self.size * math_functions.linear(avancement))))
+                    str(max(1, int(self.size * math_functions.linear(advancement))))
                 ].render(self.text, True, self.color)
             elif self.life_time <= self.shade_life_time:
-                avancement = 1 - self.life_time / self.shade_life_time
+                advancement = 1 - self.life_time / self.shade_life_time
                 text = self.font.render(self.text, True, self.color)
-                text.set_alpha(int(math_functions.decreasing_square(avancement) * 255))
+                text.set_alpha(int(math_functions.decreasing_square(advancement) * 255))
             else:
                 text = self.font.render(self.text, True, self.color)
 
@@ -316,11 +316,13 @@ class ShowText(Animation):
 
 
 class UpgradableTower(Animation):
+    
+    func = math_functions.square_bump
 
     def __init__(self, origin):
         self.game = origin.game
         self.config = self.game.config.animation.upgradable_tower
-        self.color = color.mix(self.config.color, origin.color)
+        self.color = origin.color
         self.origin_size = origin.size
         self.size = self.config.size
         self.time = self.config.time
@@ -328,7 +330,19 @@ class UpgradableTower(Animation):
         self.y = origin.y
         self.alpha = 100
         self.life_time = 0
+        self.num_shade = self.config.num_shade
+        self.max_lightness = self.config.max_lightness
+
+    # def anime(self):
+        # self.life_time += self.game.moving_action
+        # pygame.draw.circle(self.game.screen, self.color + tuple([self.alpha]), (self.game.view_x(self.x), self.game.view_y(self.y)), int(self.game.zoom * (self.origin_size - self.size * math_functions.linear_bump(self.life_time % self.time / self.time))), int(5 * self.game.zoom))
 
     def anime(self):
         self.life_time += self.game.moving_action
-        pygame.draw.circle(self.game.screen, self.color + tuple([self.alpha]), (self.game.view_x(self.x), self.game.view_y(self.y)), int(self.game.zoom * (self.origin_size - self.size * math_functions.linear_bump(self.life_time % self.time / self.time))), int(5 * self.game.zoom))
+        advancement = self.life_time % self.time / self.time
+        for i in range(self.num_shade):
+            pygame.draw.circle(self.game.screen, color.lighter_compensative(self.color, i / self.num_shade * self.max_lightness), (self.game.view_x(self.x), self.game.view_y(self.y)), int(self.game.zoom * (min(self.origin_size, self.origin_size * self.func(advancement) + (1 - i / self.num_shade) * self.size))))
+        for i in range(self.num_shade):
+            pygame.draw.circle(self.game.screen, color.lighter_compensative(self.color, (1 - i / self.num_shade) * self.max_lightness), (self.game.view_x(self.x), self.game.view_y(self.y)), int(self.game.zoom * (min(self.origin_size, self.origin_size * self.func(advancement) - i / self.num_shade * self.size))))
+
+

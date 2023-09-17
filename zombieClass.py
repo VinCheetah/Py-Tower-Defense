@@ -20,6 +20,7 @@ class Zombie(Printable):
         self.size = config.size
         self.value = config.value
         self.type = config.type
+        self.experience = config.experience
 
         for special_parameter in config.special_parameters:
             setattr(self, special_parameter, config[special_parameter])
@@ -241,7 +242,7 @@ class HealerZombie(Zombie):
     def selected(self):
         pygame.draw.circle(
             self.game.screen,
-            color.lighter(self.game.background_col, 5),
+            color.lighter(self.game.background_color, 5),
             (self.view_x(), self.view_y()),
             self.special_range * self.game.zoom,
         )

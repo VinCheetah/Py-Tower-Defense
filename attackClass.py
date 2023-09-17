@@ -30,6 +30,7 @@ class Attack(printable.Printable):
         self.game.attacks_bin.add(self)
         self.target.life -= self.origin.damage
         if self.target.life == 0:
+            self.origin.experience_reward(self.target.experience)
             self.target.killed()
 
 

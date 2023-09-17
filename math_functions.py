@@ -77,8 +77,19 @@ def linear_bump(x):
     if x <= .5:
         return linear(x * 2)
     else:
-        return decreasing_linear((x-.5) * 2)
+        return decreasing_linear((x - .5) * 2)
 
+def square_bump(x):
+    if x <= .5:
+        return square(x * 2)
+    else:
+        return decreasing_square((x - .5) * 2)
+
+def cube_bump(x):
+    if x <= .5:
+        return cube(x * 2)
+    else:
+        return decreasing_cube((x - .5) * 2)
 
 def ql_1_4(x):
     if x <= 1 / 4:
