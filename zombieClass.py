@@ -408,12 +408,10 @@ class SpawnerZombie(SpecialAtkZombie):
 
     def special_attack(self):
         for _ in range(random.randint(self.config.mini_spawn_num, self.config.maxi_spawn_num)):
-            print("New Zombie ?")
             random_angle = 2 * pi * random.random()
             radius = self.special_range * random.random()
             x, y = self.x + cos(random_angle) * radius, self.y + sin(random_angle) * radius
             zombie = self.game.recognize_dico[random.choices(self.spawnable_zombies, self.spawnable_weights)[0]](self.game, x, y)
-            print(zombie)
             self.game.spawn_zombie(zombie)
 
         self.game.animations.add(CircularEffect(self, self.special_range))

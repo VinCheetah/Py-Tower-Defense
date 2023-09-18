@@ -44,7 +44,7 @@ while running:
                 elif event.key == pygame.K_m:
                     game.change_time_speed(2 / 3)
                 elif event.key == pygame.K_u:
-                    game.change_frame_rate(5)
+                    game.upgrade_selected()
                 elif event.key == pygame.K_j:
                     game.change_frame_rate(-5)
                 elif event.key == pygame.K_o:

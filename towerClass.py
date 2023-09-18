@@ -14,6 +14,7 @@ class Tower(Printable):
         self.game = game
 
         config |= self.game.config.towers
+        self.config = config
 
         self.type = config.type
         self.range = config.range
@@ -38,6 +39,8 @@ class Tower(Printable):
         self.experience_booster = 1
 
         self.experience = BoundedValue(0, 0, self.level ** 2 * config.experience_level)
+
+        self.new_level_price = self.price * 2
 
         self.targets = set()
         self.targets_bin = set()
@@ -158,8 +161,6 @@ class Tower(Printable):
 
 
 
-
-
     def selected(self):
         pygame.draw.circle(
             self.game.screen,
@@ -180,8 +181,16 @@ class Tower(Printable):
         for target in self.targets:
             target.under_selected()
 
+    def boost_new_level(self):
+        self.range *= 1.3
+
+
     def upgrade(self):
         if self.experience.max == self.experience and self.game.transaction(self.new_level_price):
+            self.boost_new_level()
+            self.upgradable_animation = False
+            self.post_animations.clear()
+            self.new_level_price *= 2
             self.level += 1
             self.experience.set_value(0)
             self.experience.set_extremum(0, self.level ** 2 * self.config.experience_level)

@@ -40,7 +40,7 @@ title = "Py-Tower-Defense-Config"
     color="GOLD2"
     size=30
     range=100
-    price=+inf
+    price=500
     max_life=500
     num_targets=5
     damage=100
@@ -59,7 +59,7 @@ experience_level=100
     num_targets=10
     damage=20
     atk_rate=25
-experience_level=100
+experience_level=1000
 
 
 [attack_towers.magic]
@@ -73,7 +73,7 @@ experience_level=100
     num_targets=3
     damage=50
     atk_rate=60
-experience_level=100
+experience_level=1000
 
 
 [attack_towers.bomb]
@@ -87,7 +87,7 @@ experience_level=100
     num_targets=1
     damage=350
     atk_rate=150
-experience_level=100
+experience_level=1000
 
 
 
@@ -100,7 +100,7 @@ experience_level=100
     max_life=200
     power_up_factor=2
     target_type=2
-experience_level=100
+experience_level=1000
 
 
 [effect_towers.atkrate]
@@ -112,7 +112,7 @@ experience_level=100
     max_life=200
     power_up_factor=2
     target_type=2
-experience_level=100
+experience_level=1000
 
 
 [effect_towers.range]
@@ -124,7 +124,7 @@ experience_level=100
     max_life=200
     power_up_factor=2
     target_type=2
-experience_level=100
+experience_level=1000
 
 
 [effect_towers.canon_speed]
@@ -136,7 +136,7 @@ experience_level=100
     max_life=200
     power_up_factor=2
     target_type=2
-experience_level=100
+experience_level=1000
 
 
 [zombies.bar]
@@ -236,9 +236,9 @@ experience=20
     size=14
     value=3000
     experience=100
-        special_atk_rate=500
+        special_atk_rate=100
         special_range=100
-        special_pause=150
+        special_pause=0
         special_parameters=["mini_spawn_num", "maxi_spawn_num", "spawnable_zombies", "spawnable_weights"]
             mini_spawn_num=3
             maxi_spawn_num=6

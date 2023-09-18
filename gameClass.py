@@ -320,6 +320,10 @@ class Game:
         for tower in self.attack_towers:
             tower.clean()
 
+    def upgrade_selected(self):
+        if self.recognize(self.selected, "tower"):
+            self.selected.upgrade()
+
     def complete_destruction(self):
         self.selected = None
         self.zombies_bin = self.zombies.copy()
@@ -338,6 +342,8 @@ class Game:
         if self.money >= value:
             self.money -= value
             return True
+        else:
+            self.print_text(f"Price is {value} and you have {self.money} ...")
         return False
 
     def view_x(self, x):
