@@ -37,7 +37,7 @@ class Game:
         self.buildable = True
         self.moving_map = False
         self.tracking = False
-        self.god_mode_active = False
+        self.god_mode_active = True
 
         self.original_zoom = self.config.general.original_zoom
         self.min_zoom = self.config.general.min_zoom
@@ -80,6 +80,7 @@ class Game:
         self.animations_bin = set()
 
         self.new_animations = set()
+        self.new_zombies = set()
 
         self.set_map_parameters(self.config.general)
 
@@ -276,7 +277,7 @@ class Game:
                 self.selected.killed()
 
     def spawn_zombie(self, zombie):
-        self.zombies.add(zombie)
+        self.new_zombies.add(zombie)
 
     def new_wave(self):
         self.num_wave += 1
@@ -312,6 +313,10 @@ class Game:
             for animation in self.new_animations:
                 self.animations.add(animation)
             self.new_animations.clear()
+        if len(self.new_zombies) > 0:
+            for zombie in self.new_zombies:
+                self.zombies.add(zombie)
+            self.new_zombies.clear()
         for tower in self.attack_towers:
             tower.clean()
 

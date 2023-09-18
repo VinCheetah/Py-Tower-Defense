@@ -21,7 +21,7 @@ title = "Py-Tower-Defense-Config"
     mix_color="LIGHT_GREY"
 
 
-[towers]
+[towers.bar]
 
     bar_y=1.5
     life_bar_height=6
@@ -31,7 +31,6 @@ title = "Py-Tower-Defense-Config"
     color_life_bar="GREEN"
     color_missing_life_bar="RED"
     color_exp_bar="BLUE"
-    border_x=0
     border_y=1
 
 
@@ -140,7 +139,19 @@ experience_level=100
 experience_level=100
 
 
+[zombies.bar]
 
+    bar_y=1.3
+    life_bar_height=3
+    bar_length=1.6
+    color_bar="BLACK"
+    color_life_bar="GREEN"
+    color_missing_life_bar="RED"
+    border_y=0.7
+
+[zombies.bar.special]
+
+    spc_bar_height=1
 
 [zombies.classic]
     type="Classic"
@@ -206,12 +217,34 @@ experience=20
     atk_rate=100
     size=18
     value=1000
-        special_parameters=["special_atk_rate", "special_range", "special_heal", "special_pause"]
+    experience=50
         special_atk_rate=180
         special_range=150
-        special_heal=200
         special_pause=80
-experience=50
+        special_parameters=["special_heal"]
+            special_heal=200
+
+
+[zombies.spawner]
+    type="Spawner"
+    color="DARK_RED"
+    max_life=300
+    speed=0.12
+    range=3
+    damage=10
+    atk_rate=140
+    size=14
+    value=3000
+    experience=100
+        special_atk_rate=500
+        special_range=100
+        special_pause=150
+        special_parameters=["mini_spawn_num", "maxi_spawn_num", "spawnable_zombies", "spawnable_weights"]
+            mini_spawn_num=3
+            maxi_spawn_num=6
+            spawnable_zombies=["classic"]
+            spawnable_weights=[1]
+
 
 [attack]
 

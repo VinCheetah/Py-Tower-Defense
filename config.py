@@ -45,7 +45,8 @@ class Config(UserDict):
                 zombieClass.TankZombie,
                 zombieClass.SpeedyZombie,
                 zombieClass.RandomZombie,
-                zombieClass.HealerZombie
+                zombieClass.HealerZombie,
+                zombieClass.SpawnerZombie,
                 # zombieClass.RandomTanky,
                 # zombieClass.RandomTanky2,
             ],
