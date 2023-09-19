@@ -45,6 +45,7 @@ class Zombie(Printable):
         self.bar_y = config.bar.bar_y
         self.border_y = config.bar.border_y
 
+
         self.bar_height = self.life_bar_height + 2 * self.border_y
 
     @classmethod
@@ -118,6 +119,9 @@ class Zombie(Printable):
             self.last_atk = self.game.time
 
     def life_bar(self):
+        # life_difference = self.life - self.life
+        # if abs(life_difference) > self.min_visual_loss_life:
+        #     self.life += abs(life_difference) / life_difference * max(min(abs(life_difference) / 3, self.max_visual_gain_life), self.min_visual_loss_life)
 
         x_left = self.x - self.size * self.bar_length / 2
         y_up = self.y + self.size * self.bar_y - self.bar_height / 2
@@ -125,48 +129,46 @@ class Zombie(Printable):
         # BAR BG
         pygame.draw.circle(self.game.screen,
                            self.color_bar,
-                    (self.game.view_x(x_left),
-                           self.game.view_y(y_up + self.bar_height / 2)),
+                           (self.game.view_x(x_left),
+                            self.game.view_y(y_up + self.bar_height / 2)),
                            self.bar_height / 2 * self.game.zoom)
 
         pygame.draw.circle(self.game.screen,
                            self.color_bar,
-                    (self.game.view_x(x_left + self.bar_length * self.size),
-                           self.game.view_y(y_up + self.bar_height / 2)),
+                           (self.game.view_x(x_left + self.bar_length * self.size),
+                            self.game.view_y(y_up + self.bar_height / 2)),
                            self.bar_height / 2 * self.game.zoom)
 
         pygame.draw.rect(self.game.screen,
                          self.color_bar,
                          [self.game.view_x(x_left),
-                                     self.game.view_y(y_up),
-                                     self.bar_length * self.size * self.game.zoom,
-                                     self.bar_height * self.game.zoom])
-
-
+                          self.game.view_y(y_up),
+                          self.bar_length * self.size * self.game.zoom,
+                          self.bar_height * self.game.zoom])
 
         # LIFE BAR
         pygame.draw.rect(self.game.screen,
                          self.color_missing_life_bar,
                          [self.game.view_x(x_left),
-                                     self.game.view_y(y_up + self.border_y),
-                                     (self.bar_length * self.size) * self.game.zoom,
-                                     self.life_bar_height * self.game.zoom])
+                          self.game.view_y(y_up + self.border_y),
+                          (self.bar_length * self.size) * self.game.zoom,
+                          self.life_bar_height * self.game.zoom])
         pygame.draw.circle(self.game.screen,
                            self.color_missing_life_bar,
-                    (self.game.view_x(x_left + self.size * self.bar_length),
-                           self.game.view_y(y_up + self.border_y + self.life_bar_height / 2)),
+                           (self.game.view_x(x_left + self.size * self.bar_length),
+                            self.game.view_y(y_up + self.border_y + self.life_bar_height / 2)),
                            self.life_bar_height / 2 * self.game.zoom)
         pygame.draw.circle(self.game.screen,
                            self.color_life_bar,
-                    (self.game.view_x(x_left),
-                           self.game.view_y(y_up + self.border_y + self.life_bar_height / 2)),
+                           (self.game.view_x(x_left),
+                            self.game.view_y(y_up + self.border_y + self.life_bar_height / 2)),
                            self.life_bar_height / 2 * self.game.zoom)
         pygame.draw.rect(self.game.screen,
                          self.color_life_bar,
                          [self.game.view_x(x_left),
-                                     self.game.view_y(y_up + self.border_y),
-                                     (self.bar_length * self.size) * self.game.zoom * self.life / self.life.max,
-                                     self.life_bar_height * self.game.zoom])
+                          self.game.view_y(y_up + self.border_y),
+                          (self.bar_length * self.size) * self.game.zoom * self.life / self.life.max,
+                          self.life_bar_height * self.game.zoom])
 
         radius = abs(self.life.max / 2 - self.life) / self.life.max * self.life_bar_height
         pygame.draw.ellipse(self.game.screen,

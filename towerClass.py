@@ -370,7 +370,7 @@ class AttackTower(Tower):
         Tower.selected(self)
 
         for target in self.game.zombies_soon_dead:
-            if len(self.active_canons.intersection(target.attackers)) > 0:
+            if self in target.attackers:
                 target.under_selected()
 
 

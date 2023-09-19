@@ -49,8 +49,19 @@ class Printable(pygame.sprite.Sprite):
         )
 
     def show(self):
-        pygame.draw.ellipse(self.screen, color.RED, self.rect)
-        pygame.draw.ellipse(self.screen, color.BLACK, self.rect, 1)
+        pygame.draw.circle(
+            self.screen,
+            color.RED,
+            (self.view_x(), self.view_y()),
+            max(1, self.game.zoom * self.size * 2),
+        )
+        pygame.draw.circle(
+            self.screen,
+            color.BLACK,
+            (self.view_x(), self.view_y()),
+            max(1, self.game.zoom * self.size * 2) + 1,
+            1,
+        )
 
     def dist(self, printable):
         return pow(pow(printable.x - self.x, 2) + pow(printable.y - self.y, 2), 0.5)

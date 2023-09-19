@@ -149,6 +149,7 @@ experience_level=1000
     color_missing_life_bar="RED"
     border_y=0.7
 
+
 [zombies.bar.special]
 
     spc_bar_height=1
@@ -317,6 +318,20 @@ experience=20
     time=300
     num_shade=50
     max_lightness=60
+
+
+
+[window]
+
+    width=400
+    height=300
+    background_color="BLACK"
+    name="Default Window"
+
+
+[window.debug]
+    name="Debug"
+
 
 
 
