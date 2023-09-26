@@ -140,3 +140,6 @@ class BoundedValue(object):
 
     def __str__(self):
         return f"{self.value}   (min : {self.min}, max : {self.max})"
+
+    def __repr__(self):
+        return str(self.value)

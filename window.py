@@ -1,3 +1,7 @@
+import pygame
+import color
+
+
 class Window:
 
     def __init__(self, game, config):
@@ -7,34 +11,118 @@ class Window:
         self.x = 0
         self.y = 0
 
+        self.font = pygame.font.SysFont("Arial", 20)
         self.width = self.config.width
         self.height = self.config.height
         self.background_color = self.config.background_color
+        self.writing_color = self.config.writing_color
         self.name = self.config.name
+
+        self.window = pygame.Surface((self.width, self.height), pygame.RESIZABLE)
+        self.active = True
+        self.content = None
 
     def collide(self, x, y):
         return 0 <= x - self.x <= self.width and 0 <= y - self.y <= self.height
 
-    def print_content(self):
+    def collide_old(self):
+        return 0 <= self.game.mouse_x - self.x <= self.width and 0 <= self.game.mouse_y - self.y <= self.height
+
+    def print_window(self):
+        self.window.fill(self.background_color)
+        pygame.draw.rect(self.window, color.BLACK, [0, 0, self.width, self.height], 1)
+        # Title
+        # text = self.font.render(self.name, 0, color.WHITE)
+        # self.window_blit(text, loc=["center", "over"], border_y=3)
+        # Content
+        self.update_content()
+        self.print_content()
+
+        self.game.screen.blit(self.window, (self.x, self.y))
+
+    def window_blit(self, content, x=0, y=0, loc=[], border_x=0, border_y=0):
+        content_width, content_height = content.get_size()
+        if "center" in loc:
+            x, y = self.width / 2 - content_width / 2, self.height / 2 - content_height
+        if "top" in loc:
+            y = border_y
+        if "bottom" in loc:
+            y = self.height - content_height.height / 2 - border_y
+        if "left" in loc:
+            x = border_x
+        if "right" in loc:
+            x = self.width - content_width - border_x
+        if "over" in loc:
+            pygame.draw.rect(self.game.screen, self.background_color,
+                             [self.x, self.y + content_height, content_width, content_height])
+            self.game.screen.blit(content, (self.x, self.y + content_height))
+            return None
+        self.window.blit(content, (x, y))
+
+    def format_text(self, text, font, start_x=0, start_y=0):
+        text_surface = pygame.Surface((self.width, self.height))
+        text_surface.fill((0, 0, 0))
+        space = font.size(' ')[0]
+        line = font.size('I')[1]
+        min_x, min_y = 0, 0
+        max_x, max_y = self.width, self.height
+        x, y = min_x, min_y
+        for paragraph in text.split('\n'):
+            for paragraph2 in paragraph.split('\t'):
+                for word in paragraph2.split(' '):
+                    rendered_word = self.font.render(word, 0, self.writing_color)
+                    word_width = rendered_word.get_width()
+                    if x + word_width >= max_x:
+                        x = min_x
+                        y += line
+                    text_surface.blit(rendered_word, (x, y))
+
+                    x += word_width + space
+                x += 4 * space
+            y += line
+            x = 0
+        return text_surface
+
+    def update_content(self):
         pass
 
-    def move(self):
+    def print_content(self):
+        if self.content is not None:
+            self.window_blit(self.content)
 
+    def move(self, rel_x, rel_y):
+        if self.collide_old():
+            self.x += rel_x
+            self.y += rel_y
+            return True
+        return False
+
+    def go_front(self):
+        if self.game.windows[-1] != self:
+            self.game.windows.remove(self)
+            self.game.windows.append(self)
 
     def close(self):
-        self.game.windows.remove(self)
-
-
-
-
+        if self.game.windows[-1] == self:
+            self.game.windows.pop()
+        else:
+            self.game.windows.remove(self)
 
 
 class DebugWindow(Window):
 
-    def __init__(self, game, selected):
+    def __init__(self, game):
         Window.__init__(self, game, game.config.window.debug)
+        self.target_lock = False
+        self.target = None
 
-    def print_debug(self):
+    def update_content(self):
+        if not self.target_lock and self.game.selected is not None:
+            self.target = self.game.selected
+        if self.target is not None:
+            self.content = self.format_text(self.target.info(), self.font)
 
-    def close(self):
-        self.over()
+    def lock_target(self):
+        if self.target is not None:
+            print("Locking")
+            self.target_lock = not self.target_lock

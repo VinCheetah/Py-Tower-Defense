@@ -325,8 +325,9 @@ experience=20
 
     width=400
     height=300
-    background_color="BLACK"
+    background_color="GREY"
     name="Default Window"
+    writing_color="WHITE"
 
 
 [window.debug]
