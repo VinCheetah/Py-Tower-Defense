@@ -92,6 +92,7 @@ class Window:
 
     def move(self, rel_x, rel_y):
         if self.collide_old():
+            self.go_front()
             self.x += rel_x
             self.y += rel_y
             return True

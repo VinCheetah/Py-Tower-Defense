@@ -263,11 +263,9 @@ class Game:
         self.track()
         self.screen.fill(self.background_color)
         self.alpha_screen.fill(0)
+
         if self.selected is not None:
-            self.selected.selected()
-            for zombie in self.zombies_soon_dead:
-                if self.selected in zombie.attackers:
-                    zombie.under_selected()
+            self.selected.selected_background()
 
         for attack in self.attacks:
             attack.print_game()
@@ -275,6 +273,13 @@ class Game:
             tower.print_game()
         for zombie in self.zombies:
             zombie.print_game()
+
+        if self.selected is not None:
+            self.selected.selected()
+            for zombie in self.zombies_soon_dead:
+                if self.selected in zombie.attackers_list():
+                    zombie.under_selected()
+
         for animation in self.animations:
             animation.anime()
         for window in self.windows:
@@ -299,6 +304,8 @@ class Game:
         for event in pygame.event.get():
             translated_event = self.main_controller.translate(event)
             arg = []
+            if translated_event is None:
+                continue
             if type(translated_event) == tuple:
                 translated_event, arg = translated_event
             for controler in self.controllers:
@@ -306,6 +313,8 @@ class Game:
                     if controler.controller_debug:
                         print(f"I have applied {translated_event} with {controler.name}")
                     break
+                elif controler.controller_debug:
+                    print(f"Couldn't apply {translated_event} with {controler.name}")
 
             else:
                 if translated_event is not None and self.main_controller.controller_debug:
@@ -333,16 +342,31 @@ class Game:
         self.mouse_x, self.mouse_y = pygame.mouse.get_pos()
 
     def find_window(self, x, y):
-        for window in reversed(self.windows):
-            if window.collide(x, y):
-                window.go_front()
-                self.debug_window_controller.activize()
-                return True
+        if not self.moving_map:
+            for window in reversed(self.windows):
+                if window.collide(x, y):
+                    window.go_front()
+                    self.debug_window_controller.activize()
+                    return True
+        return False
 
     def move_window(self, rel_x, rel_y):
-        if pygame.mouse.get_pressed()[0]:
-            return self.windows[-1].move(rel_x, rel_y)
+        if pygame.mouse.get_pressed()[0] and not self.moving_map:
+            for window in reversed(self.windows):
+                if window.move(rel_x, rel_y):
+                    return True
         return False
+
+
+    def unselect(self):
+        if self.selected is not None:
+            if self.recognize(self.selected, "zombie"):
+                self.zombie_controller.unactivize()
+            if self.recognize(self.selected, "tower"):
+                self.tower_controller.unactivize()
+            self.selection_controller.unactivize()
+            self.selected = None
+
 
 
     def mouse_actions(self):
@@ -441,7 +465,7 @@ class Game:
             self.selected.upgrade()
 
     def complete_destruction(self):
-        self.selected = None
+        self.unselect()
         self.zombies_bin = self.zombies.copy()
         self.attack_towers_bin = self.attack_towers.copy()
         self.effect_towers_bin = self.effect_towers.copy()
@@ -451,8 +475,6 @@ class Game:
     def money_prize(self, value):
         self.money += value
 
-    def unselect(self):
-        self.selected = None
 
     def transaction(self, value):
         if self.money >= value:

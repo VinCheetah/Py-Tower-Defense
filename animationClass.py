@@ -205,7 +205,7 @@ class TowerBop:
         self.config = self.game.config.animation.tower_bop
         self.original_life_time = self.config.life_time
         self.life_time = self.original_life_time
-        self.original_size = self.origin.size
+        self.original_size = self.origin.original_size
         self.size_increase = self.config.size_increase
         self.type = "TowerBop"
 
@@ -274,6 +274,7 @@ class ShowText(Animation):
         (str(size), pygame.font.SysFont("Arial", size)) for size in range(1, 101)
     )
     texts = []
+    type = "ShowText"
 
     def __init__(self, game, text):
         self.texts.append(self)
@@ -318,6 +319,7 @@ class ShowText(Animation):
 class UpgradableTower(Animation):
 
     func = staticmethod(math_functions.ql_1_4)
+    type = "UpgradableTower"
 
     def __init__(self, origin):
         self.game = origin.game

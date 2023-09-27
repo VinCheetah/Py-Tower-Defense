@@ -65,6 +65,7 @@ class Controller:
 class MainController(Controller):
 
     name = "Main Controller"
+    controller_debug = True
 
     def create_commands(self):
         return ({
@@ -75,8 +76,10 @@ class MainController(Controller):
                     "g": self.game.god_mode,
                     "t": self.game.pausing,
                     "w": self.game.new_wave,
-                    "c": self.game.complete_destruction
+                    "c": self.game.complete_destruction,
 
+                    "p": self.increase_time_speed,
+                    "m": self.reduce_time_speed,
                 },
                 {
                     "QUIT": self.game.stop_running,
@@ -88,6 +91,12 @@ class MainController(Controller):
     def money_bonus(self):
         self.game.money_prize(10000)
 
+    def increase_time_speed(self):
+        self.game.change_time_speed(1.5)
+
+    def reduce_time_speed(self):
+        self.game.change_time_speed(2 / 3)
+
 
 
 
@@ -98,6 +107,7 @@ class MainController(Controller):
 class MapController(Controller):
 
     name = "Map Controller"
+    controller_debug = True
 
     def create_commands(self):
         return (
@@ -116,16 +126,22 @@ class MapController(Controller):
         )
 
     def attack_tower_build(self, *args):
-        if self.game.selected is None:
-            return self.game.new_attack_tower(*args)
+        if not self.game.moving_map:
+            if self.game.selected is None:
+                self.game.new_attack_tower(*args)
+            else:
+                self.game.unselect()
         else:
-            self.game.selected = None
+            self.game.buildable = True
+            self.game.moving_map = False
+        return True
 
     def effect_tower_build(self, *args):
         if self.game.selected is None:
-            return self.game.new_effect_tower(*args)
+            self.game.new_effect_tower(*args)
         else:
-            self.game.selected = None
+            self.game.unselect()
+        return True
 
 class WindowController(Controller):
 
@@ -134,18 +150,17 @@ class WindowController(Controller):
 
     def __init__(self, game):
         super().__init__(game)
-        print(self.create_commands())
         self.unactivize()
 
     def create_commands(self):
 
         return (
             {
-                "_MOUSE_MOTION": self.game.move_window
+
             },
             {
+                "_MOUSE_MOTION": self.game.move_window,
                 "_l_click": self.game.find_window,
-
             },
             {}
         )

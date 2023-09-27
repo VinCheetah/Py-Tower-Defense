@@ -19,7 +19,8 @@ class Tower(Printable):
         self.type = config.type
         self.range = config.range
         self.price = config.price
-        self.size = config.size
+        self.original_size = config.size
+        self.size = self.original_size
         self.max_life = config.max_life
 
 
@@ -160,8 +161,7 @@ class Tower(Printable):
                             self.life_bar_height * self.game.zoom])
 
 
-
-    def selected(self):
+    def selected_background(self):
         pygame.draw.circle(
             self.game.screen,
             color.lighter(self.game.background_color, 5),
@@ -176,8 +176,9 @@ class Tower(Printable):
             1,
         )
 
-        self.bar()
 
+    def selected(self):
+        self.bar()
         for target in self.targets:
             target.under_selected()
 
@@ -207,7 +208,7 @@ class Tower(Printable):
         if self.alive:
             self.alive = False
             if self.game.selected == self:
-                self.game.selected = None
+                self.game.unselect()
             for effect_tower in self.effecting:
                 effect_tower.targets.discard(self)
             self.destruction_animation()

@@ -85,6 +85,9 @@ class Zombie(Printable):
             self.target = closest
             self.target.attackers.add(self)
 
+    def attackers_list(self):
+        return list(canon.origin for canon in self.attackers)
+
     def move(self):
         if self.life > 0:
             if not self.target_lock:
@@ -198,7 +201,7 @@ class Zombie(Printable):
         self.game.zombies_soon_dead.discard(self)
         self.game.money_prize(self.value)
         if self.game.selected == self:
-            self.game.selected = None
+            self.game.unselect()
         self.kill_animation()
 
     def kill_animation(self):

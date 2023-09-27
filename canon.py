@@ -25,7 +25,7 @@ class Canon:
 
     def new_target(self, target):
         self.inactive = False
-        target.attackers.add(self.origin)
+        target.attackers.add(self)
         self.target = target
         self.target_lock = True
 
