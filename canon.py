@@ -22,6 +22,7 @@ class Canon:
         self.length = 2
         self.width2 = 1
         self.inactive = True
+        self.type = "Canon"
 
     def new_target(self, target):
         self.inactive = False

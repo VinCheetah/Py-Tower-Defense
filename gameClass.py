@@ -1,4 +1,5 @@
 import animationClass
+import boundedValue
 import color
 import towerClass
 import zombieClass
@@ -41,6 +42,7 @@ class Game:
         self.tracking = False
         self.god_mode_active = True
         self.moving_map = False
+        self.compact_string = True
 
 
         self.original_zoom = self.config.general.original_zoom
@@ -143,6 +145,21 @@ class Game:
 
     def create_alpha_screen(self):
         return pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+
+    def get_basics_parameters(self):
+        self.windows[-1].get_basics_parameters()
+
+    def get_all_parameters(self):
+        self.windows[-1].get_all_parameters()
+
+    def window_vertical_view(self, *args):
+        return self.windows[-1].window_vertical_view()
+
+    def window_view_up(self, *args):
+        return self.windows[-1].window_view_up()
+
+    def window_view_down(self, *args):
+        return self.windows[-1].window_view_down()
 
     def change_frame_rate(self, additional):
         self.frame_rate += additional
@@ -264,7 +281,7 @@ class Game:
         self.screen.fill(self.background_color)
         self.alpha_screen.fill(0)
 
-        if self.selected is not None:
+        if self.selected is not None and self.recognize(self.selected, "tower"):
             self.selected.selected_background()
 
         for attack in self.attacks:
@@ -331,6 +348,31 @@ class Game:
     def add_view_coord(self, x, y):
         self.view_center_x += x
         self.view_center_y += y
+
+    def make_str(self, object):
+        if type(object) == set or type(object) == list:
+            if len(object) == 0:
+                return "None"
+            if self.compact_string:
+                composition = dict()
+                for element in object:
+                    if element.type not in composition:
+                        composition[element.type] = 1
+                    else:
+                        composition[element.type] += 1
+                return "\n\t" + "\n\t".join((elt_type + (composition[elt_type] > 1)*(" (x"+str(composition[elt_type])+")")) for elt_type in composition)
+            else:
+                return "\n\t" + "\n\t".join(str(element) for element in object)
+        if type(object) == boundedValue.BoundedValue:
+            if self.compact_string:
+                return self.make_str(object.value)
+        if type(object) == float:
+            if self.compact_string:
+                return "%.2f" % object
+            else:
+                return "%.4f" % object
+        return str(object)
+
 
     def set_view_coord(self, x, y):
         self.view_center_x.set_value(x)
@@ -423,6 +465,7 @@ class Game:
 
     def new_window(self):
         self.windows.append(window.DebugWindow(self))
+        self.debug_window_controller.activize()
 
     def clean(self):
         if len(self.attacks_bin) > 0:

@@ -31,6 +31,7 @@ class Attack(printable.Printable):
         self.target.life -= self.origin.damage
         if self.target.life == 0:
             self.origin.experience_reward(self.target.experience)
+            self.origin.zombie_killed += 1
             self.target.killed()
 
 

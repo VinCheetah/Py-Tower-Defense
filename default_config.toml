@@ -17,6 +17,13 @@ title = "Py-Tower-Defense-Config"
 
 
 
+[towers]
+
+    object = "Tower"
+    basics_parameters = ["object","type","life", "x", "y", "attackers", "targets", "price", "damage", "atk_rate", "zombie_killed", "experience"]
+
+
+
 [towers.canon]
     mix_color="LIGHT_GREY"
 
@@ -137,6 +144,11 @@ experience_level=1000
     power_up_factor=2
     target_type=2
 experience_level=1000
+
+
+[zombies]
+
+    basics_parameters = ["object","type","life", "x", "y", "target", "attackers", "value", "damage", "speed", "atk_rate"]
 
 
 [zombies.bar]

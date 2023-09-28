@@ -1,5 +1,6 @@
 import pygame
 import color
+import boundedValue
 
 
 class Window:
@@ -10,6 +11,11 @@ class Window:
 
         self.x = 0
         self.y = 0
+
+        self.view_x = boundedValue.BoundedValue(0, 0, 0)
+        self.view_y = boundedValue.BoundedValue(0, 0, 0)
+
+        self.content_height = 0
 
         self.font = pygame.font.SysFont("Arial", 20)
         self.width = self.config.width
@@ -27,6 +33,20 @@ class Window:
 
     def collide_old(self):
         return 0 <= self.game.mouse_x - self.x <= self.width and 0 <= self.game.mouse_y - self.y <= self.height
+
+
+    def window_view_down(self):
+        if self.collide_old():
+            self.view_y += 4
+            return True
+        return False
+
+    def window_view_up(self):
+        if self.collide_old():
+            self.view_y -= 4
+            return True
+        return False
+
 
     def print_window(self):
         self.window.fill(self.background_color)
@@ -59,13 +79,19 @@ class Window:
             return None
         self.window.blit(content, (x, y))
 
-    def format_text(self, text, font, start_x=0, start_y=0):
+    def update_extremum_view(self):
+        self.view_x.set_max(0)
+        print(self.content_height, self.content.get_size()[1])
+        self.view_y.set_max(max(0, self.content_height - self.content.get_size()[1]))
+        print(self.view_y)
+
+    def format_text(self, text, font, x_space=5, y_space=5):
         text_surface = pygame.Surface((self.width, self.height))
         text_surface.fill((0, 0, 0))
         space = font.size(' ')[0]
         line = font.size('I')[1]
-        min_x, min_y = 0, 0
-        max_x, max_y = self.width, self.height
+        min_x, min_y = x_space, y_space
+        max_x, max_y = self.width - x_space, self.height - y_space
         x, y = min_x, min_y
         for paragraph in text.split('\n'):
             for paragraph2 in paragraph.split('\t'):
@@ -75,13 +101,13 @@ class Window:
                     if x + word_width >= max_x:
                         x = min_x
                         y += line
-                    text_surface.blit(rendered_word, (x, y))
+                    text_surface.blit(rendered_word, (x - self.view_x, y - self.view_y))
 
                     x += word_width + space
                 x += 4 * space
             y += line
-            x = 0
-        return text_surface
+            x = min_x
+        return text_surface, y
 
     def update_content(self):
         pass
@@ -116,14 +142,35 @@ class DebugWindow(Window):
         Window.__init__(self, game, game.config.window.debug)
         self.target_lock = False
         self.target = None
+        self.parameters = "basics"
 
     def update_content(self):
         if not self.target_lock and self.game.selected is not None:
             self.target = self.game.selected
         if self.target is not None:
-            self.content = self.format_text(self.target.info(), self.font)
+            self.content, self.content_height = self.format_text(self.get_brut_content(), self.font)
+            self.update_extremum_view()
+
+
+
+    def get_brut_content(self):
+        if self.parameters == "all":
+            parameters = self.target.__dict__
+        elif self.parameters == "basics":
+            parameters = self.target.config.basics_parameters
+        elif type(self.parameters) == list:
+            parameters = self.parameters
+
+        return "\n".join(
+            str(key) + " :  " + self.game.make_str(getattr(self.target, key)) for key in
+            parameters)
+
+    def get_basics_parameters(self):
+        self.parameters = "basics"
+
+    def get_all_parameters(self):
+        self.parameters = "all"
 
     def lock_target(self):
         if self.target is not None:
-            print("Locking")
             self.target_lock = not self.target_lock

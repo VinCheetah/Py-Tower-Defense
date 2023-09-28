@@ -9,6 +9,8 @@ from animationClass import ParticleExplosion, CircularEffect
 
 
 class Zombie(Printable):
+
+    object = "Zombie"
     def __init__(self, game, x, y, config):
         self.game = game
 
@@ -197,6 +199,7 @@ class Zombie(Printable):
     def killed(self):
         for tower in self.attackers:
             tower.erase_target(self)
+        self.target.attackers.discard(self)
         self.game.zombies_bin.add(self)
         self.game.zombies_soon_dead.discard(self)
         self.game.money_prize(self.value)

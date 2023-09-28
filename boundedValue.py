@@ -24,6 +24,15 @@ class BoundedValue(object):
     def set_extremum(self, new_min, new_max):
         self.min = new_min
         self.max = new_max
+        self.check()
+
+    def set_min(self, new_min):
+        self.min = new_min
+        self.check()
+
+    def set_max(self, new_max):
+        self.max = new_max
+        self.check()
 
     def set_value(self, value):
         self.value = value

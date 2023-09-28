@@ -10,6 +10,8 @@ from canon import Canon
 
 
 class Tower(Printable):
+
+    object = "Tower"
     def __init__(self, game, x, y, config):
         self.game = game
 
@@ -38,6 +40,7 @@ class Tower(Printable):
         self.level_memory = []
 
         self.experience_booster = 1
+        self.zombie_killed = 0
 
         self.experience = BoundedValue(0, 0, self.level ** 2 * config.experience_level)
 
@@ -207,6 +210,8 @@ class Tower(Printable):
     def destroyed(self):
         if self.alive:
             self.alive = False
+            self.targets.clear()
+            self.attackers.clear()
             if self.game.selected == self:
                 self.game.unselect()
             for effect_tower in self.effecting:

@@ -36,6 +36,8 @@ class Controller:
             return self.key_down_translate(event)
         elif event.type == pygame.MOUSEBUTTONUP:
             return self.mouse_button_up_translate(event)
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            return self.mouse_button_down_translate(event)
 
     def key_down_translate(self, event):
         if 97 <= event.key <= 122:
@@ -46,6 +48,9 @@ class Controller:
     def mouse_button_up_translate(self, event):
         return {1: "_l_click", 2: "_m_click", 3: "_r_click", 4: "_d_up_click", 5: "_d_down_click"}.get(event.button), event.pos
 
+
+    def mouse_button_down_translate(self, event):
+        return {1: "_l_down", 2: "_m_down", 3: "_r_down", 4: "_d_up_down", 5: "_d_down_down"}.get(event.button), event.pos
 
     def create_commands(self):
         return {}, {}, {}
@@ -65,7 +70,7 @@ class Controller:
 class MainController(Controller):
 
     name = "Main Controller"
-    controller_debug = True
+    controller_debug = False
 
     def create_commands(self):
         return ({
@@ -107,7 +112,7 @@ class MainController(Controller):
 class MapController(Controller):
 
     name = "Map Controller"
-    controller_debug = True
+    controller_debug = False
 
     def create_commands(self):
         return (
@@ -146,7 +151,7 @@ class MapController(Controller):
 class WindowController(Controller):
 
     name = "Window Controller"
-    controller_debug = True
+    controller_debug = False
 
     def __init__(self, game):
         super().__init__(game)
@@ -156,7 +161,12 @@ class WindowController(Controller):
 
         return (
             {
+                "_d_up_click": self.game.window_view_up,
+                "_d_down_click": self.game.window_view_down,
 
+                #"_MOUSE_MOTION": self.game.window_vertical_view
+                pygame.K_DOWN: self.game.window_view_down,
+                pygame.K_UP: self.game.window_view_up
             },
             {
                 "_MOUSE_MOTION": self.game.move_window,
@@ -173,7 +183,9 @@ class DebugWindowController(WindowController):
     def create_commands(self):
         active, general, inactive = super().create_commands()
         return (active | {
-            "l": self.game.lock_target
+            "l": self.game.lock_target,
+            "b": self.game.get_basics_parameters,
+            "a": self.game.get_all_parameters
         },
             general | {},
             inactive | {}
