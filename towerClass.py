@@ -210,14 +210,14 @@ class Tower(Printable):
     def destroyed(self):
         if self.alive:
             self.alive = False
-            self.targets.clear()
-            self.attackers.clear()
             if self.game.selected == self:
                 self.game.unselect()
             for effect_tower in self.effecting:
                 effect_tower.targets.discard(self)
             self.destruction_animation()
             self.erase_existence()
+            self.targets.clear()
+            self.attackers.clear()
 
     def destruction_animation(self):
         self.game.animations.add(animationClass.ParticleExplosion(self))

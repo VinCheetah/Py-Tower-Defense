@@ -20,7 +20,6 @@ title = "Py-Tower-Defense-Config"
 [towers]
 
     object = "Tower"
-    basics_parameters = ["object","type","life", "x", "y", "attackers", "targets", "price", "damage", "atk_rate", "zombie_killed", "experience"]
 
 
 
@@ -39,6 +38,10 @@ title = "Py-Tower-Defense-Config"
     color_missing_life_bar="RED"
     color_exp_bar="BLUE"
     border_y=1
+
+[attack_towers]
+
+    basics_parameters = ["object","type","life", "x", "y", "attackers", "targets", "price", "damage", "atk_rate", "zombie_killed", "experience"]
 
 
 [attack_towers.home]
