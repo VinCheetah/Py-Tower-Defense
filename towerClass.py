@@ -6,7 +6,7 @@ import color
 import pygame
 from math import pi
 from boundedValue import BoundedValue
-from canon import Canon
+import canon
 
 
 class Tower(Printable):
@@ -287,7 +287,7 @@ class AttackTower(Tower):
         self.active_canons = set()
         self.canon_speed = 0.03
         self.inactive_canons = set(
-            Canon(self, random_angle + 2 * i * pi / self.num_targets)
+            canon.BasicCanon(self, random_angle + 2 * i * pi / self.num_targets)
             for i in range(self.num_targets)
         )
         self.active_canons_bin = set()

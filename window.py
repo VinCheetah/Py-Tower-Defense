@@ -163,7 +163,7 @@ class DebugWindow(Window):
 
         return "\n".join(
             str(key) + " :  " + self.game.make_str(getattr(self.target, key)) for key in
-            parameters)
+            parameters if hasattr(self.target, key))
 
     def get_basics_parameters(self):
         self.parameters = "basics"

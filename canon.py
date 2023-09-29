@@ -34,6 +34,7 @@ class Canon:
         if self.target_lock:
             self.aim()
 
+
     def angle(self):
         x = self.target.x - self.center_x
         y = self.target.y - self.center_y
@@ -47,13 +48,13 @@ class Canon:
     def aim(self):
         target_theta = self.angle()
         if (
-            10 * self.origin.canon_speed * self.game.moving_action
-            < (self.rotation - target_theta) % (2 * pi)
-            < pi
+                10 * self.origin.canon_speed * self.game.moving_action
+                < (self.rotation - target_theta) % (2 * pi)
+                < pi
         ):
             self.rotation -= self.origin.canon_speed * self.game.moving_action
         elif 10 * self.origin.canon_speed * self.game.moving_action < (
-            self.rotation - target_theta
+                self.rotation - target_theta
         ) % (2 * pi):
             self.rotation += self.origin.canon_speed * self.game.moving_action
         else:
@@ -82,9 +83,16 @@ class Canon:
         self.target_lock = False
         self.origin.erase_target(target)
 
+    def style_display(self):
+        pass
+
+    def shape_display(self):
+        pygame.draw.polygon(self.game.screen, color.BLACK, self.transforms(self.shape(bigger=True)))
+        pygame.draw.polygon(self.game.screen, self.color, self.transforms(self.shape()))
+
     def print_game(self):
-        pygame.draw.polygon(self.game.screen, color.BLACK, self.trapeze(bigger=True))
-        pygame.draw.polygon(self.game.screen, self.color, self.trapeze())
+        self.shape_display()
+        self.style_display()
         # if self.target_lock:
         #     target_theta = self.target_theta
         #     pygame.draw.line(self.game.screen, (255, 255, 255),
@@ -92,7 +100,44 @@ class Canon:
         #                      self.game.view_x(self.center_x + 100 * cos(target_theta)),
         #                      self.game.view_y(self.center_y + 100 * sin(target_theta))))
 
+
+
+    def transform(self, point):
+        return (self.game.view_x(self.center_x + point[0] * self.origin.size),
+                self.game.view_y(self.center_y + point[1] * self.origin.size))
+
+    def transforms(self, points):
+        return tuple(self.transform(point) for point in points)
+
     def shape(self, bigger=False):
+        pass
+
+    def rotate_home(self):
+        target_theta = self.original_rotation
+        if (
+                3 * self.origin.canon_speed * self.game.time_speed
+                < (self.rotation - target_theta) % (2 * pi)
+                < pi
+        ):
+            self.rotation -= self.origin.canon_speed * self.game.moving_action
+        elif 3 * self.origin.canon_speed * self.game.time_speed < (
+                self.rotation - target_theta
+        ) % (2 * pi):
+            self.rotation += self.origin.canon_speed * self.game.moving_action
+        else:
+            self.rotation = target_theta
+            self.inactive = True
+
+
+class BasicCanon(Canon):
+
+    def __init__(self, origin, rotation=0):
+        super().__init__(origin, rotation)
+
+    def shape(self, bigger=False):
+        return self.trapeze(bigger)
+
+    def trapeze(self, bigger=False):
         epsilon = bigger * 0.05
         theta1 = self.rotation - self.width / 2 - epsilon
         theta2 = self.rotation + self.width / 2 + epsilon
@@ -101,37 +146,22 @@ class Canon:
         p1 = cos(theta1), sin(theta1)
         p2 = cos(theta2), sin(theta2)
         p3 = cos(theta3) * (self.length2 + epsilon), sin(theta3) * (
-            self.length2 + epsilon
+                self.length2 + epsilon
         )
         p4 = cos(theta4) * (self.length2 + epsilon), sin(theta4) * (
-            self.length2 + epsilon
+                self.length2 + epsilon
         )
         return p1, p2, p3, p4
 
-    def transform(self, points):
-        return tuple(
-            (
-                self.game.view_x(self.center_x + p[0] * self.origin.size),
-                self.game.view_y(self.center_y + p[1] * self.origin.size),
-            )
-            for p in points
-        )
-
-    def trapeze(self, bigger=False):
-        return self.transform(self.shape(bigger))
-
-    def rotate_home(self):
-        target_theta = self.original_rotation
-        if (
-            3 * self.origin.canon_speed * self.game.time_speed
-            < (self.rotation - target_theta) % (2 * pi)
-            < pi
-        ):
-            self.rotation -= self.origin.canon_speed * self.game.moving_action
-        elif 3 * self.origin.canon_speed * self.game.time_speed < (
-            self.rotation - target_theta
-        ) % (2 * pi):
-            self.rotation += self.origin.canon_speed * self.game.moving_action
-        else:
-            self.rotation = target_theta
-            self.inactive = True
+    def style_display(self):
+        p1, p2, p3, p4 = self.shape()
+        epsilon = 0.08
+        for i in range(self.origin.level - 1):
+            rapport = (i + 1) / self.origin.level
+            theta = self.rotation - self.width / 2 + rapport * self.width
+            p_1 = cos(theta - epsilon), sin(theta - epsilon)
+            p_2 = cos(theta + epsilon), sin(theta + epsilon)
+            p_3 = p3[0] * (rapport+epsilon) + p4[0] * (1-rapport-epsilon), p3[1] * (rapport+epsilon) + p4[1] * (1-rapport-epsilon)
+            p_4 = p3[0] * (rapport - epsilon) + p4[0] * (1-rapport+epsilon), p3[1] * (rapport-epsilon) + p4[1] * (1-rapport+epsilon)
+            pygame.draw.polygon(self.game.screen, self.origin.color, self.transforms([p_1, p_2, p_3, p_4]))
+            pygame.draw.polygon(self.game.screen, color.BLACK, self.transforms([p_1, p_2, p_3, p_4]), max(1,int(self.game.zoom * .5)))
