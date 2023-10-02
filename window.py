@@ -17,7 +17,7 @@ class Window:
 
         self.content_height = 0
 
-        self.font = pygame.font.SysFont("Arial", 20)
+        self.font = pygame.font.SysFont("Courier New", 20)
         self.width = self.config.width
         self.height = self.config.height
         self.background_color = self.config.background_color
@@ -162,7 +162,7 @@ class DebugWindow(Window):
             parameters = self.parameters
 
         return "\n".join(
-            str(key) + " :  " + self.game.make_str(getattr(self.target, key)) for key in
+            str(key) + (max(0, 10 - len(key)) * " ") + ":  " + self.game.make_str(getattr(self.target, key)) for key in
             parameters if hasattr(self.target, key))
 
     def get_basics_parameters(self):

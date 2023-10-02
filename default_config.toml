@@ -22,6 +22,7 @@ title = "Py-Tower-Defense-Config"
     object="Tower"
     range=100
     basics_parameters = ["object","type","life", "x", "y", "level", "attackers", "targets", "price", "damage", "atk_rate", "range", "zombie_killed", "experience"]
+    max_sub_level=6
 
 
 [towers.canon]

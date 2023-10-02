@@ -258,10 +258,16 @@ class ZombieController(Controller):
 class TowerController(Controller):
 
     name = "Tower Controller"
+
+    def __init__(self, game):
+        super().__init__(game)
+        self.unactivize()
     def create_commands(self):
         return (
             {
                 "u": self.game.upgrade_selected,
+                "i": self.game.forced_upgrade,
+                "_l_click": self.game.find_canon
             },
             {},
             {}

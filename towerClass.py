@@ -22,6 +22,7 @@ class Tower(Printable):
         self.original_size = self.config.size
         self.size = self.original_size
         self.max_life = self.config.max_life
+        self.max_sub_level = self.config.max_sub_level
 
         self.animation = []
 
@@ -181,18 +182,21 @@ class Tower(Printable):
             target.under_selected()
 
     def boost_new_level(self):
-        self.range *= 1.3
+        pass
 
 
     def upgrade(self):
         if self.experience.max == self.experience and self.game.transaction(self.new_level_price):
-            self.boost_new_level()
-            self.upgradable_animation = False
-            self.post_animations.clear()
-            self.new_level_price *= 2
-            self.level += 1
-            self.experience.set_value(0)
-            self.experience.set_extremum(0, self.level ** 2 * self.config.experience_level)
+            self.new_level()
+
+    def new_level(self):
+        self.boost_new_level()
+        self.upgradable_animation = False
+        self.post_animations.clear()
+        self.new_level_price *= 2
+        self.level += 1
+        self.experience.set_value(0)
+        self.experience.set_extremum(0, self.level ** 2 * self.config.experience_level)
 
     def experience_reward(self, amount):
         self.experience += amount * self.experience_booster
@@ -302,9 +306,14 @@ class AttackTower(Tower):
         self.inactive_canons.add(canon.BasicCanon(self, random_angle))
         self.targets_lock = False
 
+
+    def canons(self):
+        return self.active_canons.union(self.inactive_canons)
+
     def boost_new_level(self):
         Tower.boost_new_level(self)
-        self.new_canon()
+        if self.level % self.max_sub_level == 0:
+            self.new_canon()
 
     def find_target(self):
         distances = sorted(

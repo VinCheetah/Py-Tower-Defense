@@ -95,6 +95,8 @@ class Game:
         self.new_animations = set()
         self.animations_bin = set()
 
+        self.show = set()
+
         self.windows = list()
 
         self.set_map_parameters(self.config.general)
@@ -316,6 +318,20 @@ class Game:
             zombie.move()
         for attack in self.attacks:
             attack.move()
+
+        for show in self.show:
+            pygame.draw.line(self.screen, color.RED, show[0], show[1], int(max(3, 2 * self.zoom)))
+
+
+    def forced_upgrade(self):
+        self.selected.new_level()
+
+    def find_canon(self, *args):
+        for canon in self.selected.canons():
+            if canon.collide(*args):
+                self.print_text("I got a Canon")
+                return True
+        return False
 
     def interactions(self):
         self.update_mouse_pos()

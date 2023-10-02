@@ -132,17 +132,51 @@ class Canon:
             self.rotation = target_theta
             self.inactive = True
 
+    def collide(self, x, y):
+        return False
+        # Not Working
+        p = list(self.transforms(self.shape()))
+        p.append(p[0])
+        c = 0
+        for i in range(len(p)-1):
+            p1_x, p1_y = p[i][0] - x, p[i][1] - y
+            p2_x, p2_y = p[i+1][0] - x, p[i+1][1] - y
+            c += (p1_y * p2_y <= 0 and - (p1_y - (p2_y-p1_y) / (p2_x - p1_x) / p1_x) / (p2_y - p1_y) / (p2_x - p1_x) > 0)
+            if (p1_y * p2_y <= 0 and - (p1_y - (p2_y-p1_y) / (p2_x - p1_x) / p1_x) / (p2_y - p1_y) / (p2_x - p1_x) > 0):
+                self.game.show.add(tuple([p[i], p[i+1]]))
+        print(c)
+        return c % 2
+
 
 class BasicCanon(Canon):
 
-    def __init__(self, origin, rotation=0):
-        super().__init__(origin, rotation)
-
     def shape(self, bigger=False):
-        return self.trapeze(bigger)
+        epsilon = bigger * 0.03
+        ps = list(self.trapeze(epsilon))
 
-    def trapeze(self, bigger=False):
-        epsilon = bigger * 0.05
+        p_start = [ps[2]]
+        p_end = [ps[3]]
+
+        rapport = 0.15 - epsilon
+        length = 0.07 + epsilon / 3
+
+        for i in range((self.origin.level - 1) // self.origin.max_sub_level):
+            p_s = p_start[-1]
+            p_e = p_end[-1]
+            p_sn = p_s[0] * (1 - rapport) + p_e[0] * rapport, p_s[1] * (1 - rapport) + p_e[1] * rapport
+            p_snn = p_sn[0] + cos(self.rotation) * length, p_sn[1] + sin(self.rotation) * length
+            p_en = p_e[0] * (1 - rapport) + p_s[0] * rapport, p_e[1] * (1 - rapport) + p_s[1] * rapport
+            p_enn = p_en[0] + cos(self.rotation) * length, p_en[1] + sin(self.rotation) * length
+
+            p_start.append(p_sn)
+            p_start.append(p_snn)
+            p_end.append(p_en)
+            p_end.append(p_enn)
+
+        return ps[:2] + p_start + list(reversed(p_end))
+
+
+    def trapeze(self, epsilon):
         theta1 = self.rotation - self.width / 2 - epsilon
         theta2 = self.rotation + self.width / 2 + epsilon
         theta3 = self.rotation + self.width / 4 + epsilon / 2
@@ -158,10 +192,13 @@ class BasicCanon(Canon):
         return p1, p2, p3, p4
 
     def style_display(self):
-        p1, p2, p3, p4 = self.shape()
+        p = self.shape()
+        p1, p2, p3, p4 = p[0], p[1], p[2], p[-1]
+        for i in range((self.origin.level - 1) // self.origin.max_sub_level):
+            pygame.draw.line(self.game.screen, color.BLACK, self.transform(p[(i+1) * 2]), self.transform(p[(i+1) * -2 + 1]), int(max(1, self.game.zoom)))
         epsilon = 0.08
-        for i in range(self.origin.level - 1):
-            rapport = (i + 1) / self.origin.level
+        for i in range((self.origin.level - 1) % self.origin.max_sub_level):
+            rapport = (i + 1) / (1 + (self.origin.level - 1) % self.origin.max_sub_level)
             theta = self.rotation - self.width / 1.8 + rapport * self.width / 0.9
             p_1 = cos(theta - epsilon), sin(theta - epsilon)
             p_2 = cos(theta + epsilon), sin(theta + epsilon)
@@ -169,3 +206,4 @@ class BasicCanon(Canon):
             p_4 = p3[0] * (rapport - epsilon) + p4[0] * (1-rapport + epsilon), p3[1] * (rapport - epsilon) + p4[1] * (1 - rapport+epsilon)
             pygame.draw.polygon(self.game.screen, self.origin.color, self.transforms([p_1, p_2, p_3, p_4]))
             pygame.draw.polygon(self.game.screen, color.BLACK, self.transforms([p_1, p_2, p_3, p_4]), max(1 ,int(self.game.zoom * .5)))
+
