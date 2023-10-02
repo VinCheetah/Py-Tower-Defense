@@ -34,6 +34,10 @@ class Canon:
         if self.target_lock:
             self.aim()
 
+    def set_original_rotation(self, rotation):
+        self.original_rotation = rotation
+        self.inactive = False
+
 
     def angle(self):
         x = self.target.x - self.center_x
@@ -158,10 +162,10 @@ class BasicCanon(Canon):
         epsilon = 0.08
         for i in range(self.origin.level - 1):
             rapport = (i + 1) / self.origin.level
-            theta = self.rotation - self.width / 2 + rapport * self.width
+            theta = self.rotation - self.width / 1.8 + rapport * self.width / 0.9
             p_1 = cos(theta - epsilon), sin(theta - epsilon)
             p_2 = cos(theta + epsilon), sin(theta + epsilon)
-            p_3 = p3[0] * (rapport+epsilon) + p4[0] * (1-rapport-epsilon), p3[1] * (rapport+epsilon) + p4[1] * (1-rapport-epsilon)
-            p_4 = p3[0] * (rapport - epsilon) + p4[0] * (1-rapport+epsilon), p3[1] * (rapport-epsilon) + p4[1] * (1-rapport+epsilon)
+            p_3 = p3[0] * (rapport + epsilon) + p4[0] * (1-rapport - epsilon), p3[1] * (rapport + epsilon) + p4[1] * (1 - rapport-epsilon)
+            p_4 = p3[0] * (rapport - epsilon) + p4[0] * (1-rapport + epsilon), p3[1] * (rapport - epsilon) + p4[1] * (1 - rapport+epsilon)
             pygame.draw.polygon(self.game.screen, self.origin.color, self.transforms([p_1, p_2, p_3, p_4]))
-            pygame.draw.polygon(self.game.screen, color.BLACK, self.transforms([p_1, p_2, p_3, p_4]), max(1,int(self.game.zoom * .5)))
+            pygame.draw.polygon(self.game.screen, color.BLACK, self.transforms([p_1, p_2, p_3, p_4]), max(1 ,int(self.game.zoom * .5)))

@@ -14,22 +14,19 @@ class Tower(Printable):
     object = "Tower"
     def __init__(self, game, x, y, config):
         self.game = game
+        self.config = self.game.config.towers | config
 
-        config |= self.game.config.towers
-        self.config = config
-
-        self.type = config.type
-        self.range = config.range
-        self.price = config.price
-        self.original_size = config.size
+        self.type = self.config.type
+        self.range = self.config.range
+        self.price = self.config.price
+        self.original_size = self.config.size
         self.size = self.original_size
-        self.max_life = config.max_life
-
+        self.max_life = self.config.max_life
 
         self.animation = []
 
         Printable.__init__(
-            self, game, config.color, self.size, game.unview_x(x), game.unview_y(y)
+            self, game, self.config.color, self.size, game.unview_x(x), game.unview_y(y)
         )
 
         self.life = BoundedValue(self.max_life, 0, self.max_life)
@@ -37,12 +34,10 @@ class Tower(Printable):
 
         self.level = 1
 
-        self.level_memory = []
-
         self.experience_booster = 1
         self.zombie_killed = 0
 
-        self.experience = BoundedValue(0, 0, self.level ** 2 * config.experience_level)
+        self.experience = BoundedValue(0, 0, self.level ** 2 * self.config.experience_level)
 
         self.new_level_price = self.price * 2
 
@@ -56,15 +51,15 @@ class Tower(Printable):
 
         self.upgradable_animation = False
 
-        self.life_bar_height = config.bar.life_bar_height
-        self.exp_bar_height = config.bar.exp_bar_height
-        self.bar_length = config.bar.bar_length
-        self.color_bar = config.bar.color_bar
-        self.color_life_bar = config.bar.color_life_bar
-        self.color_missing_life_bar = config.bar.color_missing_life_bar
-        self.color_exp_bar = config.bar.color_exp_bar
-        self.bar_y = config.bar.bar_y
-        self.border_y = config.bar.border_y
+        self.life_bar_height = self.config.bar.life_bar_height
+        self.exp_bar_height = self.config.bar.exp_bar_height
+        self.bar_length = self.config.bar.bar_length
+        self.color_bar = self.config.bar.color_bar
+        self.color_life_bar = self.config.bar.color_life_bar
+        self.color_missing_life_bar = self.config.bar.color_missing_life_bar
+        self.color_exp_bar = self.config.bar.color_exp_bar
+        self.bar_y = self.config.bar.bar_y
+        self.border_y = self.config.bar.border_y
 
         self.bar_height = self.life_bar_height + self.exp_bar_height + 2.5 * self.border_y
 
@@ -277,11 +272,11 @@ class AttackTower(Tower):
     effect_type = 2
 
     def __init__(self, game, x, y, config):
-        Tower.__init__(self, game, x, y, config)
+        Tower.__init__(self, game, x, y, game.config.towers.attack | config)
 
-        self.num_targets = config.num_targets
-        self.damage = config.damage
-        self.atk_rate = config.atk_rate
+        self.num_targets = self.config.num_targets
+        self.damage = self.config.damage
+        self.atk_rate = self.config.atk_rate
 
         random_angle = random.random() * 2 * pi
         self.active_canons = set()
@@ -292,11 +287,24 @@ class AttackTower(Tower):
         )
         self.active_canons_bin = set()
 
-        self.attack = config.attack
+        self.attack = self.config.attack
         self.targets_lock = False
         self.last_attack = self.game.time
 
         self.boost_affecting()
+
+
+    def new_canon(self):
+        self.num_targets += 1
+        random_angle = random.random() * 2 * pi
+        for i, canon_obj in enumerate(self.active_canons.union(self.inactive_canons)):
+            canon_obj.set_original_rotation(random_angle + 2 * (i + 1) * pi / self.num_targets)
+        self.inactive_canons.add(canon.BasicCanon(self, random_angle))
+        self.targets_lock = False
+
+    def boost_new_level(self):
+        Tower.boost_new_level(self)
+        self.new_canon()
 
     def find_target(self):
         distances = sorted(
@@ -384,10 +392,10 @@ class EffectTower(Tower):
     effect_type = 0
 
     def __init__(self, game, x, y, config):
-        Tower.__init__(self, game, x, y, config)
+        Tower.__init__(self, game, x, y, game.config.towers.effect | config)
 
-        self.target_type = config.target_type
-        self.power_up_factor = config.power_up_factor
+        self.target_type = self.config.target_type
+        self.power_up_factor = self.config.power_up_factor
         self.alpha_screen = self.game.create_alpha_screen()
 
         # self.init_effecting()
@@ -435,7 +443,7 @@ class EffectTower(Tower):
 
 class DamageBoostTower(EffectTower):
     def __init__(self, game, x, y):
-        EffectTower.__init__(self, game, x, y, game.config.effect_towers.damage)
+        EffectTower.__init__(self, game, x, y, game.config.towers.effect.damage_b)
 
     def start_boost(self, tower):
         tower.damage *= self.power_up_factor
@@ -446,7 +454,7 @@ class DamageBoostTower(EffectTower):
 
 class AtkRateBoostTower(EffectTower):
     def __init__(self, game, x, y):
-        EffectTower.__init__(self, game, x, y, game.config.effect_towers.atkrate)
+        EffectTower.__init__(self, game, x, y, game.config.towers.effect.atkrate_b)
 
     def start_boost(self, tower):
         tower.atk_rate /= self.power_up_factor
@@ -457,7 +465,7 @@ class AtkRateBoostTower(EffectTower):
 
 class RangeBoostTower(EffectTower):
     def __init__(self, game, x, y):
-        EffectTower.__init__(self, game, x, y, game.config.effect_towers.range)
+        EffectTower.__init__(self, game, x, y, game.config.towers.effect.range_b)
 
     def start_boost(self, tower):
         tower.range *= self.power_up_factor
@@ -468,7 +476,7 @@ class RangeBoostTower(EffectTower):
 
 class CanonSpeedBoostTower(EffectTower):
     def __init__(self, game, x, y):
-        EffectTower.__init__(self, game, x, y, game.config.effect_towers.canon_speed)
+        EffectTower.__init__(self, game, x, y, game.config.towers.effect.canon_speed_b)
 
     def start_boost(self, tower):
         tower.canon_speed *= self.power_up_factor
@@ -477,10 +485,22 @@ class CanonSpeedBoostTower(EffectTower):
         tower.canon_speed /= self.power_up_factor
 
 
+class ExperienceBoostTower(EffectTower):
+
+    def __init__(self, game, x, y):
+        EffectTower.__init__(self, game, x, y, game.config.towers.effect.experience_b)
+
+    def start_boost(self, tower):
+        tower.experience_booster *= self.power_up_factor
+
+    def stop_boost(self, tower):
+        tower.canon_speed /= self.power_up_factor
+
+
 class HomeTower(AttackTower):
     def __init__(self, game):
         AttackTower.__init__(
-            self, game, game.width / 2, game.height / 2, game.config.attack_towers.home
+            self, game, game.width / 2, game.height / 2, game.config.towers.attack.home
         )
         self.alpha_screen = self.game.create_alpha_screen()
 
@@ -490,17 +510,17 @@ class HomeTower(AttackTower):
 
 class ArcheryTower(AttackTower):
     def __init__(self, game, x, y):
-        AttackTower.__init__(self, game, x, y, game.config.attack_towers.archery)
+        AttackTower.__init__(self, game, x, y, game.config.towers.attack.archery)
 
 
 class MagicTower(AttackTower):
     def __init__(self, game, x, y):
-        AttackTower.__init__(self, game, x, y, game.config.attack_towers.magic)
+        AttackTower.__init__(self, game, x, y, game.config.towers.attack.magic)
 
 
 class BombTower(AttackTower):
     def __init__(self, game, x, y):
-        AttackTower.__init__(self, game, x, y, game.config.attack_towers.bomb)
+        AttackTower.__init__(self, game, x, y, game.config.towers.attack.bomb)
         self.alpha_screen = self.game.create_alpha_screen()
 
     def damaging(self):

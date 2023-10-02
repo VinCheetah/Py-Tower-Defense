@@ -37,13 +37,13 @@ class Game:
 
         self.running = True
         self.pause = False
-        self.moving_action = None
+        self.moving_action = 0
         self.buildable = True
         self.tracking = False
         self.god_mode_active = True
         self.moving_map = False
         self.compact_string = True
-
+        self.zoom_change = False
 
         self.original_zoom = self.config.general.original_zoom
         self.min_zoom = self.config.general.min_zoom
@@ -111,7 +111,8 @@ class Game:
         self.debug_window_controller = controller.DebugWindowController(self)
         self.zombie_controller = controller.ZombieController(self)
         self.tower_controller = controller.TowerController(self)
-        self.controllers = [self.debug_window_controller, self.zombie_controller, self.tower_controller, self.main_controller, self.selection_controller, self.map_controller]
+        self.controllers = [self.debug_window_controller, self.zombie_controller, self.tower_controller,
+                            self.main_controller, self.selection_controller, self.map_controller]
 
     def actu_dimensions(self):
         self.width = pygame.display.Info().current_w
@@ -124,8 +125,8 @@ class Game:
 
     def actu_moving_action(self):
         self.moving_action = (
-            self.time_speed * self.original_frame_rate / self.frame_rate
-        ) * (1 - self.pause)
+                                     self.time_speed * self.original_frame_rate / self.frame_rate
+                             ) * (1 - self.pause)
 
     def stop_running(self):
         self.running = False
@@ -337,7 +338,6 @@ class Game:
                 if translated_event is not None and self.main_controller.controller_debug:
                     print(f"Couldn't match event {translated_event}")
 
-
     def track(self):
         if self.tracking and self.selected is not None:
             self.set_view_coord(self.selected.x, self.selected.y)
@@ -360,7 +360,9 @@ class Game:
                         composition[element.type] = 1
                     else:
                         composition[element.type] += 1
-                return "\n\t" + "\n\t".join((elt_type + (composition[elt_type] > 1)*(" (x"+str(composition[elt_type])+")")) for elt_type in composition)
+                return "\n\t" + "\n\t".join(
+                    (elt_type + (composition[elt_type] > 1) * (" (x" + str(composition[elt_type]) + ")")) for elt_type
+                    in composition)
             else:
                 return "\n\t" + "\n\t".join(str(element) for element in object)
         if type(object) == boundedValue.BoundedValue:
@@ -372,7 +374,6 @@ class Game:
             else:
                 return "%.4f" % object
         return str(object)
-
 
     def set_view_coord(self, x, y):
         self.view_center_x.set_value(x)
@@ -399,7 +400,6 @@ class Game:
                     return True
         return False
 
-
     def unselect(self):
         if self.selected is not None:
             if self.recognize(self.selected, "zombie"):
@@ -408,8 +408,6 @@ class Game:
                 self.tower_controller.unactivize()
             self.selection_controller.unactivize()
             self.selected = None
-
-
 
     def mouse_actions(self):
         if pygame.mouse.get_pressed()[0] and (self.mouse_x != self.ex_mouse_x or self.mouse_y != self.ex_mouse_y):
@@ -425,7 +423,6 @@ class Game:
         else:
             self.moving_map = False
 
-
     def move_map(self, rel_x, rel_y):
         if pygame.mouse.get_pressed()[0]:
             self.add_view_coord(- rel_x / self.zoom, - rel_y / self.zoom)
@@ -433,7 +430,6 @@ class Game:
             self.moving_map = True
             return True
         return False
-
 
     def view_move(self, x_end, y_end, zoom_end=None, speed=1, tracking=False):
         self.animations.add(
@@ -518,7 +514,6 @@ class Game:
     def money_prize(self, value):
         self.money += value
 
-
     def transaction(self, value):
         if self.money >= value:
             self.money -= value
@@ -541,20 +536,20 @@ class Game:
 
     def game_stats(self):
         return (
-            (
-                f"Frame rate : {self.frame_rate}\n"
-                f"Zoom : {self.zoom}\n"
-                f"Ticks : {self.time}\n"
-                f"Center : {self.view_center_x, self.view_center_y}\n"
-                f"Towers : {len(self.attack_towers) + len(self.effect_towers)}\n"
-                f"Zombies : {len(self.zombies)}\n"
-                f"Money : {self.money}\n"
-                f"Wave : {self.wave}\n"
-            )
-            + "\nCOMPLETE DESCRIPTION\n"
-            + "\n".join(
-                (str(key) + " : " + str(getattr(self, key))) for key in self.__dict__
-            )
+                (
+                    f"Frame rate : {self.frame_rate}\n"
+                    f"Zoom : {self.zoom}\n"
+                    f"Ticks : {self.time}\n"
+                    f"Center : {self.view_center_x, self.view_center_y}\n"
+                    f"Towers : {len(self.attack_towers) + len(self.effect_towers)}\n"
+                    f"Zombies : {len(self.zombies)}\n"
+                    f"Money : {self.money}\n"
+                    f"Wave : {self.wave}\n"
+                )
+                + "\nCOMPLETE DESCRIPTION\n"
+                + "\n".join(
+            (str(key) + " : " + str(getattr(self, key))) for key in self.__dict__
+        )
         )
 
     def recognize(self, obj, potential_class):

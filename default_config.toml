@@ -19,9 +19,9 @@ title = "Py-Tower-Defense-Config"
 
 [towers]
 
-    object = "Tower"
-
-    basics_parameters = ["object","type","life", "x", "y", "attackers", "targets", "price", "damage", "atk_rate", "zombie_killed", "experience"]
+    object="Tower"
+    range=100
+    basics_parameters = ["object","type","life", "x", "y", "level", "attackers", "targets", "price", "damage", "atk_rate", "range", "zombie_killed", "experience"]
 
 
 [towers.canon]
@@ -41,109 +41,92 @@ title = "Py-Tower-Defense-Config"
     border_y=1
 
 
-[attack_towers.home]
+[towers.attack]
+    experience_level=0.1
+    price=0
+    size=20
+    max_life=300
+
+
+[towers.attack.home]
     type="Home"
     attack="HomeAttack"
     color="GOLD2"
     size=30
     range=100
-    price=500
     max_life=500
     num_targets=5
     damage=100
     atk_rate=20
-experience_level=100
 
 
-[attack_towers.archery]
+[towers.attack.archery]
     type="Archery"
     attack="ArcherAttack"
     color="VIOLET"
-    size=20
     range=600
-    price=300
-    max_life=200
     num_targets=10
     damage=20
     atk_rate=25
-experience_level=1000
 
 
-[attack_towers.magic]
+[towers.attack.magic]
     type="Magic"
     attack="MagicAttack"
     color="BLUE"
-    size=20
     range=400
-    price=500
-    max_life=200
     num_targets=3
     damage=50
     atk_rate=60
-experience_level=1000
 
 
-[attack_towers.bomb]
+[towers.attack.bomb]
     type="Bomb"
     attack="BombAttack"
     color="BLACK"
-    size=20
     range=700
-    price=1000
-    max_life=100
     num_targets=1
     damage=350
     atk_rate=150
-experience_level=1000
 
 
+[towers.effect]
+    type="EffectTower"
+    color="WHITE"
+    size=15
+    price=1000
+    max_life=200
+    power_up_factor=2
+    experience_level=300
 
-[effect_towers.damage]
+[towers.effect.damage_b]
     type="DamageBoost"
     color="CREA2"
-    size=15
-    range=100
-    price=1000
-    max_life=200
-    power_up_factor=2
     target_type=2
-experience_level=1000
 
 
-[effect_towers.atkrate]
+[towers.effect.atkrate_b]
     type="AtkRateBoost"
     color="CREA1"
-    size=15
-    range=100
-    price=1000
-    max_life=200
-    power_up_factor=2
     target_type=2
-experience_level=1000
 
 
-[effect_towers.range]
+[towers.effect.range_b]
     type="RangeBoost"
     color="CREA3"
-    size=15
-    range=100
-    price=1000
-    max_life=200
-    power_up_factor=2
     target_type=2
-experience_level=1000
 
 
-[effect_towers.canon_speed]
+[towers.effect.canon_speed_b]
     type="CanonSpeedBoost"
     color="CREA4"
-    size=15
-    range=100
-    price=1500
-    max_life=200
-    power_up_factor=2
     target_type=2
-experience_level=1000
+
+
+[towers.effect.experience_b]
+    type="ExperienceBoost"
+    color="DARK_BLUE"
+    target_type=2
 
 
 [zombies]

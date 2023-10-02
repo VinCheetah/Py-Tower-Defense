@@ -227,7 +227,7 @@ class SelectionController(Controller):
         for tower in self.game.attack_towers.union(self.game.effect_towers):
             if tower.dist_point(self.game.unview_x(x), self.game.unview_y(y)) < tower.size:
                 self.game.selected = tower
-                self.game.view_move(tower.x, tower.y, self.game.height / (3 * tower.range), 1.5)
+                self.game.view_move(tower.x, tower.y, self.game.zoom if not self.game.zoom_change else self.game.height / (3 * tower.range), 1.5)
                 self.activize()
                 self.game.tower_controller.activize()
                 return True
