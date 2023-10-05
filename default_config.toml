@@ -1,6 +1,7 @@
 title = "Py-Tower-Defense-Config"
 
 [general]
+
     original_frame_rate=60
     max_frame_rate=90
     min_frame_rate=15
@@ -25,109 +26,118 @@ title = "Py-Tower-Defense-Config"
     max_sub_level=6
 
 
-[towers.canon]
-    mix_color="LIGHT_GREY"
+    [towers.canon]
+
+        type="Canon"
+        mix_color="LIGHT_GREY"
+        width=0.78
+        length=1.3
 
 
-[towers.bar]
+    [towers.bar]
 
-    bar_y=1.5
-    life_bar_height=6
-    exp_bar_height=1
-    bar_length=2
-    color_bar="BLACK"
-    color_life_bar="GREEN"
-    color_missing_life_bar="RED"
-    color_exp_bar="BLUE"
-    border_y=1
-
-
-[towers.attack]
-    experience_level=0.1
-    price=0
-    size=20
-    max_life=300
+        bar_y=1.5
+        life_bar_height=6
+        exp_bar_height=1
+        bar_length=2
+        color_bar="BLACK"
+        color_life_bar="GREEN"
+        color_missing_life_bar="RED"
+        color_exp_bar="BLUE"
+        border_y=1
 
 
-[towers.attack.home]
-    type="Home"
-    attack="HomeAttack"
-    color="GOLD2"
-    size=30
-    range=100
-    max_life=500
-    num_targets=5
-    damage=100
-    atk_rate=20
+    [towers.attack]
+
+        experience_level=100
+        price=1000
+        size=20
+        max_life=300
 
 
-[towers.attack.archery]
-    type="Archery"
-    attack="ArcherAttack"
-    color="VIOLET"
-    range=600
-    num_targets=10
-    damage=20
-    atk_rate=25
+        [towers.attack.home]
+
+            type="Home"
+            attack="HomeAttack"
+            color="GOLD2"
+            size=30
+            range=100
+            max_life=500
+            num_targets=5
+            damage=100
+            atk_rate=20
 
 
-[towers.attack.magic]
-    type="Magic"
-    attack="MagicAttack"
-    color="BLUE"
-    range=400
-    num_targets=3
-    damage=50
-    atk_rate=60
+        [towers.attack.archery]
+
+            type="Archery"
+            attack="ArcherAttack"
+            color="VIOLET"
+            range=600
+            num_targets=10
+            damage=20
+            atk_rate=25
 
 
-[towers.attack.bomb]
-    type="Bomb"
-    attack="BombAttack"
-    color="BLACK"
-    range=700
-    num_targets=1
-    damage=350
-    atk_rate=150
+        [towers.attack.magic]
+
+            type="Magic"
+            attack="MagicAttack"
+            color="BLUE"
+            range=400
+            num_targets=3
+            damage=50
+            atk_rate=60
 
 
-[towers.effect]
-    type="EffectTower"
-    color="WHITE"
-    size=15
-    price=1000
-    max_life=200
-    power_up_factor=2
-    experience_level=300
+        [towers.attack.bomb]
 
-[towers.effect.damage_b]
-    type="DamageBoost"
-    color="CREA2"
-    target_type=2
+            type="Bomb"
+            attack="BombAttack"
+            color="BLACK"
+            range=700
+            num_targets=1
+            damage=350
+            atk_rate=150
 
 
-[towers.effect.atkrate_b]
-    type="AtkRateBoost"
-    color="CREA1"
-    target_type=2
+    [towers.effect]
+        type="EffectTower"
+        color="WHITE"
+        size=15
+        price=1000
+        max_life=200
+        power_up_factor=2
+        experience_level=300
+
+        [towers.effect.damage_b]
+            type="DamageBoost"
+            color="CREA2"
+            target_type=2
 
 
-[towers.effect.range_b]
-    type="RangeBoost"
-    color="CREA3"
-    target_type=2
+        [towers.effect.atkrate_b]
+            type="AtkRateBoost"
+            color="CREA1"
+            target_type=2
 
 
-[towers.effect.canon_speed_b]
-    type="CanonSpeedBoost"
-    color="CREA4"
-    target_type=2
+        [towers.effect.range_b]
+            type="RangeBoost"
+            color="CREA3"
+            target_type=2
 
 
-[towers.effect.experience_b]
-    type="ExperienceBoost"
-    color="DARK_BLUE"
-    target_type=2
+        [towers.effect.canon_speed_b]
+            type="CanonSpeedBoost"
+            color="CREA4"
+            target_type=2
+
+
+        [towers.effect.experience_b]
+            type="ExperienceBoost"
+            color="DARK_BLUE"
+            target_type=2
 
 
 [zombies]
@@ -135,112 +145,122 @@ title = "Py-Tower-Defense-Config"
     basics_parameters = ["object","type","life", "x", "y", "target", "attackers", "value", "damage", "speed", "atk_rate"]
 
 
-[zombies.bar]
+    [zombies.bar]
 
-    bar_y=1.3
-    life_bar_height=3
-    bar_length=1.6
-    color_bar="BLACK"
-    color_life_bar="GREEN"
-    color_missing_life_bar="RED"
-    border_y=0.7
-
-
-[zombies.bar.special]
-
-    spc_bar_height=1
-
-[zombies.classic]
-    type="Classic"
-    color="GREEN"
-    max_life=200
-    speed=0.4
-    range=1
-    damage=10
-    atk_rate=60
-    size=10
-    value=50
-experience=5
+        bar_y=1.3
+        life_bar_height=3
+        bar_length=1.6
+        color_bar="BLACK"
+        color_life_bar="GREEN"
+        color_missing_life_bar="RED"
+        border_y=0.7
 
 
-[zombies.tank]
-    type="Tank"
-    color="DARK_GREEN"
-    max_life=1000
-    speed=0.2
-    range=3
-    damage=50
-    atk_rate=120
-    size=15
-    value=200
-experience=10
+        [zombies.bar.special]
 
-[zombies.speedy]
-    type="Speedy"
-    color="YELLOW"
-    max_life=200
-    speed=1
-    range=2
-    damage=20
-    atk_rate=90
-    size=13
-    value=100
-experience=10
-
-[zombies.random]
-    type="Random"
-    color="BROWN"
-    mini_max_life=100
-    maxi_max_life=3000
-    mini_speed=0.2
-    maxi_speed=2
-    range=4
-    mini_damage=5
-    maxi_damage=30
-    mini_atk_rate=6
-    maxi_atk_rate=120
-    mini_size=10
-    maxi_size=30
-    value=500
-experience=20
-
-[zombies.healer]
-    type="Healer"
-    color="LIGHT_GREEN"
-    max_life=400
-    speed=0.30
-    range=2
-    damage=25
-    atk_rate=100
-    size=18
-    value=1000
-    experience=50
-        special_atk_rate=180
-        special_range=150
-        special_pause=80
-        special_parameters=["special_heal"]
-            special_heal=200
+            spc_bar_height=1
 
 
-[zombies.spawner]
-    type="Spawner"
-    color="DARK_RED"
-    max_life=300
-    speed=0.12
-    range=3
-    damage=10
-    atk_rate=140
-    size=14
-    value=3000
-    experience=100
-        special_atk_rate=100
-        special_range=100
-        special_pause=0
-        special_parameters=["mini_spawn_num", "maxi_spawn_num", "spawnable_zombies", "spawnable_weights"]
-            mini_spawn_num=3
-            maxi_spawn_num=6
-            spawnable_zombies=["classic"]
-            spawnable_weights=[1]
+    [zombies.classic]
+
+        type="Classic"
+        color="GREEN"
+        max_life=200
+        speed=0.4
+        range=1
+        damage=10
+        atk_rate=60
+        size=10
+        value=50
+        experience=5
+
+
+    [zombies.tank]
+
+        type="Tank"
+        color="DARK_GREEN"
+        max_life=1000
+        speed=0.2
+        range=3
+        damage=50
+        atk_rate=120
+        size=15
+        value=200
+        experience=10
+
+
+    [zombies.speedy]
+
+        type="Speedy"
+        color="YELLOW"
+        max_life=200
+        speed=1
+        range=2
+        damage=20
+        atk_rate=90
+        size=13
+        value=100
+        experience=10
+
+
+    [zombies.random]
+
+        type="Random"
+        color="BROWN"
+        mini_max_life=100
+        maxi_max_life=3000
+        mini_speed=0.2
+        maxi_speed=2
+        range=4
+        mini_damage=5
+        maxi_damage=30
+        mini_atk_rate=6
+        maxi_atk_rate=120
+        mini_size=10
+        maxi_size=30
+        value=500
+        experience=20
+
+
+    [zombies.healer]
+
+        type="Healer"
+        color="LIGHT_GREEN"
+        max_life=400
+        speed=0.30
+        range=2
+        damage=25
+        atk_rate=100
+        size=18
+        value=1000
+        experience=50
+            special_atk_rate=180
+            special_range=150
+            special_pause=80
+            special_parameters=["special_heal"]
+                special_heal=200
+
+
+    [zombies.spawner]
+
+        type="Spawner"
+        color="DARK_RED"
+        max_life=300
+        speed=0.12
+        range=3
+        damage=10
+        atk_rate=140
+        size=14
+        value=3000
+        experience=100
+            special_atk_rate=100
+            special_range=100
+            special_pause=0
+            special_parameters=["mini_spawn_num", "maxi_spawn_num", "spawnable_zombies", "spawnable_weights"]
+                mini_spawn_num=3
+                maxi_spawn_num=6
+                spawnable_zombies=["classic"]
+                spawnable_weights=[1]
 
 
 [attack]
@@ -248,72 +268,85 @@ experience=20
 
 [animation]
 
-[animation.circular_explosion]
-    expansion_life_time = 40
-    disappear_life_time = 60
+    [animation.circular_explosion]
 
-[animation.particle_explosion]
-    mini_num_particles=10
-    maxi_num_particles=80
-
-[animation.particle_explosion.particle]
-    mini_life_time=20
-    maxi_life_time=50
-    mini_size_factor=0.2
-    maxi_size_factor=0.8
-    mini_color_variation=-20
-    maxi_color_variation=20
-    mini_speed=0.3
-    maxi_speed=4
-    mini_alpha=100
-    maxi_alpha=255
-    mini_speed_decrease=0.7
-    maxi_speed_decrease=1
-    mini_alpha_decrease=0.4
-    maxi_alpha_decrease=1
-
-[animation.particle_explosion_zombie]
-    mini_num_particles=8
-    maxi_num_particles=30
-
-[animation.particle_explosion_zombie.particle]
-    mini_life_time=20
-    maxi_life_time=40
-    mini_size_factor=0.2
-    maxi_size_factor=0.5
-    mini_color_variation=-20
-    maxi_color_variation=20
-    mini_speed=0.3
-    maxi_speed=2
-    mini_alpha=100
-    maxi_alpha=255
-    mini_speed_decrease=0.7
-    maxi_speed_decrease=1
-    mini_alpha_decrease=0.6
-    maxi_alpha_decrease=1
+        expansion_life_time = 40
+        disappear_life_time = 60
 
 
-[animation.tower_bop]
-    life_time = 20
-    size_increase=0.3
+    [animation.particle_explosion]
 
-[animation.circular_effect]
-    alpha=40
-    life_time=35
+        mini_num_particles=10
+        maxi_num_particles=80
 
 
-[animation.show_text]
-    life_time=150
-    pop_life_time=30
-    shade_life_time=50
-    color="WHITE"
+        [animation.particle_explosion.particle]
+
+            mini_life_time=20
+            maxi_life_time=50
+            mini_size_factor=0.2
+            maxi_size_factor=0.8
+            mini_color_variation=-20
+            maxi_color_variation=20
+            mini_speed=0.3
+            maxi_speed=4
+            mini_alpha=100
+            maxi_alpha=255
+            mini_speed_decrease=0.7
+            maxi_speed_decrease=1
+            mini_alpha_decrease=0.4
+            maxi_alpha_decrease=1
+
+    [animation.particle_explosion_zombie]
+
+        mini_num_particles=8
+        maxi_num_particles=30
 
 
-[animation.upgradable_tower]
-    size=15
-    time=300
-    num_shade=50
-    max_lightness=60
+        [animation.particle_explosion_zombie.particle]
+
+            mini_life_time=20
+            maxi_life_time=40
+            mini_size_factor=0.2
+            maxi_size_factor=0.5
+            mini_color_variation=-20
+            maxi_color_variation=20
+            mini_speed=0.3
+            maxi_speed=2
+            mini_alpha=100
+            maxi_alpha=255
+            mini_speed_decrease=0.7
+            maxi_speed_decrease=1
+            mini_alpha_decrease=0.6
+            maxi_alpha_decrease=1
+
+
+    [animation.tower_bop]
+
+        life_time = 20
+        size_increase=0.3
+
+
+    [animation.circular_effect]
+
+        alpha=40
+        life_time=35
+
+
+    [animation.show_text]
+
+        life_time=150
+        pop_life_time=30
+        shade_life_time=50
+        color="WHITE"
+
+
+    [animation.upgradable_tower]
+
+        size=15
+        time=300
+        num_shade=50
+        max_lightness=60
 
 
 
@@ -326,46 +359,48 @@ experience=20
     writing_color="WHITE"
 
 
-[window.debug]
-    name="Debug"
+    [window.debug]
+        name="Debug"
 
 
 
 
 [wave]
-auto_wave=false
+
+    auto_wave=false
 
 
-[wave.1-]
-continuous_spawn=true
-continuous_spawning_weight_classic=1
+    [wave.1-]
 
-min_zoom=0.1
-max_zoom=5
+        continuous_spawn=true
+        continuous_spawning_weight_classic=1
 
-max_coord = 3000
+        min_zoom=0.1
+        max_zoom=5
 
-mini_continuous_spawning_rest_time = 30
-maxi_continuous_spawning_rest_time = 300
+        max_coord = 3000
 
-life_time= 3000
+        mini_continuous_spawning_rest_time = 30
+        maxi_continuous_spawning_rest_time = 300
 
-
-
+        life_time= 3000
 
 
+    [wave.1]
 
-[wave.1]
-max_coord=600
-life_time=1000
-continuous_spawning_rest_time=500
+        max_coord=600
+        life_time=1000
+        continuous_spawning_rest_time=500
 
 
-[wave.2-10]
-max_x=1500
-max_y=1000
-min_zoom=0.4
+    [wave.2-10]
 
-[wave.5]
-max_x=1800
-max_y=1200
+        max_x=1500
+        max_y=1000
+        min_zoom=0.4
+
+
+    [wave.5]
+
+        max_x=1800
+        max_y=1200

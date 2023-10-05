@@ -6,23 +6,25 @@ from math import pi, cos, sin, atan
 class Canon:
     def __init__(self, origin, rotation=0):
         self.origin = origin
-        self.game = self.origin.game
-        self.config = self.game.config.towers.canon
         self.center_x = self.origin.x
         self.center_y = self.origin.y
+
+        self.game = self.origin.game
+        self.config = self.game.config.towers.canon
+        self.type = self.config.type
+        self.width = self.config.width
+        self.length = self.config.length
+
+        self.last_attack = self.game.time
         self.original_rotation = rotation
         self.rotation = self.original_rotation
-        self.width = pi / 4
         self.color = color.mix(self.origin.color, self.config.mix_color)
+
         self.target = None
         self.target_lock = False
         self.adjusted_aim = False
-        self.last_attack = self.game.time
-        self.length2 = 1.3
-        self.length = 2
-        self.width2 = 1
         self.inactive = True
-        self.type = "Canon"
+
 
     def new_target(self, target):
         self.inactive = False
@@ -97,14 +99,6 @@ class Canon:
     def print_game(self):
         self.shape_display()
         self.style_display()
-        # if self.target_lock:
-        #     target_theta = self.target_theta
-        #     pygame.draw.line(self.game.screen, (255, 255, 255),
-        #                      (self.game.view_x(self.center_x), self.game.view_y(self.center_y)), (
-        #                      self.game.view_x(self.center_x + 100 * cos(target_theta)),
-        #                      self.game.view_y(self.center_y + 100 * sin(target_theta))))
-
-
 
     def transform(self, point):
         return (self.game.view_x(self.center_x + point[0] * self.origin.size),
@@ -135,17 +129,17 @@ class Canon:
     def collide(self, x, y):
         return False
         # Not Working
-        p = list(self.transforms(self.shape()))
-        p.append(p[0])
-        c = 0
-        for i in range(len(p)-1):
-            p1_x, p1_y = p[i][0] - x, p[i][1] - y
-            p2_x, p2_y = p[i+1][0] - x, p[i+1][1] - y
-            c += (p1_y * p2_y <= 0 and - (p1_y - (p2_y-p1_y) / (p2_x - p1_x) / p1_x) / (p2_y - p1_y) / (p2_x - p1_x) > 0)
-            if (p1_y * p2_y <= 0 and - (p1_y - (p2_y-p1_y) / (p2_x - p1_x) / p1_x) / (p2_y - p1_y) / (p2_x - p1_x) > 0):
-                self.game.show.add(tuple([p[i], p[i+1]]))
-        print(c)
-        return c % 2
+        # p = list(self.transforms(self.shape()))
+        # p.append(p[0])
+        # c = 0
+        # for i in range(len(p)-1):
+        #     p1_x, p1_y = p[i][0] - x, p[i][1] - y
+        #     p2_x, p2_y = p[i+1][0] - x, p[i+1][1] - y
+        #     c += (p1_y * p2_y <= 0 and - (p1_y - (p2_y-p1_y) / (p2_x - p1_x) / p1_x) / (p2_y - p1_y) / (p2_x - p1_x) > 0)
+        #     if (p1_y * p2_y <= 0 and - (p1_y - (p2_y-p1_y) / (p2_x - p1_x) / p1_x) / (p2_y - p1_y) / (p2_x - p1_x) > 0):
+        #         self.game.show.add(tuple([p[i], p[i+1]]))
+        # print(c)
+        # return c % 2
 
 
 class BasicCanon(Canon):
@@ -175,7 +169,6 @@ class BasicCanon(Canon):
 
         return ps[:2] + p_start + list(reversed(p_end))
 
-
     def trapeze(self, epsilon):
         theta1 = self.rotation - self.width / 2 - epsilon
         theta2 = self.rotation + self.width / 2 + epsilon
@@ -183,12 +176,8 @@ class BasicCanon(Canon):
         theta4 = self.rotation - self.width / 4 - epsilon / 2
         p1 = cos(theta1), sin(theta1)
         p2 = cos(theta2), sin(theta2)
-        p3 = cos(theta3) * (self.length2 + epsilon), sin(theta3) * (
-                self.length2 + epsilon
-        )
-        p4 = cos(theta4) * (self.length2 + epsilon), sin(theta4) * (
-                self.length2 + epsilon
-        )
+        p3 = cos(theta3) * (self.length + epsilon), sin(theta3) * (self.length + epsilon)
+        p4 = cos(theta4) * (self.length + epsilon), sin(theta4) * (self.length + epsilon)
         return p1, p2, p3, p4
 
     def style_display(self):
@@ -205,5 +194,5 @@ class BasicCanon(Canon):
             p_3 = p3[0] * (rapport + epsilon) + p4[0] * (1-rapport - epsilon), p3[1] * (rapport + epsilon) + p4[1] * (1 - rapport-epsilon)
             p_4 = p3[0] * (rapport - epsilon) + p4[0] * (1-rapport + epsilon), p3[1] * (rapport - epsilon) + p4[1] * (1 - rapport+epsilon)
             pygame.draw.polygon(self.game.screen, self.origin.color, self.transforms([p_1, p_2, p_3, p_4]))
-            pygame.draw.polygon(self.game.screen, color.BLACK, self.transforms([p_1, p_2, p_3, p_4]), max(1 ,int(self.game.zoom * .5)))
+            pygame.draw.polygon(self.game.screen, color.BLACK, self.transforms([p_1, p_2, p_3, p_4]), max(1, int(self.game.zoom * .5)))
 
