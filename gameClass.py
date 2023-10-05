@@ -197,6 +197,9 @@ class Game:
             return True
         return False
 
+    def towers_set(self):
+        return self.attack_towers.difference(self.attack_towers_bin).union(self.effect_towers.difference(self.effect_towers_bin))
+
     def check_zombies_target(self, new_tower=None):
         for zombie in self.zombies:
             zombie.find_target(new_tower)
@@ -297,7 +300,7 @@ class Game:
         if self.selected is not None:
             self.selected.selected()
             for zombie in self.zombies_soon_dead:
-                if self.selected in zombie.attackers_list():
+                if self.selected in zombie.attackers_set():
                     zombie.under_selected()
 
         for animation in self.animations:
