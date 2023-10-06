@@ -134,8 +134,8 @@ class Game:
         self.running = False
 
     @god_function
-    def pausing(self):
-        if self.god_mode_active:
+    def pausing(self, forced=False):
+        if self.god_mode_active or forced:
             self.pause = not self.pause
             self.actu_moving_action()
         else:

@@ -6,25 +6,27 @@ import animationClass
 
 
 class Attack(printable.Printable):
-    def __init__(self, game, target, origin, col, speed):
-        printable.Printable.__init__(self, game, col, 5, origin.x, origin.y)
+    def __init__(self, game, target, origin, config):
         self.game = game
-        self.speed = speed
         self.target = target
         self.origin = origin
+        self.config = self.game.config.attacks | config
+        self.speed = self.config.speed
+
+        printable.Printable.__init__(self, game, self.config.color, self.config.size, origin.x, origin.y)
 
     def move(self):
         self.origin.target_lock = False
         dist = self.dist(self.target)
-        if dist < self.speed * self.game.moving_action:
-            self.attack_over()
-        else:
+        if dist >= self.speed * self.game.moving_action:
             self.x += (
                 self.speed * self.game.moving_action * (self.target.x - self.x) / dist
             )
             self.y += (
                 self.speed * self.game.moving_action * (self.target.y - self.y) / dist
             )
+        else:
+            self.attack_over()
 
     def attack_over(self):
         self.game.attacks_bin.add(self)
@@ -37,22 +39,22 @@ class Attack(printable.Printable):
 
 class HomeAttack(Attack):
     def __init__(self, game, target, origin):
-        Attack.__init__(self, game, target, origin, color.GOLD2, 3)
+        Attack.__init__(self, game, target, origin, game.config.attacks.home)
 
 
 class MagicAttack(Attack):
     def __init__(self, game, target, origin):
-        Attack.__init__(self, game, target, origin, color.BLUE, 8)
+        Attack.__init__(self, game, target, origin, game.config.attacks.magic)
 
 
-class ArcherAttack(Attack):
+class ArcheryAttack(Attack):
     def __init__(self, game, target, origin):
-        Attack.__init__(self, game, target, origin, color.darker(color.VIOLET), 6)
+        Attack.__init__(self, game, target, origin, game.config.attacks.archery)
 
 
 class BombAttack(Attack):
     def __init__(self, game, target, origin):
-        Attack.__init__(self, game, target, origin, color.BLACK, 3)
+        Attack.__init__(self, game, target, origin, game.config.attacks.bomb)
         self.range = random.randint(20, 80)
 
     def attack_over(self):

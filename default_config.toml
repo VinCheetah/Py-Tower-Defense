@@ -71,7 +71,7 @@ title = "Py-Tower-Defense-Config"
         [towers.attack.archery]
 
             type="Archery"
-            attack="ArcherAttack"
+            attack="ArcheryAttack"
             color="VIOLET"
             range=600
             num_targets=10
@@ -263,7 +263,42 @@ title = "Py-Tower-Defense-Config"
                 spawnable_weights=[1]
 
 
-[attack]
+[attacks]
+
+    type="Attack"
+    color="WHITE"
+    speed=3
+    size=5
+
+
+    [attacks.home]
+
+        type="Home Attack"
+        color="GOLD2"
+        speed=3
+
+
+    [attacks.magic]
+
+        type="Magic Attack"
+        color="BLUE"
+        speed=8
+
+
+    [attacks.archery]
+
+        type="Archery Attack"
+        color="VIOLET"
+        speed=6
+        size=3
+
+
+    [attacks.bomb]
+
+        type="Bomb Attack"
+        color="BLACK"
+        speed=4
+        size=6
 
 
 [animation]
@@ -352,15 +387,25 @@ title = "Py-Tower-Defense-Config"
 
 [window]
 
+    x=0
+    y=0
     width=400
     height=300
     background_color="GREY"
     name="Default Window"
     writing_color="WHITE"
+    moveable=true
 
 
     [window.debug]
         name="Debug"
+
+    [window.shop]
+        moveable=false
+        name="Shop"
+
+x=0
+y=600
 
 
 
