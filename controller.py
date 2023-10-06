@@ -11,6 +11,8 @@ class Controller:
         self.game = game
         self.active = True
 
+        self.buttons = set()
+
         self.active_commands, self.commands, self.inactive_commands = self.create_commands()
 
     def apply(self, command, *arg):
@@ -60,6 +62,13 @@ class Controller:
         self.active = True
     def unactivize(self):
         self.active = False
+
+
+    def check_buttons(self, *args):
+        for button in self.buttons:
+            if button.clicked(*args):
+                return True
+        return False
 
 
 
@@ -130,7 +139,9 @@ class MapController(Controller):
             {}
         )
 
-    def attack_tower_build(self, *args):
+    def left_click(self, *args):
+        if self.check_buttons(*args):
+            return True
         if not self.game.moving_map:
             if self.game.selected is None:
                 self.game.new_attack_tower(*args)
@@ -140,6 +151,8 @@ class MapController(Controller):
             self.game.buildable = True
             self.game.moving_map = False
         return True
+
+
 
     def effect_tower_build(self, *args):
         if self.game.selected is None:

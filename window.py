@@ -9,8 +9,8 @@ class Window:
         self.game = game
         self.config = game.config.window | config
 
-        self.x = 0
-        self.y = 0
+        self.x = self.config.x
+        self.y = self.config.y
 
         self.view_x = boundedValue.BoundedValue(0, 0, 0)
         self.view_y = boundedValue.BoundedValue(0, 0, 0)
@@ -23,6 +23,7 @@ class Window:
         self.background_color = self.config.background_color
         self.writing_color = self.config.writing_color
         self.name = self.config.name
+        self.moveable = self.config.moveable
 
         self.window = pygame.Surface((self.width, self.height), pygame.RESIZABLE)
         self.active = True
@@ -117,7 +118,7 @@ class Window:
             self.window_blit(self.content)
 
     def move(self, rel_x, rel_y):
-        if self.collide_old():
+        if self.moveable and self.collide_old():
             self.go_front()
             self.x += rel_x
             self.y += rel_y
@@ -151,8 +152,6 @@ class DebugWindow(Window):
             self.content, self.content_height = self.format_text(self.get_brut_content(), self.font)
             self.update_extremum_view()
 
-
-
     def get_brut_content(self):
         if self.parameters == "all":
             parameters = self.target.__dict__
@@ -174,3 +173,21 @@ class DebugWindow(Window):
     def lock_target(self):
         if self.target is not None:
             self.target_lock = not self.target_lock
+
+
+
+class ShopWindow(Window):
+
+    def __init__(self, game):
+
+        Window.__init__(self, game, game.config.window.shop)
+
+        self.game.pausing(True)
+
+        self.width = self.game.width
+        self.height = self.game.height - self.y
+
+
+
+
+
