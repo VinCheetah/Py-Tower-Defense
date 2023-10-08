@@ -275,6 +275,7 @@ class ShowText(Animation):
     )
     texts = []
     type = "ShowText"
+    x, y = 0, 0
 
     def __init__(self, game, text):
         self.texts.append(self)

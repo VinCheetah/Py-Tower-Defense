@@ -41,7 +41,8 @@ class Controller:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             return self.mouse_button_down_translate(event)
 
-    def key_down_translate(self, event):
+    @staticmethod
+    def key_down_translate(event):
         if 97 <= event.key <= 122:
             return event.unicode
         else:
@@ -71,11 +72,6 @@ class Controller:
         return False
 
 
-
-
-
-
-
 class MainController(Controller):
 
     name = "Main Controller"
@@ -91,6 +87,7 @@ class MainController(Controller):
                     "t": self.game.pausing,
                     "w": self.game.new_wave,
                     "c": self.game.complete_destruction,
+                    "i": self.print_infos,
 
                     "p": self.increase_time_speed,
                     "m": self.reduce_time_speed,
@@ -101,6 +98,9 @@ class MainController(Controller):
                 },
                 {}
         )
+
+    def print_infos(self):
+        print(self.game.game_stats())
 
     def money_bonus(self):
         self.game.money_prize(10000)
@@ -128,8 +128,8 @@ class MapController(Controller):
             {
                 "_d_up_click": self.game.zoom_move,
                 "_d_down_click": self.game.unzoom_move,
-                "_l_click": self.attack_tower_build,
-                "_r_click": self.effect_tower_build,
+                "_l_click": self.left_click,
+                "_r_click": self.right_click,
 
                 "_MOUSE_MOTION": self.game.move_map,
 
@@ -152,14 +152,19 @@ class MapController(Controller):
             self.game.moving_map = False
         return True
 
-
-
-    def effect_tower_build(self, *args):
-        if self.game.selected is None:
-            self.game.new_effect_tower(*args)
+    def right_click(self, *args):
+        if self.check_buttons(*args):
+            return True
+        if not self.game.moving_map:
+            if self.game.selected is None:
+                self.game.new_effect_tower(*args)
+            else:
+                self.game.unselect()
         else:
-            self.game.unselect()
+            self.game.buildable = True
+            self.game.moving_map = False
         return True
+
 
 class WindowController(Controller):
 
@@ -239,7 +244,7 @@ class SelectionController(Controller):
     def find_selected(self, x, y):
         for tower in self.game.attack_towers.union(self.game.effect_towers):
             if tower.dist_point(self.game.unview_x(x), self.game.unview_y(y)) < tower.size:
-                self.game.selected = tower
+                self.game.select(tower)
                 self.game.view_move(tower.x, tower.y, self.game.zoom if not self.game.zoom_change else self.game.height / (3 * tower.range), 1.5)
                 self.activize()
                 self.game.tower_controller.activize()
@@ -247,7 +252,7 @@ class SelectionController(Controller):
         else:
             for zombie in self.game.zombies:
                 if zombie.dist_point(self.game.unview_x(x), self.game.unview_y(y)) < zombie.size:
-                    self.game.selected = zombie
+                    self.game.select(zombie)
                     self.game.view_move(zombie.x, zombie.y, speed=3, tracking=True)
                     return True
         return False
@@ -275,14 +280,25 @@ class TowerController(Controller):
     def __init__(self, game):
         super().__init__(game)
         self.unactivize()
+
     def create_commands(self):
         return (
             {
                 "u": self.game.upgrade_selected,
                 "i": self.game.forced_upgrade,
-                "_l_click": self.game.find_canon
+                # "_l_click": self.game.find_canon
             },
             {},
             {}
         )
 
+
+class ShopController(WindowController):
+
+    def activize(self):
+        super().activize()
+        self.game.pausing(True)
+
+    def unactivize(self):
+        super().unactivize()
+        self.game.pausing(True)

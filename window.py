@@ -22,10 +22,13 @@ class Window:
         self.height = self.config.height
         self.background_color = self.config.background_color
         self.writing_color = self.config.writing_color
+        self.alpha = self.config.alpha
         self.name = self.config.name
         self.moveable = self.config.moveable
 
-        self.window = pygame.Surface((self.width, self.height), pygame.RESIZABLE)
+        self.buttons = set()
+
+        self.window = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.active = True
         self.content = None
 
@@ -82,9 +85,7 @@ class Window:
 
     def update_extremum_view(self):
         self.view_x.set_max(0)
-        print(self.content_height, self.content.get_size()[1])
         self.view_y.set_max(max(0, self.content_height - self.content.get_size()[1]))
-        print(self.view_y)
 
     def format_text(self, text, font, x_space=5, y_space=5):
         text_surface = pygame.Surface((self.width, self.height))
@@ -116,6 +117,8 @@ class Window:
     def print_content(self):
         if self.content is not None:
             self.window_blit(self.content)
+        for button in self.buttons:
+            button.display()
 
     def move(self, rel_x, rel_y):
         if self.moveable and self.collide_old():
@@ -135,6 +138,11 @@ class Window:
             self.game.windows.pop()
         else:
             self.game.windows.remove(self)
+
+
+    def new_button(self, button):
+        self.buttons.add(button)
+        self.controller.buttons.add(button)
 
 
 class DebugWindow(Window):
@@ -175,17 +183,29 @@ class DebugWindow(Window):
             self.target_lock = not self.target_lock
 
 
+class MainWindow(Window):
+
+    def __init__(self, game):
+        Window.__init__(self, game, game.config.window.main)
+
+        self.width = self.game.width
+        self.height = self.game.height
+        self.controller = self.game.main_controller
+        # self.new_button(controller)
+
+
 
 class ShopWindow(Window):
 
     def __init__(self, game):
-
         Window.__init__(self, game, game.config.window.shop)
 
-        self.game.pausing(True)
 
         self.width = self.game.width
         self.height = self.game.height - self.y
+
+
+
 
 
 

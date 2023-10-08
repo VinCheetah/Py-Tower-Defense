@@ -13,6 +13,7 @@ from boundedValue import BoundedValue
 
 
 class Game:
+
     config = Config.get_default()
     recognize_dico = {
         "zombie": zombieClass.Zombie,
@@ -115,6 +116,11 @@ class Game:
         self.tower_controller = controller.TowerController(self)
         self.controllers = [self.debug_window_controller, self.zombie_controller, self.tower_controller,
                             self.main_controller, self.selection_controller, self.map_controller]
+
+
+        self.main_window = window.MainWindow(self)
+        self.shop_window = window.ShopWindow(self)
+
 
     def actu_dimensions(self):
         self.width = pygame.display.Info().current_w
@@ -311,8 +317,7 @@ class Game:
         self.print_money()
 
     def actu_action(self):
-        if not self.pause:
-            self.time += self.time_speed / self.frame_rate * self.original_frame_rate
+        self.time += self.moving_action
         if self.wave is not None:
             self.wave.action()
         for tower in self.attack_towers:
@@ -419,11 +424,20 @@ class Game:
                     return True
         return False
 
+    def select(self, selected):
+        self.unselect()
+        self.selection_controller.activize()
+        if self.recognize(selected, "zombie"):
+            self.zombie_controller.activize()
+        elif self.recognize(selected, "tower"):
+            self.tower_controller.activize()
+        self.selected = selected
+
     def unselect(self):
         if self.selected is not None:
             if self.recognize(self.selected, "zombie"):
                 self.zombie_controller.unactivize()
-            if self.recognize(self.selected, "tower"):
+            elif self.recognize(self.selected, "tower"):
                 self.tower_controller.unactivize()
             self.selection_controller.unactivize()
             self.selected = None

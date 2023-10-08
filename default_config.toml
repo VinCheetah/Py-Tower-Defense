@@ -391,6 +391,7 @@ title = "Py-Tower-Defense-Config"
     y=0
     width=400
     height=300
+    alpha=255
     background_color="GREY"
     name="Default Window"
     writing_color="WHITE"
@@ -401,11 +402,38 @@ title = "Py-Tower-Defense-Config"
         name="Debug"
 
     [window.shop]
+
         moveable=false
         name="Shop"
 
-x=0
-y=600
+        x=0
+        y=600
+
+    [window.main]
+        name="Main"
+        moveable=false
+
+
+
+[buttons]
+
+    [buttons.classic]
+
+        label="Button"
+        height=100
+        width=250
+        line_color="LIGHT_GREY"
+        unclicked_color="DARK_GREY_1"
+        under_mouse_color="DARK_GREY_2"
+        clicked_color="DARK_GREY_3"
+        value=0
+
+
+    [buttons.multi]
+        key="None"
+        clicked=false
+
+
 
 
 
