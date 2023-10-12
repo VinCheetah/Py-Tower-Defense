@@ -20,15 +20,20 @@ class Button:
         self.unclicked_color = self.config.unclicked_color
         self.color = self.unclicked_color
 
-        self.screen = self.get_config_screen()
-        self.x, self.y = self.get_config_coordonates()
+        self.screen = self.window.screen
+        self.x, self.y = self.config_get_coord()
 
         self.rect = pygame.Rect((self.x, self.y), (self.width, self.height))
         self.clicked = False
 
+    def config_get_coord(self):
+        x, y = self.config.x, self.config.y
+        if type(x) == str:
+            x = {"left": 0 + self.window.border_x + self.width / 2, "right": self.window.width - self.window.border_x - self.width / 2, "center": self.window.width / 2}.get(x)
+        if type(y) == str:
+            y = {"up": 0 + self.window.border_y + self.height / 2, "down": self.window.height - self.window.border_y - self.height / 2, "center": self.window.height / 2}.get(x)
+        return x, y
 
-    def get_config_screen(self):
-        if self.config.screen =
 
     def display(self):
         police = pygame.font.SysFont("monospace", 30)

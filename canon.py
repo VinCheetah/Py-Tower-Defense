@@ -181,7 +181,7 @@ class BasicCanon(Canon):
         return p1, p2, p3, p4
 
     def style_display(self):
-        p = self.shape()
+        p = self.shape(.5)
         p1, p2, p3, p4 = p[0], p[1], p[2], p[-1]
         for i in range((self.origin.level - 1) // self.origin.max_sub_level):
             pygame.draw.line(self.game.screen, color.BLACK, self.transform(p[(i+1) * 2]), self.transform(p[(i+1) * -2 + 1]), int(max(1, self.game.zoom)))

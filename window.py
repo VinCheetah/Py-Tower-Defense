@@ -1,6 +1,7 @@
 import pygame
 import color
 import boundedValue
+import controller
 
 
 class Window:
@@ -20,13 +21,16 @@ class Window:
         self.font = pygame.font.SysFont("Courier New", 20)
         self.width = self.config.width
         self.height = self.config.height
+        self.alpha = self.config.alpha
         self.background_color = self.config.background_color
         self.writing_color = self.config.writing_color
-        self.alpha = self.config.alpha
         self.name = self.config.name
         self.moveable = self.config.moveable
+        self.selectionable = self.config.selectionable
+        self.closable = self.config.closable
 
         self.buttons = set()
+        self.controller = self.game.window_controller
 
         self.window = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.active = True
@@ -40,13 +44,13 @@ class Window:
 
 
     def window_view_down(self):
-        if self.collide_old():
+        if self.moveable and self.collide_old():
             self.view_y += 4
             return True
         return False
 
     def window_view_up(self):
-        if self.collide_old():
+        if self.moveable and self.collide_old():
             self.view_y -= 4
             return True
         return False
@@ -129,21 +133,29 @@ class Window:
         return False
 
     def go_front(self):
-        if self.game.windows[-1] != self:
+        if self.selectionable and self.game.windows[-1] != self:
             self.game.windows.remove(self)
             self.game.windows.append(self)
 
     def close(self):
-        if self.game.windows[-1] == self:
-            self.game.windows.pop()
-        else:
-            self.game.windows.remove(self)
+        if self.closable:
+            if self.game.windows[-1] == self:
+                self.game.windows.pop()
+            else:
+                self.game.windows.remove(self)
 
 
     def new_button(self, button):
         self.buttons.add(button)
         self.controller.buttons.add(button)
 
+
+    def select(self, x, y):
+        if self.selectionable and self.collide(x, y):
+            self.go_front()
+            self.controller.activize()
+            return True
+        return False
 
 class DebugWindow(Window):
 
@@ -192,6 +204,13 @@ class MainWindow(Window):
         self.height = self.game.height
         self.controller = self.game.main_controller
         # self.new_button(controller)
+        self.window = self.game.screen
+
+    def print_window(self):
+        self.update_content()
+        self.print_content()
+
+        self.game.screen.blit(self.window, (self.x, self.y))
 
 
 

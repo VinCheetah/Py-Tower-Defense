@@ -184,7 +184,9 @@ class WindowController(Controller):
 
                 #"_MOUSE_MOTION": self.game.window_vertical_view
                 pygame.K_DOWN: self.game.window_view_down,
-                pygame.K_UP: self.game.window_view_up
+                pygame.K_UP: self.game.window_view_up,
+
+                pygame.K_BACKSPACE: self.game.delete_selected_window,
             },
             {
                 "_MOUSE_MOTION": self.game.move_window,
@@ -238,7 +240,7 @@ class SelectionController(Controller):
         )
 
     def create_debug_window(self):
-        self.game.new_window()
+        self.game.new_debug_window()
         self.game.lock_target()
 
     def find_selected(self, x, y):

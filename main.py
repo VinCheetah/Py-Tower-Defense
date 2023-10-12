@@ -1,30 +1,8 @@
-import pygame
-
-pygame.init()
-import os
-import time
 import gameClass
 
-os.environ["SDL_VIDEO_CENTERED"] = "1"
 
-screen = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
-
-pygame.display.set_caption("Tower Defense")
-pygame.display.set_icon(pygame.image.load("icon.png"))
-
-game = gameClass.Game(screen)
-last_frame = 0
-
-while game.running:
-    game.clean()
-    game.actu_action()
-    game.display()
-
-    one_loop_done = False
-
-    while not one_loop_done or time.time() - last_frame < 1 / game.frame_rate:
-        one_loop_done = True
-        game.interactions()
+game = gameClass.Game()
+game.start()
 
         # for event in pygame.event.get():
         #     if event.type == pygame.QUIT:
@@ -122,6 +100,3 @@ while game.running:
         #
         #
         # game.mouse_actions()
-
-    pygame.display.flip()
-    last_frame = time.time()

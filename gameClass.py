@@ -1,11 +1,16 @@
+import time
+import os
+import random
+import pygame
+
+pygame.init()
+
 import animationClass
 import boundedValue
 import color
 import towerClass
 import zombieClass
 import wave
-import random
-import pygame
 import window
 import controller
 from config import Config
@@ -23,6 +28,7 @@ class Game:
         "classic": zombieClass.ClassicZombie,
     }
 
+    @staticmethod
     def god_function(function):
         def wrapper(*args):
             self = args[0]
@@ -33,7 +39,15 @@ class Game:
 
         return wrapper
 
-    def __init__(self, screen):
+    def __init__(self):
+
+        pygame.init()
+
+        os.environ["SDL_VIDEO_CENTERED"] = "1"
+
+        pygame.display.set_caption("Tower Defense")
+        pygame.display.set_icon(pygame.image.load("icon.png"))
+
         self.test = False
 
         self.running = True
@@ -63,7 +77,7 @@ class Game:
 
         self.alpha_screen = self.create_alpha_screen()
         self.money_rect = pygame.Rect(self.width - 40, self.height - 20, 40, 20)
-        self.screen = screen
+        self.screen = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
 
         self.view_center_x = BoundedValue(0)
         self.view_center_y = BoundedValue(0)
@@ -111,16 +125,35 @@ class Game:
         self.main_controller = controller.MainController(self)
         self.map_controller = controller.MapController(self)
         self.selection_controller = controller.SelectionController(self)
+        self.window_controller = controller.WindowController(self)
         self.debug_window_controller = controller.DebugWindowController(self)
         self.zombie_controller = controller.ZombieController(self)
         self.tower_controller = controller.TowerController(self)
-        self.controllers = [self.debug_window_controller, self.zombie_controller, self.tower_controller,
+        self.controllers = [self.debug_window_controller, self.zombie_controller, self.tower_controller, self.window_controller,
                             self.main_controller, self.selection_controller, self.map_controller]
 
 
         self.main_window = window.MainWindow(self)
+        self.new_window(self.main_window)
         self.shop_window = window.ShopWindow(self)
 
+    def start(self):
+
+        last_frame = 0
+
+        while self.running:
+            self.clean()
+            self.actu_action()
+            self.display()
+
+            one_loop_done = False
+
+            while not one_loop_done or time.time() - last_frame < 1 / self.frame_rate:
+                one_loop_done = True
+                self.interactions()
+
+            pygame.display.flip()
+            last_frame = time.time()
 
     def actu_dimensions(self):
         self.width = pygame.display.Info().current_w
@@ -221,6 +254,9 @@ class Game:
         if not self.god_mode_active:
             self.active_map_parameters()
         return True
+
+    def delete_selected_window(self):
+        self.windows[-1].close()
 
     def set_map_parameters(self, config):
         if "max_coord" in config:
@@ -411,9 +447,7 @@ class Game:
     def find_window(self, x, y):
         if not self.moving_map:
             for window in reversed(self.windows):
-                if window.collide(x, y):
-                    window.go_front()
-                    self.debug_window_controller.activize()
+                if window.select(x, y):
                     return True
         return False
 
@@ -492,9 +526,12 @@ class Game:
         self.wave = wave.Wave(self)
         self.print_text("Wave " + str(self.num_wave) + " ... ")
 
-    def new_window(self):
-        self.windows.append(window.DebugWindow(self))
+    def new_debug_window(self):
+        self.new_window(window.DebugWindow(self))
         self.debug_window_controller.activize()
+
+    def new_window(self, new_window):
+        self.windows.append(new_window)
 
     def clean(self):
         if len(self.attacks_bin) > 0:
