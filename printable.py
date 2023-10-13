@@ -24,8 +24,8 @@ class Printable(pygame.sprite.Sprite):
         # self.rect = pygame.Rect(0, 0, self.width, self.height)
         # self.rect.x, self.rect.y = x - self.width / 2, y - self.height / 2
 
-    def print_game(self):
-        self.classic_print()
+    def print_game(self, window):
+        self.classic_print(window)
 
 
 
@@ -33,15 +33,15 @@ class Printable(pygame.sprite.Sprite):
         # pygame.draw.ellipse(self.screen, color.BLACK, self.rect, 1)
         # self.game.screen.blit(self.image, self.rect)
 
-    def classic_print(self):
+    def classic_print(self, window):
         pygame.draw.circle(
-            self.screen,
+            window,
             self.color,
             (self.view_x(), self.view_y()),
             max(1, self.game.zoom * self.size),
         )
         pygame.draw.circle(
-            self.screen,
+            window,
             color.BLACK,
             (self.view_x(), self.view_y()),
             max(1, self.game.zoom * self.size) + 1,

@@ -40,9 +40,6 @@ class Game:
         return wrapper
 
     def __init__(self):
-
-        pygame.init()
-
         os.environ["SDL_VIDEO_CENTERED"] = "1"
 
         pygame.display.set_caption("Tower Defense")
@@ -132,7 +129,9 @@ class Game:
         self.controllers = [self.debug_window_controller, self.zombie_controller, self.tower_controller, self.window_controller,
                             self.main_controller, self.selection_controller, self.map_controller]
 
-
+        self.window_controller.activize()
+        self.map_window = window.MapWindow(self)
+        self.new_window(self.map_window)
         self.main_window = window.MainWindow(self)
         self.new_window(self.main_window)
         self.shop_window = window.ShopWindow(self)
@@ -145,7 +144,6 @@ class Game:
             self.clean()
             self.actu_action()
             self.display()
-
             one_loop_done = False
 
             while not one_loop_done or time.time() - last_frame < 1 / self.frame_rate:
@@ -256,6 +254,7 @@ class Game:
         return True
 
     def delete_selected_window(self):
+        print("closing")
         self.windows[-1].close()
 
     def set_map_parameters(self, config):
@@ -318,39 +317,34 @@ class Game:
             self.print_text("God Mode Deactivated")
             self.active_map_parameters()
 
-    def print_money(self):
-        txt_surface = (pygame.font.Font(None, 50)).render(
-            str(self.money), True, color.WHITE
-        )
-        self.screen.blit(txt_surface, (self.width - txt_surface.get_width(), 10))
+
 
     def display(self):
-        self.track()
-        self.screen.fill(self.background_color)
-        self.alpha_screen.fill(0)
-
-        if self.selected is not None and self.recognize(self.selected, "tower"):
-            self.selected.selected_background()
-
-        for attack in self.attacks:
-            attack.print_game()
-        for tower in self.attack_towers.union(self.effect_towers):
-            tower.print_game()
-        for zombie in self.zombies:
-            zombie.print_game()
-
-        if self.selected is not None:
-            self.selected.selected()
-            for zombie in self.zombies_soon_dead:
-                if self.selected in zombie.attackers_set():
-                    zombie.under_selected()
-
-        for animation in self.animations:
-            animation.anime()
+        # self.track()
+        self.screen.fill(color.BLACK)
+        # self.alpha_screen.fill(0)
+        #
+        # if self.selected is not None and self.recognize(self.selected, "tower"):
+        #     self.selected.selected_background()
+        #
+        # for attack in self.attacks:
+        #     attack.print_game()
+        # for tower in self.attack_towers.union(self.effect_towers):
+        #     tower.print_game()
+        # for zombie in self.zombies:
+        #     zombie.print_game()
+        #
+        # if self.selected is not None:
+        #     self.selected.selected()
+        #     for zombie in self.zombies_soon_dead:
+        #         if self.selected in zombie.attackers_set():
+        #             zombie.under_selected()
+        #
+        # for animation in self.animations:
+        #     animation.anime()
         for window in self.windows:
             window.print_window()
         self.screen.blit(self.alpha_screen, (0, 0))
-        self.print_money()
 
     def actu_action(self):
         self.time += self.moving_action
@@ -624,3 +618,7 @@ class Game:
 
     def recognize(self, obj, potential_class):
         return isinstance(obj, self.recognize_dico.get(potential_class))
+
+
+    def __repr__(self):
+        return "G.A.M.E"

@@ -25,6 +25,8 @@ class Window:
         self.background_color = self.config.background_color
         self.writing_color = self.config.writing_color
         self.name = self.config.name
+        self.border_x = self.config.border_x
+        self.border_y = self.config.border_y
         self.moveable = self.config.moveable
         self.selectionable = self.config.selectionable
         self.closable = self.config.closable
@@ -68,7 +70,9 @@ class Window:
 
         self.game.screen.blit(self.window, (self.x, self.y))
 
-    def window_blit(self, content, x=0, y=0, loc=[], border_x=0, border_y=0):
+    def window_blit(self, content, x=0, y=0, loc=[], border_x=None, border_y=None):
+        border_x = self.border_x if border_x is None else border_x
+        border_y = self.border_y if border_y is None else border_y
         content_width, content_height = content.get_size()
         if "center" in loc:
             x, y = self.width / 2 - content_width / 2, self.height / 2 - content_height
@@ -139,6 +143,7 @@ class Window:
 
     def close(self):
         if self.closable:
+            print("closed")
             if self.game.windows[-1] == self:
                 self.game.windows.pop()
             else:
@@ -204,13 +209,63 @@ class MainWindow(Window):
         self.height = self.game.height
         self.controller = self.game.main_controller
         # self.new_button(controller)
-        self.window = self.game.screen
+        #self.window = self.game.screen
+        self.window = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
     def print_window(self):
         self.update_content()
         self.print_content()
 
         self.game.screen.blit(self.window, (self.x, self.y))
+        self.window.fill(0)
+
+
+    def update_content(self):
+        self.money_display()
+
+
+    def money_display(self):
+        money_content = pygame.font.Font(None, 50).render(str(self.game.money), True, color.WHITE)
+        money_width, money_height = money_content.get_size()
+        pygame.draw.rect(self.window, color.DARK_GREY_2, [self.width - money_width - 2 * self.border_x, 0, money_width + 2 * self.border_x, 2 * self.border_y + money_height])
+        self.window_blit(money_content, loc=["top", "right"])
+
+
+class MapWindow(Window):
+
+    def __init__(self, game):
+        Window.__init__(self, game, game.config.window.map)
+
+        self.width = self.game.width
+        self.height = self.game.height
+        self.controller = self.game.map_controller
+        # self.new_button(controller)
+        #self.window = self.game.screen
+        self.window = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+
+    def update_content(self):
+        self.game.track()
+        self.window.fill(self.game.background_color)
+        self.game.alpha_screen.fill(0)
+
+        if self.game.selected is not None and self.game.recognize(self.game.selected, "tower"):
+            self.game.selected.selected_background()
+
+        for attack in self.game.attacks:
+            attack.print_game()
+        for tower in self.game.towers_set():
+            tower.print_game()
+        for zombie in self.game.zombies:
+            zombie.print_game()
+
+        if self.game.selected is not None:
+            self.game.selected.selected()
+            for zombie in self.game.zombies_soon_dead:
+                if self.game.selected in zombie.attackers_set():
+                    zombie.under_selected()
+
+        for animation in self.game.animations:
+            animation.anime()
 
 
 

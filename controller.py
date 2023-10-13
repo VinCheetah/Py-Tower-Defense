@@ -5,7 +5,7 @@ class Controller:
 
     name = "Default Controller"
 
-    controller_debug = False
+    controller_debug = True
 
     def __init__(self, game):
         self.game = game
@@ -49,6 +49,7 @@ class Controller:
             return event.key
 
     def mouse_button_up_translate(self, event):
+        print(event.button)
         return {1: "_l_click", 2: "_m_click", 3: "_r_click", 4: "_d_up_click", 5: "_d_down_click"}.get(event.button), event.pos
 
 
@@ -75,7 +76,7 @@ class Controller:
 class MainController(Controller):
 
     name = "Main Controller"
-    controller_debug = False
+    controller_debug = True
 
     def create_commands(self):
         return ({
@@ -121,7 +122,7 @@ class MainController(Controller):
 class MapController(Controller):
 
     name = "Map Controller"
-    controller_debug = False
+    controller_debug = True
 
     def create_commands(self):
         return (
@@ -169,7 +170,7 @@ class MapController(Controller):
 class WindowController(Controller):
 
     name = "Window Controller"
-    controller_debug = False
+    controller_debug = True
 
     def __init__(self, game):
         super().__init__(game)

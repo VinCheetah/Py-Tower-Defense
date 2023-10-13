@@ -79,6 +79,9 @@ class Zombie(Printable):
     def attackers_set(self):
         return set(canon.origin for canon in self.attackers)
 
+    def print_game(self):
+        Printable.print_game(self, self.game.map_window.window)
+
     def move(self):
         if self.life > 0:
             if not self.target_lock:
@@ -108,19 +111,19 @@ class Zombie(Printable):
         y_up = self.y + self.size * self.bar_y - self.bar_height / 2
 
         # BAR BG
-        pygame.draw.circle(self.game.screen,
+        pygame.draw.circle(self.game.map_window.window,
                            self.color_bar,
                            (self.game.view_x(x_left),
                             self.game.view_y(y_up + self.bar_height / 2)),
                            self.bar_height / 2 * self.game.zoom)
 
-        pygame.draw.circle(self.game.screen,
+        pygame.draw.circle(self.game.map_window.window,
                            self.color_bar,
                            (self.game.view_x(x_left + self.bar_length * self.size),
                             self.game.view_y(y_up + self.bar_height / 2)),
                            self.bar_height / 2 * self.game.zoom)
 
-        pygame.draw.rect(self.game.screen,
+        pygame.draw.rect(self.game.map_window.window,
                          self.color_bar,
                          [self.game.view_x(x_left),
                           self.game.view_y(y_up),
@@ -128,23 +131,23 @@ class Zombie(Printable):
                           self.bar_height * self.game.zoom])
 
         # LIFE BAR
-        pygame.draw.rect(self.game.screen,
+        pygame.draw.rect(self.game.map_window.window,
                          self.color_missing_life_bar,
                          [self.game.view_x(x_left),
                           self.game.view_y(y_up + self.border_y),
                           (self.bar_length * self.size) * self.game.zoom,
                           self.life_bar_height * self.game.zoom])
-        pygame.draw.circle(self.game.screen,
+        pygame.draw.circle(self.game.map_window.window,
                            self.color_missing_life_bar,
                            (self.game.view_x(x_left + self.size * self.bar_length),
                             self.game.view_y(y_up + self.border_y + self.life_bar_height / 2)),
                            self.life_bar_height / 2 * self.game.zoom)
-        pygame.draw.circle(self.game.screen,
+        pygame.draw.circle(self.game.map_window.window,
                            self.color_life_bar,
                            (self.game.view_x(x_left),
                             self.game.view_y(y_up + self.border_y + self.life_bar_height / 2)),
                            self.life_bar_height / 2 * self.game.zoom)
-        pygame.draw.rect(self.game.screen,
+        pygame.draw.rect(self.game.map_window.window,
                          self.color_life_bar,
                          [self.game.view_x(x_left),
                           self.game.view_y(y_up + self.border_y),
@@ -152,7 +155,7 @@ class Zombie(Printable):
                           self.life_bar_height * self.game.zoom])
 
         radius = abs(self.life.max / 2 - self.life) / self.life.max * self.life_bar_height
-        pygame.draw.ellipse(self.game.screen,
+        pygame.draw.ellipse(self.game.map_window.window,
                             self.color_life_bar if self.life >= self.life.max / 2 else self.color_missing_life_bar,
                             [self.game.view_x(
                                 x_left + self.size * self.bar_length * self.life / self.life.max - radius),
@@ -165,7 +168,7 @@ class Zombie(Printable):
 
     def under_selected(self):
         pygame.draw.circle(
-            self.screen,
+            self.game.map_window.window,
             color.LIGHT_GREY,
             (self.view_x(), self.view_y()),
             (self.size + self.range) * self.game.zoom,
@@ -176,7 +179,10 @@ class Zombie(Printable):
     def killed(self):
         for tower in self.attackers:
             tower.erase_target(self)
-        self.target.attackers.discard(self)
+        if self.target is not None:
+            self.target.attackers.discard(self)
+        else:
+            print("Zombie with no target ?")
         self.game.zombies_bin.add(self)
         self.game.zombies_soon_dead.discard(self)
         self.game.money_prize(self.value)
@@ -250,19 +256,19 @@ class SpecialAtkZombie(Zombie):
         y_up = self.y + self.size * self.bar_y - self.bar_height / 2
 
         # BAR BG
-        pygame.draw.circle(self.game.screen,
+        pygame.draw.circle(self.game.map_window.window,
                            self.color_bar,
                            (self.game.view_x(x_left),
                             self.game.view_y(y_up + self.bar_height / 2)),
                            self.bar_height / 2 * self.game.zoom)
 
-        pygame.draw.circle(self.game.screen,
+        pygame.draw.circle(self.game.map_window.window,
                            self.color_bar,
                            (self.game.view_x(x_left + self.bar_length * self.size),
                             self.game.view_y(y_up + self.bar_height / 2)),
                            self.bar_height / 2 * self.game.zoom)
 
-        pygame.draw.rect(self.game.screen,
+        pygame.draw.rect(self.game.map_window.window,
                          self.color_bar,
                          [self.game.view_x(x_left),
                           self.game.view_y(y_up),
@@ -270,20 +276,20 @@ class SpecialAtkZombie(Zombie):
                           self.bar_height * self.game.zoom])
 
         # SPECIAL BAR
-        pygame.draw.rect(self.game.screen,
+        pygame.draw.rect(self.game.map_window.window,
                          self.color,
                          [self.game.view_x(x_left),
                           self.game.view_y(y_up + 1.5 * self.border_y + self.life_bar_height),
                           self.size * self.bar_length * self.game.zoom * min(1, (
                                       self.game.time - self.last_special_atk) / self.special_atk_rate),
                           self.spc_bar_height * self.game.zoom])
-        pygame.draw.circle(self.game.screen,
+        pygame.draw.circle(self.game.map_window.window,
                            self.color,
                            (self.game.view_x(x_left),
                             self.game.view_y(
                                 y_up + 1.5 * self.border_y + self.life_bar_height + self.spc_bar_height / 2)),
                            self.spc_bar_height / 2 * self.game.zoom)
-        pygame.draw.circle(self.game.screen,
+        pygame.draw.circle(self.game.map_window.window,
                            self.color,
                            (self.game.view_x(x_left + self.size * self.bar_length * min(1, (
                                        self.game.time - self.last_special_atk) / self.special_atk_rate)),
@@ -292,23 +298,23 @@ class SpecialAtkZombie(Zombie):
                            self.spc_bar_height / 2 * self.game.zoom)
 
         # LIFE BAR
-        pygame.draw.rect(self.game.screen,
+        pygame.draw.rect(self.game.map_window.window,
                          self.color_missing_life_bar,
                          [self.game.view_x(x_left),
                           self.game.view_y(y_up + self.border_y),
                           (self.bar_length * self.size) * self.game.zoom,
                           self.life_bar_height * self.game.zoom])
-        pygame.draw.circle(self.game.screen,
+        pygame.draw.circle(self.game.map_window.window,
                            self.color_missing_life_bar,
                            (self.game.view_x(x_left + self.size * self.bar_length),
                             self.game.view_y(y_up + self.border_y + self.life_bar_height / 2)),
                            self.life_bar_height / 2 * self.game.zoom)
-        pygame.draw.circle(self.game.screen,
+        pygame.draw.circle(self.game.map_window.window,
                            self.color_life_bar,
                            (self.game.view_x(x_left),
                             self.game.view_y(y_up + self.border_y + self.life_bar_height / 2)),
                            self.life_bar_height / 2 * self.game.zoom)
-        pygame.draw.rect(self.game.screen,
+        pygame.draw.rect(self.game.map_window.window,
                          self.color_life_bar,
                          [self.game.view_x(x_left),
                           self.game.view_y(y_up + self.border_y),
@@ -316,7 +322,7 @@ class SpecialAtkZombie(Zombie):
                           self.life_bar_height * self.game.zoom])
 
         radius = abs(self.life.max / 2 - self.life) / self.life.max * self.life_bar_height
-        pygame.draw.ellipse(self.game.screen,
+        pygame.draw.ellipse(self.game.map_window.window,
                             self.color_life_bar if self.life >= self.life.max / 2 else self.color_missing_life_bar,
                             [self.game.view_x(
                                 x_left + self.size * self.bar_length * self.life / self.life.max - radius),

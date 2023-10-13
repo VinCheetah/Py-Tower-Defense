@@ -88,19 +88,19 @@ class Tower(Printable):
         y_up = self.y + self.size * self.bar_y - self.bar_height / 2
 
         # BAR BG
-        pygame.draw.circle(self.game.screen,
+        pygame.draw.circle(self.game.map_window.window,
                            self.color_bar,
                     (self.game.view_x(x_left),
                            self.game.view_y(y_up + self.bar_height / 2)),
                            self.bar_height / 2 * self.game.zoom)
 
-        pygame.draw.circle(self.game.screen,
+        pygame.draw.circle(self.game.map_window.window,
                            self.color_bar,
                     (self.game.view_x(x_left + self.bar_length * self.size),
                            self.game.view_y(y_up + self.bar_height / 2)),
                            self.bar_height / 2 * self.game.zoom)
 
-        pygame.draw.rect(self.game.screen,
+        pygame.draw.rect(self.game.map_window.window,
                          self.color_bar,
                          [self.game.view_x(x_left),
                                      self.game.view_y(y_up),
@@ -109,18 +109,18 @@ class Tower(Printable):
 
 
         # EXP BAR
-        pygame.draw.rect(self.game.screen,
+        pygame.draw.rect(self.game.map_window.window,
                          self.color_exp_bar,
                          [self.game.view_x(x_left),
                                      self.game.view_y(y_up + 1.5 * self.border_y + self.life_bar_height),
                                      self.size * self.bar_length * self.game.zoom * self.experience / self.experience.max,
                                      self.exp_bar_height * self.game.zoom])
-        pygame.draw.circle(self.game.screen,
+        pygame.draw.circle(self.game.map_window.window,
                            self.color_exp_bar,
                     (self.game.view_x(x_left),
                            self.game.view_y(y_up + 1.5 * self.border_y + self.life_bar_height + self.exp_bar_height / 2)),
                            self.exp_bar_height / 2 * self.game.zoom)
-        pygame.draw.circle(self.game.screen,
+        pygame.draw.circle(self.game.map_window.window,
                            self.color_exp_bar,
                     (self.game.view_x(x_left + self.size * self.bar_length * self.experience / self.experience.max),
                            self.game.view_y(y_up + 1.5 * self.border_y + self.life_bar_height + self.exp_bar_height / 2)),
@@ -128,23 +128,23 @@ class Tower(Printable):
 
 
         # LIFE BAR
-        pygame.draw.rect(self.game.screen,
+        pygame.draw.rect(self.game.map_window.window,
                          self.color_missing_life_bar,
                          [self.game.view_x(x_left),
                                      self.game.view_y(y_up + self.border_y),
                                      (self.bar_length * self.size) * self.game.zoom,
                                      self.life_bar_height * self.game.zoom])
-        pygame.draw.circle(self.game.screen,
+        pygame.draw.circle(self.game.map_window.window,
                            self.color_missing_life_bar,
                     (self.game.view_x(x_left + self.size * self.bar_length),
                            self.game.view_y(y_up + self.border_y + self.life_bar_height / 2)),
                            self.life_bar_height / 2 * self.game.zoom)
-        pygame.draw.circle(self.game.screen,
+        pygame.draw.circle(self.game.map_window.window,
                            self.color_life_bar,
                     (self.game.view_x(x_left),
                            self.game.view_y(y_up + self.border_y + self.life_bar_height / 2)),
                            self.life_bar_height / 2 * self.game.zoom)
-        pygame.draw.rect(self.game.screen,
+        pygame.draw.rect(self.game.map_window.window,
                          self.color_life_bar,
                          [self.game.view_x(x_left),
                                      self.game.view_y(y_up + self.border_y),
@@ -152,7 +152,7 @@ class Tower(Printable):
                                      self.life_bar_height * self.game.zoom])
 
         radius = abs(self.life.max / 2 - self.life) / self.life.max * self.life_bar_height
-        pygame.draw.ellipse(self.game.screen,
+        pygame.draw.ellipse(self.game.map_window.window,
                             self.color_life_bar if self.life >= self.life.max / 2 else self.color_missing_life_bar,
                             [self.game.view_x(x_left + self.size * self.bar_length * self.life / self.life.max - radius),
                             self.game.view_y(y_up + self.border_y),
@@ -162,13 +162,13 @@ class Tower(Printable):
 
     def selected_background(self):
         pygame.draw.circle(
-            self.game.screen,
+            self.game.map_window.window,
             color.lighter(self.game.background_color, 5),
             (self.view_x(), self.view_y()),
             self.range * self.game.zoom,
         )
         pygame.draw.circle(
-            self.game.screen,
+            self.game.map_window.window,
             color.LIGHT_GREY,
             (self.view_x(), self.view_y()),
             self.range * self.game.zoom,
@@ -230,7 +230,7 @@ class Tower(Printable):
 
     def under_selected(self):
         pygame.draw.circle(
-            self.game.screen,
+            self.game.map_window.window,
             color.LIGHT_GREY,
             (self.view_x(), self.view_y()),
             2 * self.size * self.game.zoom,
@@ -264,7 +264,7 @@ class Tower(Printable):
     def print_game(self):
         for animation in self.animations:
             animation.anime()
-        Printable.print_game(self)
+        Printable.print_game(self, self.game.map_window.window)
         for animation in self.post_animations:
             animation.anime()
 

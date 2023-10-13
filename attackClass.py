@@ -1,11 +1,11 @@
 import random
 
-import printable
+from printable import Printable
 import color
 import animationClass
 
 
-class Attack(printable.Printable):
+class Attack(Printable):
     def __init__(self, game, target, origin, config):
         self.game = game
         self.target = target
@@ -13,7 +13,7 @@ class Attack(printable.Printable):
         self.config = self.game.config.attacks | config
         self.speed = self.config.speed
 
-        printable.Printable.__init__(self, game, self.config.color, self.config.size, origin.x, origin.y)
+        Printable.__init__(self, game, self.config.color, self.config.size, origin.x, origin.y)
 
     def move(self):
         self.origin.target_lock = False
@@ -35,6 +35,10 @@ class Attack(printable.Printable):
             self.origin.experience_reward(self.target.experience)
             self.origin.zombie_killed += 1
             self.target.killed()
+
+
+    def print_game(self):
+        Printable.print_game(self, self.game.map_window.window)
 
 
 class HomeAttack(Attack):

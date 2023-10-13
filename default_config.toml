@@ -7,6 +7,7 @@ title = "Py-Tower-Defense-Config"
     min_frame_rate=15
     original_zoom=1
     original_time_speed=1
+    original_time_speed_slow = 0.2
     max_zoom=20
     min_zoom=0.01
     zoom_speed=1.03
@@ -158,7 +159,7 @@ title = "Py-Tower-Defense-Config"
 
         [zombies.bar.special]
 
-            spc_bar_height=1
+            spc_bar_height=1.5
 
 
     [zombies.classic]
@@ -398,6 +399,8 @@ title = "Py-Tower-Defense-Config"
     moveable=true
     selectionable=true
     closable=true
+    border_x=5
+    border_y=5
 
 
     [window.debug]
@@ -416,6 +419,17 @@ title = "Py-Tower-Defense-Config"
         moveable=false
         selectionable=false
         closable=false
+        border_x=20
+        border_y=20
+        alpha=0
+
+    [window.map]
+        name="Map"
+        moveable=false
+        selectionable=false
+        closable=false
+        border_x=20
+        border_y=20
         alpha=0
 
 

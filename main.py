@@ -1,6 +1,5 @@
 import gameClass
 
-
 game = gameClass.Game()
 game.start()
 

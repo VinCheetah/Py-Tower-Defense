@@ -93,8 +93,8 @@ class Canon:
         pass
 
     def shape_display(self):
-        pygame.draw.polygon(self.game.screen, color.BLACK, self.transforms(self.shape(bigger=True)))
-        pygame.draw.polygon(self.game.screen, self.color, self.transforms(self.shape()))
+        pygame.draw.polygon(self.game.map_window.window, color.BLACK, self.transforms(self.shape(bigger=True)))
+        pygame.draw.polygon(self.game.map_window.window, self.color, self.transforms(self.shape()))
 
     def print_game(self):
         self.shape_display()
@@ -184,7 +184,7 @@ class BasicCanon(Canon):
         p = self.shape(.5)
         p1, p2, p3, p4 = p[0], p[1], p[2], p[-1]
         for i in range((self.origin.level - 1) // self.origin.max_sub_level):
-            pygame.draw.line(self.game.screen, color.BLACK, self.transform(p[(i+1) * 2]), self.transform(p[(i+1) * -2 + 1]), int(max(1, self.game.zoom)))
+            pygame.draw.line(self.game.map_window.window, color.BLACK, self.transform(p[(i+1) * 2]), self.transform(p[(i+1) * -2 + 1]), int(max(1, self.game.zoom)))
         epsilon = 0.08
         for i in range((self.origin.level - 1) % self.origin.max_sub_level):
             rapport = (i + 1) / (1 + (self.origin.level - 1) % self.origin.max_sub_level)
@@ -193,6 +193,6 @@ class BasicCanon(Canon):
             p_2 = cos(theta + epsilon), sin(theta + epsilon)
             p_3 = p3[0] * (rapport + epsilon) + p4[0] * (1-rapport - epsilon), p3[1] * (rapport + epsilon) + p4[1] * (1 - rapport-epsilon)
             p_4 = p3[0] * (rapport - epsilon) + p4[0] * (1-rapport + epsilon), p3[1] * (rapport - epsilon) + p4[1] * (1 - rapport+epsilon)
-            pygame.draw.polygon(self.game.screen, self.origin.color, self.transforms([p_1, p_2, p_3, p_4]))
-            pygame.draw.polygon(self.game.screen, color.BLACK, self.transforms([p_1, p_2, p_3, p_4]), max(1, int(self.game.zoom * .5)))
+            pygame.draw.polygon(self.game.map_window.window, self.origin.color, self.transforms([p_1, p_2, p_3, p_4]))
+            pygame.draw.polygon(self.game.map_window.window, color.BLACK, self.transforms([p_1, p_2, p_3, p_4]), max(1, int(self.game.zoom * .5)))
 

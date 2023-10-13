@@ -152,7 +152,7 @@ class Particle:
 
     def display(self):
         pygame.draw.circle(
-            self.game.alpha_screen,
+            self.game.map_window.window,
             (self.color[0], self.color[1], self.color[2], int(self.alpha)),
             (self.game.view_x(self.x), self.game.view_y(self.y)),
             self.size * self.game.zoom,
@@ -192,7 +192,7 @@ class ParticleExplosion(Animation):
             for particle in self.particles_bin:
                 self.particles.discard(particle)
                 del particle
-            self.particles_bin.clear
+            self.particles_bin.clear()
 
 
 class TowerBop:
@@ -311,7 +311,7 @@ class ShowText(Animation):
 
             text_rect = text.get_rect()
             text_rect.center = self.game.width // 2, self.game.height // 2 + self.texts.index(self) * 100
-            self.game.screen.blit(text, text_rect)
+            self.game.main_window.window.blit(text, text_rect)
         else:
             self.over()
             self.texts.pop(0)
@@ -341,9 +341,9 @@ class UpgradableTower(Animation):
         self.life_time += self.game.moving_action
         advancement = self.life_time % self.time / self.time
         for shade in range(self.num_shade):
-            pygame.draw.circle(self.game.screen, color.lighter_compensative(self.origin.color, shade / self.num_shade * self.max_lightness), (self.game.view_x(self.x), self.game.view_y(self.y)), int(self.game.zoom * (min(self.origin.size, (2 * self.size + self.origin.size) * (self.func)(advancement) - shade / self.num_shade * self.size))))
+            pygame.draw.circle(self.game.map_window.window, color.lighter_compensative(self.origin.color, shade / self.num_shade * self.max_lightness), (self.game.view_x(self.x), self.game.view_y(self.y)), int(self.game.zoom * (min(self.origin.size, (2 * self.size + self.origin.size) * (self.func)(advancement) - shade / self.num_shade * self.size))))
         for shade in range(self.num_shade):
-            pygame.draw.circle(self.game.screen, color.lighter_compensative(self.origin.color, (1 - shade / self.num_shade) * self.max_lightness), (self.game.view_x(self.x), self.game.view_y(self.y)), int(self.game.zoom * (min(self.origin.size, (2 * self.size + self.origin.size) * (self.func)(advancement) - (1 + shade / self.num_shade) * self.size))))
+            pygame.draw.circle(self.game.map_window.window, color.lighter_compensative(self.origin.color, (1 - shade / self.num_shade) * self.max_lightness), (self.game.view_x(self.x), self.game.view_y(self.y)), int(self.game.zoom * (min(self.origin.size, (2 * self.size + self.origin.size) * (self.func)(advancement) - (1 + shade / self.num_shade) * self.size))))
 
 
 
