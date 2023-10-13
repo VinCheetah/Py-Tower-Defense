@@ -5,7 +5,7 @@ class Controller:
 
     name = "Default Controller"
 
-    controller_debug = True
+    controller_debug = False
 
     def __init__(self, game):
         self.game = game
@@ -76,7 +76,7 @@ class Controller:
 class MainController(Controller):
 
     name = "Main Controller"
-    controller_debug = True
+    controller_debug = False
 
     def create_commands(self):
         return ({
@@ -122,7 +122,7 @@ class MainController(Controller):
 class MapController(Controller):
 
     name = "Map Controller"
-    controller_debug = True
+    controller_debug = False
 
     def create_commands(self):
         return (
@@ -170,7 +170,7 @@ class MapController(Controller):
 class WindowController(Controller):
 
     name = "Window Controller"
-    controller_debug = True
+    controller_debug = False
 
     def __init__(self, game):
         super().__init__(game)

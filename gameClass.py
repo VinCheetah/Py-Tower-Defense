@@ -163,14 +163,11 @@ class Game:
         pygame.display.flip()
 
     def actu_moving_action(self):
-        self.moving_action = (
-                                     self.time_speed * self.original_frame_rate / self.frame_rate
-                             ) * (1 - self.pause)
+        self.moving_action = not self.pause * self.time_speed * self.original_frame_rate / self.frame_rate
 
     def stop_running(self):
         self.running = False
 
-    @god_function
     def pausing(self, forced=False):
         if self.god_mode_active or forced:
             self.pause = not self.pause
