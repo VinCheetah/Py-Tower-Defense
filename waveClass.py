@@ -1,5 +1,5 @@
 import random
-from config import Config
+from configClass import Config
 
 
 class Wave:

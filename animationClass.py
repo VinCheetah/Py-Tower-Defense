@@ -38,7 +38,7 @@ class CircularExplosion(Animation):
         else:
             self.explosion = origin.damaging
             self.size = origin.range
-            self.screen = origin.origin.alpha_screen
+            self.screen = self.game.map_window.window
 
         self.exploded = False
         self.type = "CircularExplosion"
@@ -262,7 +262,7 @@ class CircularEffect:
                 self.size * self.game.zoom * advancement,
                 int(4 * self.game.zoom),
             )
-            self.game.screen.blit(self.screen, (0, 0))
+            self.game.map_window.window.blit(self.screen, (0, 0))
         else:
             self.game.animations_bin.add(self)
 

@@ -38,6 +38,7 @@ class Zombie(Printable):
         self.pause = 0
         self.last_atk = self.game.time
         self.attackers = set()
+        self.path = list()
 
         # Bar parameters
         self.life_bar_height = self.config.bar.life_bar_height
@@ -75,6 +76,23 @@ class Zombie(Printable):
             self.target_lock = True
             self.target = closest
             self.target.attackers.add(self)
+            self.path = self.get_path()
+
+
+    def get_path(self):
+        return self.find_path((self.x, self.y), (self.target.x, self.target.y))[1]
+
+    def find_path(self, start, end):
+        for wall in self.game.walls:
+            if wall.intersect(start, end):
+                p1s, p1e = self.find_path(start, wall.p1), self.find_path(wall.p1, end)
+                p2s, p2e = self.find_path(start, wall.p2), self.find_path(wall.p2, end)
+                if p1s[0] + p1e[0] >= p2s[0] + p2e[0]:
+                    return p2s[0] + p2e[0], p2s[1] + p2e[1]
+                else:
+                    return p1s[0] + p1e[0], p1s[1] + p1e[1]
+        return self.game.dist(start, end), [end]
+
 
     def attackers_set(self):
         return set(canon.origin for canon in self.attackers)
@@ -88,12 +106,13 @@ class Zombie(Printable):
                 self.find_target()
             if self.target_lock:
                 if not self.tower_reach:
-                    dist = self.target.dist(self)
-                    if dist > self.target.size + self.range + self.size:
-                        self.x += self.speed * self.game.moving_action * (self.target.x - self.x) / dist
-                        self.y += self.speed * self.game.moving_action * (self.target.y - self.y) / dist
+                    dist = self.dist_point(*self.path[0])
+                    if dist > (self.target.size + self.range + self.size) * (len(self.path) == 1) + self.speed:
+                        self.x += self.speed * self.game.moving_action * (self.path[0][0] - self.x) / dist
+                        self.y += self.speed * self.game.moving_action * (self.path[0][1] - self.y) / dist
                     else:
-                        self.tower_reach = True
+                        self.path.pop(0)
+                        self.tower_reach = len(self.path) == 0
                         self.last_atk = self.game.time
                 else:
                     self.attack()
@@ -101,7 +120,7 @@ class Zombie(Printable):
     def attack(self):
         if self.game.time - self.last_atk >= self.atk_rate:
             self.target.life -= self.damage
-            if self.target.life <= 0:
+            if self.target.life == 0:
                 self.target.destroyed()
             self.last_atk = self.game.time
 

@@ -10,10 +10,15 @@ class Controller:
     def __init__(self, game):
         self.game = game
         self.active = True
+        self.game.add_controllers(self)
+        self.window = None
 
         self.buttons = set()
 
         self.active_commands, self.commands, self.inactive_commands = self.create_commands()
+
+    def link_window(self):
+        pass
 
     def apply(self, command, *arg):
         if self.active and command in self.active_commands:
@@ -49,7 +54,6 @@ class Controller:
             return event.key
 
     def mouse_button_up_translate(self, event):
-        print(event.button)
         return {1: "_l_click", 2: "_m_click", 3: "_r_click", 4: "_d_up_click", 5: "_d_down_click"}.get(event.button), event.pos
 
 
@@ -62,8 +66,13 @@ class Controller:
 
     def activize(self):
         self.active = True
+        if self.window is not None:
+            self.game.new_window(self.window)
+
     def unactivize(self):
         self.active = False
+        if self.window is not None:
+            self.window.close()
 
 
     def check_buttons(self, *args):
@@ -89,6 +98,8 @@ class MainController(Controller):
                     "w": self.game.new_wave,
                     "c": self.game.complete_destruction,
                     "i": self.print_infos,
+
+                    "y": self.game.build_wall_controller.activize,
 
                     "p": self.increase_time_speed,
                     "m": self.reduce_time_speed,
@@ -245,19 +256,21 @@ class SelectionController(Controller):
         self.game.lock_target()
 
     def find_selected(self, x, y):
-        for tower in self.game.attack_towers.union(self.game.effect_towers):
-            if tower.dist_point(self.game.unview_x(x), self.game.unview_y(y)) < tower.size:
-                self.game.select(tower)
-                self.game.view_move(tower.x, tower.y, self.game.zoom if not self.game.zoom_change else self.game.height / (3 * tower.range), 1.5)
-                self.activize()
-                self.game.tower_controller.activize()
-                return True
-        else:
-            for zombie in self.game.zombies:
-                if zombie.dist_point(self.game.unview_x(x), self.game.unview_y(y)) < zombie.size:
-                    self.game.select(zombie)
-                    self.game.view_move(zombie.x, zombie.y, speed=3, tracking=True)
+        if not self.game.moving_map:
+            for tower in self.game.attack_towers.union(self.game.effect_towers):
+                if tower.dist_point(self.game.unview_x(x), self.game.unview_y(y)) < tower.size:
+                    self.game.select(tower)
+                    self.game.view_move(tower.x, tower.y, self.game.zoom if not self.game.zoom_change else self.game.height / (3 * tower.range), 1.5)
+                    self.activize()
+                    self.game.tower_controller.activize()
                     return True
+            else:
+                for zombie in self.game.zombies:
+                    if zombie.dist_point(self.game.unview_x(x), self.game.unview_y(y)) < zombie.size:
+                        self.game.select(zombie)
+                        self.game.view_move(zombie.x, zombie.y, speed=3, tracking=True)
+                        return True
+            return False
         return False
 
 
@@ -305,3 +318,56 @@ class ShopController(WindowController):
     def unactivize(self):
         super().unactivize()
         self.game.pausing(True)
+
+
+
+class BuildController(Controller):
+
+    name = "Build Controller"
+
+    def __init__(self, game):
+        super().__init__(game)
+        self.unactivize()
+
+    def create_commands(self):
+        return (
+            {
+                #pygame.K_KP_ENTER: ,
+            },
+            {},
+            {}
+        )
+
+class WallBuildController(BuildController):
+
+    name = "Wall Build Controller"
+
+    def __init__(self, game):
+        super().__init__(game)
+        self.unactivize()
+
+    def link_window(self):
+        self.window = self.game.build_window
+
+
+    def create_commands(self):
+        return (
+            {
+                "_l_click": self.left_click,
+                "_MOUSE_MOTION": self.check_merge,
+                pygame.K_ESCAPE: self.stop_build
+            },
+            {},
+            {}
+        )
+
+    def check_merge(self, *args):
+        return self.window.check_merge(*args)
+
+    def stop_build(self):
+        return self.window.stop_wall_build()
+
+    def left_click(self, x, y):
+        return self.game.build_window.wall_build(x, y)
+
+

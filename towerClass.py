@@ -6,7 +6,7 @@ import color
 import pygame
 from math import pi
 from boundedValue import BoundedValue
-import canon
+import canonClass
 
 
 class Tower(Printable):
@@ -63,6 +63,8 @@ class Tower(Printable):
         self.border_y = self.config.bar.border_y
 
         self.bar_height = self.life_bar_height + self.exp_bar_height + 2.5 * self.border_y
+
+        self.game.check_zombies_target([self])
 
     def check_target(self):
         for target in self.targets:
@@ -286,7 +288,7 @@ class AttackTower(Tower):
         self.active_canons = set()
         self.canon_speed = 0.03
         self.inactive_canons = set(
-            canon.BasicCanon(self, random_angle + 2 * i * pi / self.num_targets)
+            canonClass.BasicCanon(self, random_angle + 2 * i * pi / self.num_targets)
             for i in range(self.num_targets)
         )
         self.active_canons_bin = set()
@@ -303,7 +305,7 @@ class AttackTower(Tower):
         random_angle = random.random() * 2 * pi
         for i, canon_obj in enumerate(self.active_canons.union(self.inactive_canons)):
             canon_obj.set_original_rotation(random_angle + 2 * (i + 1) * pi / self.num_targets)
-        self.inactive_canons.add(canon.BasicCanon(self, random_angle))
+        self.inactive_canons.add(canonClass.BasicCanon(self, random_angle))
         self.targets_lock = False
 
 
@@ -407,7 +409,7 @@ class EffectTower(Tower):
         self.power_up_factor = self.config.power_up_factor
         self.alpha_screen = self.game.create_alpha_screen()
 
-        # self.init_effecting()
+        self.init_effecting()
         # 0 is for effect_towers | 1 is for all towers | 2 is for attack_towers
 
     def animate_boost(self):

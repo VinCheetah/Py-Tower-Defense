@@ -1,6 +1,7 @@
-import time
 import os
 import random
+import time
+
 import pygame
 
 pygame.init()
@@ -10,10 +11,11 @@ import boundedValue
 import color
 import towerClass
 import zombieClass
-import wave
-import window
-import controller
-from config import Config
+import wallClass
+import waveClass
+import windowClass
+import controllerClass
+from configClass import Config
 from boundedValue import BoundedValue
 
 
@@ -54,7 +56,7 @@ class Game:
         self.tracking = False
         self.god_mode_active = True
         self.moving_map = False
-        self.compact_string = True
+        self.compact_string = False
         self.zoom_change = False
 
         self.original_zoom = self.config.general.original_zoom
@@ -81,8 +83,9 @@ class Game:
         self.time = 0
         self.money = 1000
         self.lives = 100
-        self.zombie_spawn_number = 5
+        self.zombie_spawn_number = 1
         self.wave = None
+        self.selected = None
         self.num_wave = 0
         self.mouse_x = 0
         self.mouse_y = 0
@@ -107,34 +110,42 @@ class Game:
         self.new_animations = set()
         self.animations_bin = set()
 
+        self.walls = set()
+
         self.show = set()
 
         self.windows = list()
 
         self.set_map_parameters(self.config.general)
 
-        self.selected = None
-
         self.actu_moving_action()
         self.home = towerClass.HomeTower(self)
         self.attack_towers.add(self.home)
 
-        self.main_controller = controller.MainController(self)
-        self.map_controller = controller.MapController(self)
-        self.selection_controller = controller.SelectionController(self)
-        self.window_controller = controller.WindowController(self)
-        self.debug_window_controller = controller.DebugWindowController(self)
-        self.zombie_controller = controller.ZombieController(self)
-        self.tower_controller = controller.TowerController(self)
-        self.controllers = [self.debug_window_controller, self.zombie_controller, self.tower_controller, self.window_controller,
-                            self.main_controller, self.selection_controller, self.map_controller]
+        self.controllers = list()
+        self.build_wall_controller = controllerClass.WallBuildController(self)
+        self.zombie_controller = controllerClass.ZombieController(self)
+        self.tower_controller = controllerClass.TowerController(self)
+        self.selection_controller = controllerClass.SelectionController(self)
+        self.debug_window_controller = controllerClass.DebugWindowController(self)
+        self.window_controller = controllerClass.WindowController(self)
+        self.map_controller = controllerClass.MapController(self)
+        self.main_controller = controllerClass.MainController(self)
+        #self.controllers = [self.debug_window_controller, self.zombie_controller, self.tower_controller, self.window_controller,
+        #                    self.main_controller, self.selection_controller, self.map_controller]
 
         self.window_controller.activize()
-        self.map_window = window.MapWindow(self)
+        self.map_window = windowClass.MapWindow(self)
         self.new_window(self.map_window)
-        self.main_window = window.MainWindow(self)
+        self.main_window = windowClass.MainWindow(self)
         self.new_window(self.main_window)
-        self.shop_window = window.ShopWindow(self)
+        self.shop_window = windowClass.ShopWindow(self)
+
+        self.build_window = windowClass.BuildWindow(self)
+
+        for controller in self.controllers:
+            controller.link_window()
+
 
     def start(self):
 
@@ -153,6 +164,9 @@ class Game:
             pygame.display.flip()
             last_frame = time.time()
 
+    def add_controllers(self, new_controller):
+        self.controllers.append(new_controller)
+
     def actu_dimensions(self):
         self.width = pygame.display.Info().current_w
         self.height = pygame.display.Info().current_h
@@ -163,7 +177,7 @@ class Game:
         pygame.display.flip()
 
     def actu_moving_action(self):
-        self.moving_action = not self.pause * self.time_speed * self.original_frame_rate / self.frame_rate
+        self.moving_action = (not self.pause) * self.time_speed * self.original_frame_rate / self.frame_rate
 
     def stop_running(self):
         self.running = False
@@ -210,26 +224,37 @@ class Game:
     def new_attack_tower(self, x, y):
         if self.buildable:
             chosen_tower = random.choice(self.config.types.attack_towers)(self, x, y)
-            if self.transaction(chosen_tower.price):
-                self.attack_towers.add(chosen_tower)
-                self.check_zombies_target([chosen_tower])
+            for tower in self.towers_set():
+                if chosen_tower.dist(tower) <= tower.size + chosen_tower.size:
+                    self.new_animations.add(animationClass.TowerBop(tower))
+                    self.new_animations.add(animationClass.ShowText(self, "Cannot build here"))
+                    break
             else:
-                del chosen_tower
+                if self.transaction(chosen_tower.price):
+                    self.attack_towers.add(chosen_tower)
+                    self.check_zombies_target([chosen_tower])
+                else:
+                    del chosen_tower
             return True
         return False
 
     @god_function
     def new_effect_tower(self, x, y):
         if self.buildable:
-            chosen_tower = random.choice(self.config.types.effect_towers)(self, x, y)
-            if self.transaction(chosen_tower.price):
-                self.effect_towers.add(chosen_tower)
-                chosen_tower.init_effecting()
-                self.check_zombies_target([chosen_tower])
+            chosen_tower = random.choice(self.config.types.attack_towers)(self, x, y)
+            for tower in self.towers_set():
+                if chosen_tower.dist(tower) <= tower.size + chosen_tower.size:
+                    self.new_animations.add(animationClass.TowerBop(tower))
+                    self.new_animations.add(animationClass.ShowText(self, "Cannot build here"))
+                    break
             else:
-                del chosen_tower
+                if self.transaction(chosen_tower.price):
+                    self.effect_towers.add(chosen_tower)
+                else:
+                    del chosen_tower
             return True
         return False
+
 
     def towers_set(self):
         return self.attack_towers.difference(self.attack_towers_bin).union(self.effect_towers.difference(self.effect_towers_bin))
@@ -317,32 +342,12 @@ class Game:
 
 
     def display(self):
-        # self.track()
-        self.screen.fill(color.BLACK)
-        # self.alpha_screen.fill(0)
-        #
-        # if self.selected is not None and self.recognize(self.selected, "tower"):
-        #     self.selected.selected_background()
-        #
-        # for attack in self.attacks:
-        #     attack.print_game()
-        # for tower in self.attack_towers.union(self.effect_towers):
-        #     tower.print_game()
-        # for zombie in self.zombies:
-        #     zombie.print_game()
-        #
-        # if self.selected is not None:
-        #     self.selected.selected()
-        #     for zombie in self.zombies_soon_dead:
-        #         if self.selected in zombie.attackers_set():
-        #             zombie.under_selected()
-        #
-        # for animation in self.animations:
-        #     animation.anime()
         for window in self.windows:
             window.print_window()
-        self.screen.blit(self.alpha_screen, (0, 0))
+        #self.screen.blit(self.alpha_screen, (0, 0))
 
+    def dist(self, p1, p2):
+        return pow(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2), .5)
     def actu_action(self):
         self.time += self.moving_action
         if self.wave is not None:
@@ -514,11 +519,11 @@ class Game:
 
     def new_wave(self):
         self.num_wave += 1
-        self.wave = wave.Wave(self)
+        self.wave = waveClass.Wave(self)
         self.print_text("Wave " + str(self.num_wave) + " ... ")
 
     def new_debug_window(self):
-        self.new_window(window.DebugWindow(self))
+        self.new_window(windowClass.DebugWindow(self))
         self.debug_window_controller.activize()
 
     def new_window(self, new_window):
@@ -589,11 +594,17 @@ class Game:
     def view_y(self, y):
         return int((y - self.view_center_y) * self.zoom + self.height / 2)
 
+    def view(self, p):
+        return self.view_x(p[0]), self.view_y(p[1])
+
     def unview_x(self, x):
         return (x - self.width / 2) / self.zoom + self.view_center_x
 
     def unview_y(self, y):
         return (y - self.height / 2) / self.zoom + self.view_center_y
+
+    def unview(self, p):
+        return self.unview_x(p[0]), self.unview_y(p[1])
 
     def game_stats(self):
         return (

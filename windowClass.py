@@ -1,7 +1,8 @@
 import pygame
 import color
 import boundedValue
-import controller
+import controllerClass
+import wallClass
 
 
 class Window:
@@ -37,6 +38,8 @@ class Window:
         self.window = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.active = True
         self.content = None
+
+
 
     def collide(self, x, y):
         return 0 <= x - self.x <= self.width and 0 <= y - self.y <= self.height
@@ -143,7 +146,7 @@ class Window:
 
     def close(self):
         if self.closable:
-            print("closed")
+            print("CLOSE")
             if self.game.windows[-1] == self:
                 self.game.windows.pop()
             else:
@@ -257,6 +260,8 @@ class MapWindow(Window):
             tower.print_game()
         for zombie in self.game.zombies:
             zombie.print_game()
+        for wall in self.game.walls:
+            wall.display()
 
         if self.game.selected is not None:
             self.game.selected.selected()
@@ -274,9 +279,63 @@ class ShopWindow(Window):
     def __init__(self, game):
         Window.__init__(self, game, game.config.window.shop)
 
-
         self.width = self.game.width
         self.height = self.game.height - self.y
+
+
+class BuildWindow(Window):
+
+    def __init__(self, game):
+        Window.__init__(self, game, game.config.window.build)
+
+        self.width = self.game.width
+        self.height = self.game.height
+
+        self.build1 = None
+        self.window = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+
+        self.build_pos = None
+
+
+    def update_content(self):
+        self.window.fill((0, 0, 0, 50))
+        if self.build_pos is None:
+            pygame.draw.circle(self.window, color.BLACK, (self.game.mouse_x, self.game.mouse_y), 10 * self.game.zoom)
+        else:
+            pygame.draw.circle(self.window, color.BLACK, self.build_pos, 10 * self.game.zoom)
+        if self.build1 is not None:
+            if self.build_pos is None:
+                pygame.draw.line(self.window, color.BLACK, self.build1, (self.game.mouse_x, self.game.mouse_y), max(1, int(10*self.game.zoom)))
+            else:
+                pygame.draw.line(self.window, color.BLACK, self.build1, self.build_pos,
+                                 max(1, int(10 * self.game.zoom)))
+
+
+    def wall_build(self,x ,y):
+        if self.build1 is None:
+            if self.build_pos is None:
+                self.build1 = x, y
+            else:
+                self.build1 = self.build_pos
+        else:
+            self.game.walls.add(wallClass.Wall(self.game, {}, self.game.unview(self.build1), self.game.unview((x, y))))
+            self.stop_wall_build()
+        return True
+
+    def stop_wall_build(self):
+        self.build1 = None
+        self.game.build_wall_controller.unactivize()
+
+
+    def check_merge(self, *args):
+        x, y = self.game.mouse_x, self.game.mouse_y
+        for wall in self.game.walls:
+            for p in [wall.p1, wall.p2]:
+                if self.game.dist(self.game.view(p), (x, y)) < 50:
+                    self.build_pos = self.game.view(p)
+                    return True
+        self.build_pos = None
+
 
 
 

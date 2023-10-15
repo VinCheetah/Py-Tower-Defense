@@ -143,7 +143,7 @@ title = "Py-Tower-Defense-Config"
 
 [zombies]
 
-    basics_parameters = ["object","type","life", "x", "y", "target", "attackers", "value", "damage", "speed", "atk_rate"]
+    basics_parameters = ["object","type","life", "x", "y", "target", "path", "attackers", "value", "damage", "speed", "atk_rate"]
 
 
     [zombies.bar]
@@ -301,6 +301,10 @@ title = "Py-Tower-Defense-Config"
         speed=4
         size=6
 
+[wall]
+
+    color="BLACK"
+
 
 [animation]
 
@@ -428,6 +432,14 @@ title = "Py-Tower-Defense-Config"
         moveable=false
         selectionable=false
         closable=false
+        border_x=20
+        border_y=20
+        alpha=0
+
+    [window.build]
+        name="Build"
+        moveable=false
+        selectionable=false
         border_x=20
         border_y=20
         alpha=0
