@@ -12,8 +12,6 @@ title = "Py-Tower-Defense-Config"
     min_zoom=0.01
     zoom_speed=1.03
 
-    background_color="DARK_GREY"
-
     max_x=inf
     max_y=inf
 
@@ -308,10 +306,17 @@ title = "Py-Tower-Defense-Config"
 
 [animation]
 
+    [animation.basics]
+
+        type="Animation"
+        life_time=0
+        color="BLACK"
+
+
     [animation.circular_explosion]
 
-        expansion_life_time = 40
-        disappear_life_time = 60
+        expansion_life_time = 20
+        disappear_life_time = 30
 
 
     [animation.particle_explosion]
@@ -392,19 +397,21 @@ title = "Py-Tower-Defense-Config"
 
 [window]
 
-    x=0
-    y=0
-    width=400
-    height=300
-    alpha=255
-    background_color="GREY"
-    name="Default Window"
-    writing_color="WHITE"
-    moveable=true
-    selectionable=true
-    closable=true
-    border_x=5
-    border_y=5
+    [window.basics]
+
+        x=0
+        y=0
+        width=400
+        height=300
+        alpha=255
+        background_color="GREY"
+        name="Default Window"
+        writing_color="WHITE"
+        moveable=true
+        selectionable=true
+        closable=true
+        border_x=5
+        border_y=5
 
 
     [window.debug]
@@ -429,6 +436,7 @@ title = "Py-Tower-Defense-Config"
 
     [window.map]
         name="Map"
+        background_color="DARK_GREY"
         moveable=false
         selectionable=false
         closable=false
