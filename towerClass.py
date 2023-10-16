@@ -1,12 +1,12 @@
 import random
-
-from printable import Printable
-import animationClass
-import color
 import pygame
 from math import pi
-from boundedValue import BoundedValue
+
+import color
+import animationClass
 import canonClass
+from printable import Printable
+from boundedValue import BoundedValue
 
 
 class Tower(Printable):
@@ -165,7 +165,7 @@ class Tower(Printable):
     def selected_background(self):
         pygame.draw.circle(
             self.game.map_window.window,
-            color.lighter(self.game.background_color, 5),
+            color.lighter(self.game.map_window.background_color, 5),
             (self.view_x(), self.view_y()),
             self.range * self.game.zoom,
         )
