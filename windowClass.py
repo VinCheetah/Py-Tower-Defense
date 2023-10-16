@@ -9,7 +9,7 @@ class Window:
 
     def __init__(self, game, config):
         self.game = game
-        self.config = game.config.window | config
+        self.config = game.config.window.basics | config
 
         self.x = self.config.x
         self.y = self.config.y
@@ -64,14 +64,15 @@ class Window:
     def print_window(self):
         self.window.fill(self.background_color)
         pygame.draw.rect(self.window, color.BLACK, [0, 0, self.width, self.height], 1)
-        # Title
-        # text = self.font.render(self.name, 0, color.WHITE)
-        # self.window_blit(text, loc=["center", "over"], border_y=3)
-        # Content
+
         self.update_content()
         self.print_content()
 
         self.game.screen.blit(self.window, (self.x, self.y))
+        self.clean()
+
+    def clean(self):
+        self.window.fill(self.background_color)
 
     def window_blit(self, content, x=0, y=0, loc=[], border_x=None, border_y=None):
         border_x = self.border_x if border_x is None else border_x
@@ -244,12 +245,11 @@ class MapWindow(Window):
         self.controller = self.game.map_controller
         # self.new_button(controller)
         #self.window = self.game.screen
-        self.window = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        self.window = pygame.Surface((self.width, self.height))
+        self.alpha_window = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
     def update_content(self):
         self.game.track()
-        self.window.fill(self.game.background_color)
-        self.game.alpha_screen.fill(0)
 
         if self.game.selected is not None and self.game.recognize(self.game.selected, "tower"):
             self.game.selected.selected_background()
@@ -271,6 +271,12 @@ class MapWindow(Window):
 
         for animation in self.game.animations:
             animation.anime()
+
+        self.window.blit(self.alpha_window, (0, 0))
+
+    def clean(self):
+        super().clean()
+        self.alpha_window.fill(0)
 
 
 
