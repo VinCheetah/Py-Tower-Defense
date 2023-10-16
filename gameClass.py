@@ -38,7 +38,6 @@ class Game:
                 function(*args)
             else:
                 self.print_text("God Mode Required")
-
         return wrapper
 
     def __init__(self):
@@ -66,7 +65,7 @@ class Game:
         self.zoom_speed = self.config.general.zoom_speed
         self.time_speed = self.config.general.original_time_speed
         self.auto_wave = self.config.wave.auto_wave
-        self.background_color = self.config.general.background_color
+        # self.background_color = self.config.general.background_color
         self.original_frame_rate = self.config.general.original_frame_rate
         self.frame_rate = self.original_frame_rate
 
