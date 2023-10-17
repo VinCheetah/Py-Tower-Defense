@@ -68,31 +68,3 @@ class Config(UserDict):
         else:
             raise AttributeError(name)
 
-
-# DEFAULT = Config(
-#     {
-#         "original_frame_rate": 60,
-#         "max_frame_rate": 90,
-#         "original_zoom": 1,
-#         "min_frame_rate": 15,
-#         "original_speed": 1,
-#         "attack_towers_types": {
-#             towerClass.ArcheryTower,
-#             towerClass.MagicTower,
-#             towerClass.BombTower,
-#         },
-#         "effect_towers_types": {
-#             towerClass.DamageBoostTower,
-#             towerClass.AtkRateBoostTower,
-#             towerClass.RangeBoostTower,
-#         },
-#         "zombies_types": {
-#             zombieClass.ClassicZombie,
-#             zombieClass.TankZombie,
-#             zombieClass.SpeedyZombie,
-#             zombieClass.RandomZombie,
-#             #zombieClass.RandomTanky,
-#             #zombieClass.RandomTanky2,
-#         },
-#     }
-# )
