@@ -4,17 +4,14 @@ import pygame
 class Controller:
 
     name = "Default Controller"
-
     controller_debug = False
 
     def __init__(self, game):
         self.game = game
         self.active = True
-        self.game.add_controllers(self)
         self.window = None
-
+        self.game.add_controllers(self)
         self.buttons = set()
-
         self.active_commands, self.commands, self.inactive_commands = self.create_commands()
 
     def link_window(self):
@@ -56,13 +53,11 @@ class Controller:
     def mouse_button_up_translate(self, event):
         return {1: "_l_click", 2: "_m_click", 3: "_r_click", 4: "_d_up_click", 5: "_d_down_click"}.get(event.button), event.pos
 
-
     def mouse_button_down_translate(self, event):
         return {1: "_l_down", 2: "_m_down", 3: "_r_down", 4: "_d_up_down", 5: "_d_down_down"}.get(event.button), event.pos
 
     def create_commands(self):
         return {}, {}, {}
-
 
     def activize(self):
         self.active = True
@@ -73,7 +68,6 @@ class Controller:
         self.active = False
         if self.window is not None:
             self.window.close()
-
 
     def check_buttons(self, *args):
         for button in self.buttons:
@@ -106,10 +100,9 @@ class MainController(Controller):
                 },
                 {
                     "QUIT": self.game.stop_running,
-                    "RESIZE": self.game.window_resize,
+                    "RESIZE": self.game.screen_resize,
                 },
-                {}
-        )
+                {})
 
     def print_infos(self):
         print(self.game.game_stats())
@@ -194,7 +187,6 @@ class WindowController(Controller):
                 "_d_up_click": self.game.window_view_up,
                 "_d_down_click": self.game.window_view_down,
 
-                #"_MOUSE_MOTION": self.game.window_vertical_view
                 pygame.K_DOWN: self.game.window_view_down,
                 pygame.K_UP: self.game.window_view_up,
 
@@ -243,7 +235,6 @@ class SelectionController(Controller):
 
                 "d": self.create_debug_window,
                 "i": self.print_infos
-
             },
             {
                 "_l_click": self.find_selected
