@@ -356,8 +356,6 @@ class Game:
         for attack in self.attacks:
             attack.move()
 
-        for show in self.show:
-            pygame.draw.line(self.screen, color.RED, show[0], show[1], int(max(3, 2 * self.zoom)))
 
 
     def forced_upgrade(self):

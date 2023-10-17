@@ -25,7 +25,7 @@ title = "Py-Tower-Defense-Config"
     max_sub_level=6
 
 
-    [towers.canon]
+    [towers.canon.basics]
 
         type="Canon"
         mix_color="LIGHT_GREY"

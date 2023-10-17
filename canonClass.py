@@ -10,7 +10,7 @@ class Canon:
         self.center_y = self.origin.y
 
         self.game = self.origin.game
-        self.config = self.game.config.towers.canon
+        self.config = self.game.config.towers.canon.basics
         self.type = self.config.type
         self.width = self.config.width
         self.length = self.config.length
@@ -25,21 +25,15 @@ class Canon:
         self.adjusted_aim = False
         self.inactive = True
 
-
     def new_target(self, target):
         self.inactive = False
+        self.target_lock = True
         target.attackers.add(self)
         self.target = target
-        self.target_lock = True
-
-    def action(self):
-        if self.target_lock:
-            self.aim()
 
     def set_original_rotation(self, rotation):
         self.original_rotation = rotation
         self.inactive = False
-
 
     def angle(self):
         x = self.target.x - self.center_x
@@ -51,45 +45,55 @@ class Canon:
         else:
             return 0 if y == 0 else pi / 2
 
-    def aim(self):
-        target_theta = self.angle()
-        if (
-                10 * self.origin.canon_speed * self.game.moving_action
-                < (self.rotation - target_theta) % (2 * pi)
-                < pi
-        ):
-            self.rotation -= self.origin.canon_speed * self.game.moving_action
-        elif 10 * self.origin.canon_speed * self.game.moving_action < (
-                self.rotation - target_theta
-        ) % (2 * pi):
-            self.rotation += self.origin.canon_speed * self.game.moving_action
-        else:
-            self.rotation = target_theta
+    def action(self):
+        if self.target_lock:
             self.attack()
 
+    def aim(self):
+        theta = self.angle()
+        if self.origin.epsi_rotation < (theta - self.rotation) % (2 * pi) < pi:
+            self.rotation += self.origin.epsi_rotation
+        elif pi <= (theta - self.rotation) % (2 * pi) < 2 * pi - self.origin.epsi_rotation:
+            self.rotation -= self.origin.epsi_rotation
+        else:
+            return True
+        return False
+
     def attack(self):
-        if (self.game.time - self.last_attack) > self.origin.atk_rate:
+        if self.aim() and self.game.time - self.last_attack > self.origin.atk_rate:
             if self.target.life_expect > 0:
                 self.target.life_expect -= self.origin.damage
-                self.game.attacks.add(
-                    self.origin.attack(self.game, self.target, self.origin)
-                )
+                self.game.attacks.add(self.origin.attack(self.game, self.target, self.origin))
                 if self.target.life_expect <= 0:
                     self.game.zombies_soon_dead.add(self.target)
                     for attacker in self.target.attackers:
                         attacker.erase_target(self.target)
             else:
-                self.origin.erase_target(self.target)
+                self.erase_target(self.target)
             self.last_attack = self.game.time
+
+    def rotate_home(self):
+        theta = self.original_rotation
+        if self.origin.epsi_rotation < (theta - self.rotation) % (2 * pi) < pi:
+            self.rotation += self.origin.epsi_rotation
+        elif pi <= (theta - self.rotation) % (2 * pi) < 2 * pi - self.origin.epsi_rotation:
+            self.rotation -= self.origin.epsi_rotation
+        else:
+            self.rotation = theta
+            self.inactive = True
 
     def erase_target(self, target):
         self.origin.active_canons_bin.add(self)
         self.origin.inactive_canons.add(self)
         self.target = None
         self.target_lock = False
+        self.inactive = False
         self.origin.erase_target(target)
 
     def style_display(self):
+        pass
+
+    def shape(self, bigger=False):
         pass
 
     def shape_display(self):
@@ -106,25 +110,6 @@ class Canon:
 
     def transforms(self, points):
         return tuple(self.transform(point) for point in points)
-
-    def shape(self, bigger=False):
-        pass
-
-    def rotate_home(self):
-        target_theta = self.original_rotation
-        if (
-                3 * self.origin.canon_speed * self.game.time_speed
-                < (self.rotation - target_theta) % (2 * pi)
-                < pi
-        ):
-            self.rotation -= self.origin.canon_speed * self.game.moving_action
-        elif 3 * self.origin.canon_speed * self.game.time_speed < (
-                self.rotation - target_theta
-        ) % (2 * pi):
-            self.rotation += self.origin.canon_speed * self.game.moving_action
-        else:
-            self.rotation = target_theta
-            self.inactive = True
 
     def collide(self, x, y):
         return False

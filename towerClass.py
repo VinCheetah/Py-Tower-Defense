@@ -290,6 +290,7 @@ class AttackTower(Tower):
         random_angle = random.random() * 2 * pi
         self.active_canons = set()
         self.canon_speed = 0.03
+        self.epsi_rotation = self.actu_epsi_rotation()
         self.inactive_canons = set(
             canonClass.BasicCanon(self, random_angle + 2 * i * pi / self.num_targets)
             for i in range(self.num_targets)
@@ -346,6 +347,7 @@ class AttackTower(Tower):
 
     def tow_attack(self):
         self.check_target()
+        self.epsi_rotation = self.actu_epsi_rotation()
         if not self.targets_lock:
             self.find_target()
         for canon in self.active_canons:
@@ -353,6 +355,10 @@ class AttackTower(Tower):
         for canon in self.inactive_canons:
             if not canon.inactive:
                 canon.rotate_home()
+
+
+    def actu_epsi_rotation(self):
+        return self.canon_speed * self.game.moving_action
 
         # if (
         #     len(self.targets) != 0
