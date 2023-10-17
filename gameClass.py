@@ -145,7 +145,6 @@ class Game:
         for controller in self.controllers:
             controller.link_window()
 
-
     def start(self):
 
         last_frame = 0
@@ -520,8 +519,8 @@ class Game:
         self.wave = waveClass.Wave(self)
         self.print_text("Wave " + str(self.num_wave) + " ... ")
 
-    def new_debug_window(self):
-        self.new_window(windowClass.DebugWindow(self))
+    def new_debug_window(self, target=None):
+        self.new_window(windowClass.DebugWindow(self, target))
         self.debug_window_controller.activize()
 
     def new_window(self, new_window):

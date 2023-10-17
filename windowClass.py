@@ -168,10 +168,10 @@ class Window:
 
 class DebugWindow(Window):
 
-    def __init__(self, game):
+    def __init__(self, game, target=None):
         Window.__init__(self, game, game.config.window.debug)
-        self.target_lock = False
-        self.target = None
+        self.target_lock = target is not None
+        self.target = target
         self.parameters = "basics"
 
     def update_content(self):
