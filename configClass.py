@@ -53,17 +53,16 @@ class Config(UserDict):
         }
         return cls(config)
 
-    def get_val(self, name, integer_only=False):
-        if name in self.data:
+    def get_val(self, name):
+        if "mini_" + name in self.data and "maxi_" + name in self.data:
+            return random.uniform(self.data["mini_" + name], self.data["maxi_" + name])
+        elif name in self.data:
             if isinstance(self.data[name], str) and self.data[name] in color.__dict__:
                 return getattr(color, self.data[name])
             if name == "attack" and self.data[name] in attackClass.__dict__:
                 return getattr(attackClass, self.data[name])
             return self.data[name]
-        elif "mini_" + name in self.data and "maxi_" + name in self.data:
-            return (random.randint if integer_only else random.uniform)(
-                self.data["mini_" + name], self.data["maxi_" + name]
-            )
+
         elif name == "special_parameters":
             return []
         else:
