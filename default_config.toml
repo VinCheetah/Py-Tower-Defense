@@ -494,15 +494,12 @@ title = "Py-Tower-Defense-Config"
 
 
     [button.multi]
+
         key="None"
         clicked=false
 
 
     [button.solo]
-
-
-
-
 
 
 [wave]

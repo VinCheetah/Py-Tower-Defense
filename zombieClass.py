@@ -93,7 +93,6 @@ class Zombie(Printable):
                     return p1s[0] + p1e[0], p1s[1] + p1e[1]
         return self.game.dist(start, end), [end]
 
-
     def attackers_set(self):
         return set(canon.origin for canon in self.attackers)
 

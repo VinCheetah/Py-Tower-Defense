@@ -61,3 +61,7 @@ def lighter_compensative(c, lightness=30):
 def darker_compensative(c, darkness=30):
     comp = - min(0, c[0] - darkness) - min(0, c[1] - darkness) - min(0, c[2] - darkness)
     return max(0, c[0] - darkness - comp), max(0, c[1] - darkness - comp), max(0, c[2] - darkness - comp)
+
+
+def make_alpha(color, alpha):
+    return color + tuple([alpha])

@@ -150,12 +150,12 @@ class Particle(Animation):
             self.group.particles_bin.add(self)
 
 
-
 class ParticleExplosion(Animation):
 
     def __init__(self, origin):
-
-        config = origin.game.config.animation.get_val("particle_explosion_zombie" if origin.game.recognize(origin, "zombie") else "particle_explosion_tower")
+        config = origin.game.config.animation.get_val(
+            "particle_explosion_zombie" if origin.game.recognize(origin, "zombie") else
+            "particle_explosion_tower")
         self.from_origin(origin, config)
 
         self.particles = set(Particle(self, origin) for _ in range(int(self.config.num_particles)))
@@ -195,6 +195,7 @@ class TowerBop(Animation):
 
 
 class CircularEffect(Animation):
+
     def __init__(self, origin, size):
         self.from_origin(origin, origin.game.config.animation.circular_effect)
         self.screen = origin.alpha_screen
@@ -210,7 +211,7 @@ class CircularEffect(Animation):
 
             pygame.draw.circle(
                 self.screen,
-                color.BLACK,
+                color.make_alpha(color.BLACK, alpha),
                 (self.game.view_x(self.x), self.game.view_y(self.y)),
                 self.size * self.game.zoom + 1,
             )
