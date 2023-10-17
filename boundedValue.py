@@ -1,12 +1,5 @@
 from math import inf
 
-
-class InvalidExtremum(Exception):
-    """Raised when extremums are not valid"""
-
-    pass
-
-
 class BoundedValue(object):
     def __init__(self, value, minimum=-inf, maximum=inf):
         self.__setattr__("min", minimum, check=False)
@@ -152,3 +145,8 @@ class BoundedValue(object):
 
     def __repr__(self):
         return str(self.value)
+
+
+class InvalidExtremum(Exception):
+    """Raised when extremums are not valid"""
+    pass
