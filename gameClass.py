@@ -230,8 +230,7 @@ class Game:
                     break
             else:
                 if self.transaction(chosen_tower.price):
-                    self.attack_towers.add(chosen_tower)
-                    self.check_zombies_target([chosen_tower])
+                    chosen_tower.build()
                 else:
                     del chosen_tower
             return True
@@ -240,7 +239,7 @@ class Game:
     @god_function
     def new_effect_tower(self, x, y):
         if self.buildable:
-            chosen_tower = random.choice(self.config.types.attack_towers)(self, x, y)
+            chosen_tower = random.choice(self.config.types.effect_towers)(self, x, y)
             for tower in self.towers_set():
                 if chosen_tower.dist(tower) <= tower.size + chosen_tower.size:
                     self.new_animations.add(animationClass.TowerBop(tower))
@@ -248,7 +247,7 @@ class Game:
                     break
             else:
                 if self.transaction(chosen_tower.price):
-                    self.effect_towers.add(chosen_tower)
+                    chosen_tower.build()
                 else:
                     del chosen_tower
             return True

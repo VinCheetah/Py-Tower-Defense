@@ -71,6 +71,9 @@ class Tower(Printable):
             if self.dist(target) > self.range:
                 self.erase_target(target)
 
+    def build(self):
+        self.game.check_zombies_target([self])
+
     def erase_target(self, target):
         self.targets_bin.add(target)
 
@@ -297,8 +300,11 @@ class AttackTower(Tower):
         self.targets_lock = False
         self.last_attack = self.game.time
 
-        self.boost_affecting()
 
+    def build(self):
+        super().build()
+        self.game.attack_towers.add(self)
+        self.boost_affecting()
 
     def new_canon(self):
         self.num_targets += 1
@@ -408,9 +414,12 @@ class EffectTower(Tower):
         self.target_type = self.config.target_type
         self.power_up_factor = self.config.power_up_factor
         self.alpha_screen = self.game.create_alpha_screen()
-
-        self.init_effecting()
         # 0 is for effect_towers | 1 is for all towers | 2 is for attack_towers
+
+    def build(self):
+        super().build()
+        self.game.effect_towers.add(self)
+        self.init_effecting()
 
     def animate_boost(self):
         self.game.new_animations.add(animationClass.CircularEffect(self, self.range))
@@ -513,7 +522,6 @@ class HomeTower(AttackTower):
         AttackTower.__init__(
             self, game, game.width / 2, game.height / 2, game.config.towers.attack.home
         )
-        self.alpha_screen = self.game.create_alpha_screen()
 
     def destruction_animation(self):
         self.game.animations.add(animationClass.CircularExplosion(self))
