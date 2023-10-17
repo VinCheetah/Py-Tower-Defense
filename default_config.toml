@@ -477,9 +477,9 @@ title = "Py-Tower-Defense-Config"
 
 
 
-[buttons]
+[button]
 
-    [buttons.classic]
+    [button.classic]
 
         label="Button"
         height=100
@@ -489,11 +489,16 @@ title = "Py-Tower-Defense-Config"
         under_mouse_color="DARK_GREY_2"
         clicked_color="DARK_GREY_3"
         value=0
+        policy="monospace"
+        size=30
 
 
-    [buttons.multi]
+    [button.multi]
         key="None"
         clicked=false
+
+
+    [button.solo]
 
 
 

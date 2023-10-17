@@ -1,29 +1,31 @@
-import color
 import pygame
 
+import color
 
 class Button:
 
 
     def __init__(self, window, config):
-        self.window = window
         self.game = window.game
+        self.window = window
         self.config = self.game.config.buttons.classic | config
         self.label = self.config.label
         self.height = self.config.height
         self.width = self.config.width
         self.value = self.config.value
-        
-        self.line_color = self.config.LIGHT_GREY
-        self.clicked_color = self.config.DARK_GREY_3
-        self.under_mouse_color = self.config.DARK_GREY_2
+        self.policy = self.config.policy
+        self.size = self.config.size
+
+        self.line_color = self.config.line_color
+        self.clicked_color = self.config.clicked_color
+        self.under_mouse_color = self.config.under_mouse_color
         self.unclicked_color = self.config.unclicked_color
-        self.color = self.unclicked_color
 
         self.screen = self.window.screen
         self.x, self.y = self.config_get_coord()
 
         self.rect = pygame.Rect((self.x, self.y), (self.width, self.height))
+        self.color = self.unclicked_color
         self.clicked = False
 
     def config_get_coord(self):
@@ -36,7 +38,7 @@ class Button:
 
 
     def display(self):
-        police = pygame.font.SysFont("monospace", 30)
+        police = pygame.font.SysFont(self.policy, self.size)
         pygame.draw.rect(self.screen, self.color, self.rect)
         pygame.draw.line(self.screen, self.line_color, (self.x, self.y), (self.x + self.width, self.y))
         pygame.draw.line(self.screen, self.line_color, (self.x, self.y), (self.x, self.y + self.height))
@@ -99,10 +101,8 @@ class SoloButton(Button):
     def new_button(cls, name, window):
         pass
     
-    
     def __init__(self, window, config):
-        Button.__init__(window, window.game.config.buttons.solo | config)
-        
+        Button.__init__(self, window, window.game.config.buttons.solo | config)
 
     def action(self):
         self.value = not self.value
