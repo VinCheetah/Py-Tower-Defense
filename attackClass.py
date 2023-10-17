@@ -1,30 +1,23 @@
 import random
 
-from printable import Printable
-import color
 import animationClass
+from printable import Printable
 
 
 class Attack(Printable):
     def __init__(self, game, target, origin, config):
-        self.game = game
         self.target = target
         self.origin = origin
-        self.config = self.game.config.attacks | config
+        self.config = game.config.attacks | config
         self.speed = self.config.speed
 
         Printable.__init__(self, game, self.config.color, self.config.size, origin.x, origin.y)
 
     def move(self):
-        self.origin.target_lock = False
         dist = self.dist(self.target)
         if dist >= self.speed * self.game.moving_action:
-            self.x += (
-                self.speed * self.game.moving_action * (self.target.x - self.x) / dist
-            )
-            self.y += (
-                self.speed * self.game.moving_action * (self.target.y - self.y) / dist
-            )
+            self.x += self.speed * self.game.moving_action * (self.target.x - self.x) / dist
+            self.y += self.speed * self.game.moving_action * (self.target.y - self.y) / dist
         else:
             self.attack_over()
 
@@ -35,10 +28,6 @@ class Attack(Printable):
             self.origin.experience_reward(self.target.experience)
             self.origin.zombie_killed += 1
             self.target.killed()
-
-
-    def print_game(self):
-        Printable.print_game(self, self.game.map_window.window)
 
 
 class HomeAttack(Attack):
@@ -67,11 +56,10 @@ class BombAttack(Attack):
 
     def damaging(self):
         for potential_target in self.game.zombies:
-            if (
-                self.target.dist(potential_target) <= self.range
-                and potential_target != self.target
-            ):
+            if self.target.dist(potential_target) <= self.range and potential_target != self.target:
                 potential_target.life_expect -= self.origin.damage
                 potential_target.life -= self.origin.damage
-                if potential_target.life <= 0:
+                if potential_target.life == 0:
+                    self.origin.experience_reward(potential_target.experience)
+                    self.origin.zombie_killed += 1
                     potential_target.killed()

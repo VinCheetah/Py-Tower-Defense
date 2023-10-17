@@ -299,6 +299,7 @@ title = "Py-Tower-Defense-Config"
         speed=4
         size=6
 
+
 [wall]
 
     color="BLACK"
