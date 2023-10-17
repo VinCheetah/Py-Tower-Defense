@@ -272,6 +272,13 @@ class MapWindow(Window):
         for animation in self.game.animations:
             animation.anime()
 
+        for show in self.game.show:
+            if type(show) is tuple and type(show[0]) is type(show[1]) is int:
+                pygame.draw.circle(self.window, color.RED, show, int(3 * self.game.zoom))
+            else:
+                pygame.draw.line(self.window, color.RED, show[0], show[1], int(max(3, 2 * self.game.zoom)))
+
+
         self.window.blit(self.alpha_window, (0, 0))
 
     def clean(self):

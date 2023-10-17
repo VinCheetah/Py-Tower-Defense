@@ -52,7 +52,7 @@ class CircularExplosion(Animation):
         self.disappear_life_time = self.config.disappear_life_time
         self.life_time = self.expansion_life_time + self.disappear_life_time
 
-        if isinstance(self.origin, towerClass.HomeTower) and False:
+        if isinstance(self.origin, towerClass.HomeTower):
             self.explosion = self.game.complete_destruction
             self.size = self.config.complete_destruction_size / self.game.zoom
         else:

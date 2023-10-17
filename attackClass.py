@@ -29,6 +29,9 @@ class Attack(Printable):
             self.origin.zombie_killed += 1
             self.target.killed()
 
+    def print_game(self):
+        Printable.print_game(self, self.game.map_window.window)
+
 
 class HomeAttack(Attack):
     def __init__(self, game, target, origin):
