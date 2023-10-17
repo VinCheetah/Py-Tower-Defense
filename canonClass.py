@@ -1,6 +1,7 @@
-import color
 import pygame
 from math import pi, cos, sin, atan
+
+import color
 
 
 class Canon:
@@ -34,16 +35,6 @@ class Canon:
     def set_original_rotation(self, rotation):
         self.original_rotation = rotation
         self.inactive = False
-
-    def angle(self):
-        x = self.target.x - self.center_x
-        y = self.target.y - self.center_y
-        if x > 0:
-            return atan(y / x)
-        elif x < 0:
-            return atan(y / x) + (pi if y >= 0 else -pi)
-        else:
-            return 0 if y == 0 else pi / 2
 
     def action(self):
         if self.target_lock:
@@ -90,14 +81,24 @@ class Canon:
         self.inactive = False
         self.origin.erase_target(target)
 
+    def angle(self):
+        x = self.target.x - self.center_x
+        y = self.target.y - self.center_y
+        if x > 0:
+            return atan(y / x)
+        elif x < 0:
+            return atan(y / x) + (pi if y >= 0 else -pi)
+        else:
+            return 0 if y == 0 else pi / 2
+
     def style_display(self):
         pass
 
-    def shape(self, bigger=False):
+    def shape(self, bigger=0):
         pass
 
     def shape_display(self):
-        pygame.draw.polygon(self.game.map_window.window, color.BLACK, self.transforms(self.shape(bigger=True)))
+        pygame.draw.polygon(self.game.map_window.window, color.BLACK, self.transforms(self.shape(bigger=1)))
         pygame.draw.polygon(self.game.map_window.window, self.color, self.transforms(self.shape()))
 
     def print_game(self):
@@ -129,7 +130,7 @@ class Canon:
 
 class BasicCanon(Canon):
 
-    def shape(self, bigger=False):
+    def shape(self, bigger=0):
         epsilon = bigger * 0.03
         ps = list(self.trapeze(epsilon))
 
@@ -166,11 +167,11 @@ class BasicCanon(Canon):
         return p1, p2, p3, p4
 
     def style_display(self):
-        p = self.shape(.5)
+        p = self.shape(0.5)
         p1, p2, p3, p4 = p[0], p[1], p[2], p[-1]
+        epsilon = 0.08
         for i in range((self.origin.level - 1) // self.origin.max_sub_level):
             pygame.draw.line(self.game.map_window.window, color.BLACK, self.transform(p[(i+1) * 2]), self.transform(p[(i+1) * -2 + 1]), int(max(1, self.game.zoom)))
-        epsilon = 0.08
         for i in range((self.origin.level - 1) % self.origin.max_sub_level):
             rapport = (i + 1) / (1 + (self.origin.level - 1) % self.origin.max_sub_level)
             theta = self.rotation - self.width / 1.8 + rapport * self.width / 0.9
