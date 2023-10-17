@@ -1,24 +1,15 @@
+import toml
+import collections.abc
+import random
+from collections import UserDict
+
+import color
 import towerClass
 import zombieClass
 import attackClass
-import toml
-import color
-import collections.abc
-import random
-
-from collections import UserDict
 
 
 class Config(UserDict):
-    library = []
-
-    def __getattr__(self, attr):
-        if attr in self.data and isinstance(self.data[attr], collections.abc.Mapping):
-            return Config(**self.data[attr])
-        return self.get_val(attr)
-
-    def __repr__(self):
-        return "Config " + super(Config, self).__repr__()
 
     @classmethod
     def get_default(cls):
@@ -46,9 +37,7 @@ class Config(UserDict):
                 zombieClass.SpeedyZombie,
                 zombieClass.RandomZombie,
                 zombieClass.HealerZombie,
-                zombieClass.SpawnerZombie,
-                # zombieClass.RandomTanky,
-                # zombieClass.RandomTanky2,
+                zombieClass.SpawnerZombie
             ],
         }
         return cls(config)
@@ -67,4 +56,13 @@ class Config(UserDict):
             return []
         else:
             raise AttributeError(name)
+
+    def __getattr__(self, attr):
+        if attr in self.data and isinstance(self.data[attr], collections.abc.Mapping):
+            return Config(**self.data[attr])
+        return self.get_val(attr)
+
+    def __repr__(self):
+        return "Config " + super(Config, self).__repr__()
+
 
