@@ -311,22 +311,31 @@ title = "Py-Tower-Defense-Config"
         type="Animation"
         life_time=0
         color="BLACK"
+        basic_parameters = ["type", "life_time", "color", "x", "y"]
 
 
     [animation.circular_explosion]
 
-        expansion_life_time = 20
-        disappear_life_time = 30
+        type="CircularExplosion"
+        expansion_life_time=20
+        disappear_life_time=30
+        complete_destruction_size=1800
+
+    [animation.view_move]
+
+        frames=60
 
 
-    [animation.particle_explosion]
+    [animation.particle_explosion_tower]
 
+        type="TowerParticleExplosion"
         mini_num_particles=10
         maxi_num_particles=80
 
 
-        [animation.particle_explosion.particle]
+        [animation.particle_explosion_tower.particle]
 
+            type="TowerParticle"
             mini_life_time=20
             maxi_life_time=50
             mini_size_factor=0.2
@@ -342,14 +351,17 @@ title = "Py-Tower-Defense-Config"
             mini_alpha_decrease=0.4
             maxi_alpha_decrease=1
 
+
     [animation.particle_explosion_zombie]
 
+        type="ZombieParticleExplosion"
         mini_num_particles=8
         maxi_num_particles=30
 
 
         [animation.particle_explosion_zombie.particle]
 
+            type="ZombieParticle"
             mini_life_time=20
             maxi_life_time=40
             mini_size_factor=0.2
@@ -368,28 +380,38 @@ title = "Py-Tower-Defense-Config"
 
     [animation.tower_bop]
 
+        type="TowerBop"
         life_time = 20
         size_increase=0.3
 
 
     [animation.circular_effect]
 
+        type="CircularEffect"
         alpha=40
         life_time=35
 
 
     [animation.show_text]
 
+        type="ShowText"
+        color="GREY"
+        policy="Arial"
         life_time=150
         pop_life_time=30
         shade_life_time=50
-        color="WHITE"
+        max_size=60
+        min_size=20
+        anti_alias=true
+
+        basics_parameters=["type", "text", "color", "size", "policy"]
 
 
     [animation.upgradable_tower]
 
+        type="UpgradableTower"
         size=15
-        time=300
+        period=300
         num_shade=50
         max_lightness=60
 
