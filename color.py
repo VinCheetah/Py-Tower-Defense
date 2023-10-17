@@ -34,55 +34,30 @@ def mix(c1, c2):
 
 
 def darker(c, darkness=30):
-    return (
-        max(0, c[0] - darkness),
-        max(0, c[1] - darkness),
-        max(0, c[2] - darkness),
-    )
+    return max(0, c[0] - darkness), max(0, c[1] - darkness), max(0, c[2] - darkness)
 
 
 def rand_color(r_inf=0, r_sup=255, g_inf=0, g_sup=255, b_inf=0, b_sup=255):
-    return (
-        random.randint(r_inf, r_sup),
-        random.randint(g_inf, g_sup),
-        random.randint(b_inf, b_sup),
-    )
+    return random.randint(r_inf, r_sup), random.randint(g_inf, g_sup), random.randint(b_inf, b_sup)
 
 
 def lighter(c, lightness=30):
-    return (
-        min(255, c[0] + lightness),
-        min(255, c[1] + lightness),
-        min(255, c[2] + lightness),
-    )
+    return min(255, c[0] + lightness), min(255, c[1] + lightness), min(255, c[2] + lightness)
+
 
 def lighter_absolute(c, lightness=1.3):
-    return (
-        min(255, c[0] * lightness),
-        min(255, c[1] * lightness),
-        min(255, c[2] * lightness),
-    )
+    return min(255, c[0] * lightness), min(255, c[1] * lightness), min(255, c[2] * lightness)
+
 
 def darker_absolute(c, darkness=1.3):
-    return (
-        max(0, c[0] / darkness),
-        max(0, c[1] / darkness),
-        max(0, c[2] / darkness),
-    )
+    return max(0, c[0] / darkness), max(0, c[1] / darkness), max(0, c[2] / darkness)
 
 
 def lighter_compensative(c, lightness=30):
     comp = max(255, c[0] + lightness) + max(255, c[1] + lightness) + max(255, c[2] + lightness) - 765
-    return (
-        min(255, c[0] + lightness + comp),
-        min(255, c[1] + lightness + comp),
-        min(255, c[2] + lightness + comp),
-    )
+    return min(255, c[0] + lightness + comp), min(255, c[1] + lightness + comp), min(255, c[2] + lightness + comp)
+
 
 def darker_compensative(c, darkness=30):
     comp = - min(0, c[0] - darkness) - min(0, c[1] - darkness) - min(0, c[2] - darkness)
-    return (
-        max(0, c[0] - darkness - comp),
-        max(0, c[1] - darkness - comp),
-        max(0, c[2] - darkness - comp),
-    )
+    return max(0, c[0] - darkness - comp), max(0, c[1] - darkness - comp), max(0, c[2] - darkness - comp)
