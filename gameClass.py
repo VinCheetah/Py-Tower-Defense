@@ -39,7 +39,7 @@ class Game:
         os.environ["SDL_VIDEO_CENTERED"] = "1"
 
         pygame.display.set_caption("Tower Defense")
-        pygame.display.set_icon(pygame.image.load("icon.png"))
+        pygame.display.set_icon(pygame.image.load("images/icon.png"))
 
         # self.test = False
 
