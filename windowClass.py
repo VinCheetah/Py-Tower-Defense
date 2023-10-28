@@ -147,7 +147,6 @@ class Window:
 
     def close(self):
         if self.closable:
-            print("CLOSE")
             if self.game.windows[-1] == self:
                 self.game.windows.pop()
             else:
@@ -244,7 +243,6 @@ class MapWindow(Window):
         self.height = self.game.height
         self.controller = self.game.map_controller
         # self.new_button(controller)
-        #self.window = self.game.screen
         self.window = pygame.Surface((self.width, self.height))
         self.alpha_window = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
@@ -272,19 +270,22 @@ class MapWindow(Window):
         for animation in self.game.animations:
             animation.anime()
 
+        if len(self.game.walls) != 0:
+            pygame.draw.circle(self.window, color.RED, self.game.view((self.game.min_x_wall, self.game.min_y_wall)), 2 * self.game.zoom)
+            pygame.draw.circle(self.window, color.RED, self.game.view((self.game.min_x_wall, self.game.max_y_wall)), 2 * self.game.zoom)
+            pygame.draw.circle(self.window, color.RED, self.game.view((self.game.max_x_wall, self.game.min_y_wall)), 2 * self.game.zoom)
+            pygame.draw.circle(self.window, color.RED, self.game.view((self.game.max_x_wall, self.game.max_y_wall)), 2 * self.game.zoom)
         for show in self.game.show:
-            if type(show) is tuple and type(show[0]) is type(show[1]) is int:
-                pygame.draw.circle(self.window, color.RED, show, int(3 * self.game.zoom))
-            else:
+            if type(show) is tuple and type(show[0]) is type(show[1]) is tuple:
                 pygame.draw.line(self.window, color.RED, show[0], show[1], int(max(3, 2 * self.game.zoom)))
-
+            else:
+                pygame.draw.circle(self.window, color.RED, show, int(3 * self.game.zoom))
 
         self.window.blit(self.alpha_window, (0, 0))
 
     def clean(self):
         super().clean()
         self.alpha_window.fill(0)
-
 
 
 class ShopWindow(Window):
@@ -307,31 +308,45 @@ class BuildWindow(Window):
         self.build1 = None
         self.window = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
-        self.build_pos = None
-
+        self.build_pos = 0, 0
+        self.max_wall_size = 200
 
     def update_content(self):
         self.window.fill((0, 0, 0, 50))
-        if self.build_pos is None:
-            pygame.draw.circle(self.window, color.BLACK, (self.game.mouse_x, self.game.mouse_y), 10 * self.game.zoom)
-        else:
-            pygame.draw.circle(self.window, color.BLACK, self.build_pos, 10 * self.game.zoom)
+        self.wall_update_content()
+
+    def wall_update_content(self):
         if self.build1 is not None:
-            if self.build_pos is None:
-                pygame.draw.line(self.window, color.BLACK, self.build1, (self.game.mouse_x, self.game.mouse_y), max(1, int(10*self.game.zoom)))
-            else:
-                pygame.draw.line(self.window, color.BLACK, self.build1, self.build_pos,
-                                 max(1, int(10 * self.game.zoom)))
+            if self.build_pos[0] == self.build1[0]:
+                return None
+            coef_dir = (self.build_pos[1] - self.build1[1]) / (self.build_pos[0] - self.build1[0])
+            pygame.draw.line(self.window,
+                             color.BLACK,
+                             self.game.view(self.build1),
+                             self.game.view(self.build_pos),
+                             max(1, int(10*self.game.zoom)))
+            dist = self.game.dist(self.build1, self.build_pos)
+            nb_walls = int(dist // self.max_wall_size) + 1
+            for i in range(nb_walls):
+                pygame.draw.circle(self.window,
+                                   color.BLACK,
+                                   self.game.view((self.build1[0] + i * (self.build_pos[0] - self.build1[0]) / nb_walls, self.build1[1] + coef_dir * i * (self.build_pos[0] - self.build1[0]) / nb_walls)),
+                                   10 * self.game.zoom)
+        pygame.draw.circle(self.window, color.BLACK, self.game.view(self.build_pos), 10 * self.game.zoom)
 
-
-    def wall_build(self,x ,y):
+    def wall_build(self, *args):
         if self.build1 is None:
-            if self.build_pos is None:
-                self.build1 = x, y
-            else:
-                self.build1 = self.build_pos
+            self.build1 = self.build_pos
         else:
-            self.game.walls.add(wallClass.Wall(self.game, {}, self.game.unview(self.build1), self.game.unview((x, y))))
+            if self.build_pos[0] == self.build1[0]:
+                return None
+            coef_dir = (self.build_pos[1] - self.build1[1]) / (self.build_pos[0] - self.build1[0])
+            dist = self.game.dist(self.build1, self.build_pos)
+            nb_walls = int(dist // self.max_wall_size) + 1
+            for i in range(nb_walls):
+                self.game.new_wall(wallClass.Wall.merged(self.game, {},
+                                                   (self.build1[0] + i * (self.build_pos[0] - self.build1[0]) / nb_walls, self.build1[1] + coef_dir * i * (self.build_pos[0] - self.build1[0]) / nb_walls),
+                                                   (self.build1[0] + (i + 1) * (self.build_pos[0] - self.build1[0]) / nb_walls, self.build1[1] + coef_dir * (i + 1) * (self.build_pos[0] - self.build1[0]) / nb_walls)))
             self.stop_wall_build()
         return True
 
@@ -339,16 +354,20 @@ class BuildWindow(Window):
         self.build1 = None
         self.game.build_wall_controller.unactivize()
 
-
     def check_merge(self, *args):
-        x, y = self.game.mouse_x, self.game.mouse_y
+        x, y = self.game.unview((self.game.mouse_x, self.game.mouse_y))
         for wall in self.game.walls:
             for p in [wall.p1, wall.p2]:
-                if self.game.dist(self.game.view(p), (x, y)) < 50:
-                    self.build_pos = self.game.view(p)
+                if self.game.dist(p, (x, y)) < 30:
+                    self.build_pos = p
                     return True
-        self.build_pos = None
+        self.build_pos = x, y
+        return True
 
+    def actu_walls_chain_extremity(self):
+        for wall in self.game.walls:
+            wall.actu_chain()
+            wall.actu_extremity()
 
 
 

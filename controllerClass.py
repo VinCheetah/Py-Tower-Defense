@@ -97,6 +97,7 @@ class MainController(Controller):
 
                     "p": self.increase_time_speed,
                     "m": self.reduce_time_speed,
+                    "d": self.game.switch_astar_display,
                 },
                 {
                     "QUIT": self.game.stop_running,
@@ -138,7 +139,7 @@ class MapController(Controller):
 
                 "_MOUSE_MOTION": self.game.move_map,
 
-                "h": self.game.view_home
+                "h": self.game.view_home,
             },
             {},
             {}
@@ -247,9 +248,10 @@ class SelectionController(Controller):
         self.game.lock_target()
 
     def find_selected(self, x, y):
+        x, y = self.game.unview((x, y))
         if not self.game.moving_map:
             for tower in self.game.attack_towers.union(self.game.effect_towers):
-                if tower.dist_point(self.game.unview_x(x), self.game.unview_y(y)) < tower.size:
+                if tower.dist_point(x, y) < tower.size:
                     self.game.select(tower)
                     self.game.view_move(tower.x, tower.y, self.game.zoom if not self.game.zoom_change else self.game.height / (3 * tower.range), 1.5)
                     self.activize()
@@ -257,10 +259,17 @@ class SelectionController(Controller):
                     return True
             else:
                 for zombie in self.game.zombies:
-                    if zombie.dist_point(self.game.unview_x(x), self.game.unview_y(y)) < zombie.size:
+                    if zombie.dist_point(x, y) < zombie.size:
                         self.game.select(zombie)
                         self.game.view_move(zombie.x, zombie.y, speed=3, tracking=True)
                         return True
+                else:
+                    for wall in self.game.walls:
+                        if wall.dist_point(x, y) < 20:
+                            self.game.select(wall)
+                            self.game.view_move(*wall.mid())
+                            return True
+                return False
             return False
         return False
 
@@ -298,6 +307,31 @@ class TowerController(Controller):
             {},
             {}
         )
+
+class WallController(Controller):
+
+    name = "Wall Controller"
+    controller_debug = False
+
+    def __init__(self, game):
+        super().__init__(game)
+        self.unactivize()
+
+    def create_commands(self):
+        return (
+            {
+                "e": self.show_extremity,
+                "c": self.show_chain,
+            },
+            {},
+            {}
+        )
+
+    def show_extremity(self):
+        [self.game.show.add(self.game.view(extremity)) for extremity in self.game.selected.extremity]
+
+    def show_chain(self):
+        [self.game.show.add(self.game.view(wall.p1), self.game.view(wall.p2)) for wall in self.game.selected.chain()]
 
 
 class ShopController(WindowController):

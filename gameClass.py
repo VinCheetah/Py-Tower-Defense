@@ -6,6 +6,7 @@ import pygame
 import animationClass
 import boundedValue
 import towerClass
+import wallClass
 import zombieClass
 import waveClass
 import windowClass
@@ -22,6 +23,7 @@ class Game:
         "tower": towerClass.Tower,
         "attack_tower": towerClass.AttackTower,
         "effect_tower": towerClass.EffectTower,
+        "wall": wallClass.Wall,
         "classic": zombieClass.ClassicZombie,
     }
 
@@ -51,6 +53,7 @@ class Game:
         self.moving_map = False
         self.compact_string = False
         self.zoom_change = False
+        self.astar_display = False
 
         self.original_zoom = self.config.general.original_zoom
         self.min_zoom = self.config.general.min_zoom
@@ -85,6 +88,13 @@ class Game:
         self.selected = None
         self.screen_ratio = self.width / self.height
 
+        self.wall_epsilon = 30
+
+        self.max_x_wall = 0
+        self.min_x_wall = 0
+        self.max_y_wall = 0
+        self.min_y_wall = 0
+
         self.zombies = set()
         self.new_zombies = set()
         self.zombies_bin = set()
@@ -116,6 +126,7 @@ class Game:
 
         self.controllers = list()
         self.build_wall_controller = controllerClass.WallBuildController(self)
+        self.wall_controller = controllerClass.WallController(self)
         self.zombie_controller = controllerClass.ZombieController(self)
         self.tower_controller = controllerClass.TowerController(self)
         self.selection_controller = controllerClass.SelectionController(self)
@@ -410,6 +421,9 @@ class Game:
     def stop_running(self):
         self.running = False
 
+    def switch_astar_display(self):
+        self.astar_display = not self.astar_display
+
     def pausing(self, forced=False):
         if self.god_mode_active or forced:
             self.pause = not self.pause
@@ -466,6 +480,9 @@ class Game:
             self.zombie_controller.activize()
         elif self.recognize(selected, "tower"):
             self.tower_controller.activize()
+        elif self.recognize(selected, "wall"):
+            self.wall_controller.activize()
+            print(self.wall_controller.active)
         self.selected = selected
 
     def unselect(self):
@@ -474,6 +491,8 @@ class Game:
                 self.zombie_controller.unactivize()
             elif self.recognize(self.selected, "tower"):
                 self.tower_controller.unactivize()
+            elif self.recognize(self.selected, "wall"):
+                self.wall_controller.unactivize()
             self.selection_controller.unactivize()
             self.selected = None
 
@@ -484,6 +503,9 @@ class Game:
                 self.selected.destroyed()
             elif self.recognize(self.selected, "zombie"):
                 self.selected.killed()
+            elif self.recognize(self.selected, "wall"):
+                self.selected.destruct()
+            self.unselect()
 
     def find_canon(self, *args):
         for canon in self.selected.canons():
@@ -565,6 +587,101 @@ class Game:
     def unview(self, p):
         return self.unview_x(p[0]), self.unview_y(p[1])
 
+    def dist_seg_point(self, p1, p2, p):
+        if (p[0] - p1[0]) * (p2[0] - p1[0]) + (p[1] - p1[1]) * (p2[1] - p1[1]) <= 0:
+            return self.dist(p1, p)
+        if (p[0] - p2[0]) * (p1[0] - p2[0]) + (p[1] - p2[1]) * (p1[1] - p2[1]) <= 0:
+            return self.dist(p2, p)
+        return abs((p2[0] - p1[0]) * (p1[1] - p[1]) - (p1[0] - p[0]) * (p2[1] - p1[1])) / self.dist(p1, p2)
+
+    def dist_seg_seg(self, p1, p2, q1, q2):
+        if self.intersect_seg(p1, p2, q1, q2):
+            return 0
+        return min(self.dist_seg_point(p1, p2, q1), self.dist_seg_point(p1, p2, q2),
+                   self.dist_seg_point(q1, q2, p1), self.dist_seg_point(q1, q2, p2))
+
+    def intersect_seg(self, p1, p2, q1, q2):
+        return (self.vectorial(self.vector(p1, p2), self.vector(p1, q1)) * self.vectorial(self.vector(p1, p2), self.vector(p1, q2)) < 0
+                and self.vectorial(self.vector(q1, q2), self.vector(q1, p1)) * self.vectorial(self.vector(q1, q2), self.vector(q1, p2)) < 0)
+
+    @staticmethod
+    def vector(p1, p2):
+        return p2[0] - p1[0], p2[1] - p1[1]
+
+    @staticmethod
+    def vectorial(p1, p2):
+        return p1[0] * p2[1] - p1[1] * p2[0]
+
+    def into_walls_extremums2(self, start, end):
+        V = self.vector(start, end)
+        t_values = []
+        intersections = []
+        if V[0] != 0:
+            t_left = (self.min_x_wall - self.wall_epsilon - start[0]) / V[0]
+            t_right = (self.max_x_wall + self.wall_epsilon - start[0]) / V[0]
+            if t_left > t_right:
+                t_left, t_right = t_right, t_left
+            if 0 <= t_left <= 1:
+                intersection_left = (start[0] + t_left * V[0], start[1] + t_left * V[1])
+                t_values.append(t_left)
+                intersections.append(intersection_left)
+        if V[1] != 0:
+            t_top = (self.min_y_wall - self.wall_epsilon - start[1]) / V[1]
+            t_bottom = (self.max_y_wall + self.wall_epsilon - start[1]) / V[1]
+            if t_top > t_bottom:
+                t_top, t_bottom = t_bottom, t_top
+            if 0 <= t_top <= 1:
+                intersection_top = (start[0] + t_top * V[0], start[1] + t_top * V[1])
+                t_values.append(t_top)
+                intersections.append(intersection_top)
+        if not intersections:
+            return None
+        min_t = min(t_values)
+        first_intersection = intersections[t_values.index(min_t)]
+        return first_intersection
+
+    def into_walls_extremums(self, start, end):
+        x1, y1 = start
+        x2, y2 = end
+        left, top, right, bottom = self.min_x_wall, self.min_y_wall, self.max_x_wall, self.max_y_wall
+        intersections = []
+
+        # Calculer les intersections avec les côtés du rectangle
+        for side in [(left, top, right, top), (right, top, right, bottom), (left, bottom, right, bottom),
+                     (left, top, left, bottom)]:
+            x3, y3, x4, y4 = side
+
+            if x1 == x2 and x1 == x3:  # Le segment est vertical et aligné avec le côté du rectangle
+                if min(y1, y2) <= y3 <= max(y1, y2) and min(y3, y4) <= y1 <= max(y3, y4):
+                    intersections.append((x1, y3))
+            elif y1 == y2 and y1 == y3:  # Le segment est horizontal et aligné avec le côté du rectangle
+                if min(x1, x2) <= x3 <= max(x1, x2) and min(x3, x4) <= x1 <= max(x3, x4):
+                    intersections.append((x3, y1))
+            else:
+                # Calculer l'intersection avec le côté du rectangle
+                t = ((x3 - x1) * (y4 - y3) - (y3 - y1) * (x4 - x3)) / ((x2 - x1) * (y4 - y3) - (y2 - y1) * (x4 - x3))
+                u = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / ((x2 - x1) * (y4 - y3) - (y2 - y1) * (x4 - x3))
+
+                if 0 <= t <= 1 and 0 <= u <= 1:
+                    intersection_x = x1 + (t - t / 10) * (x2 - x1)
+                    intersection_y = y1 + (t - t / 10) * (y2 - y1)
+                    intersections.append((intersection_x, intersection_y))
+
+        if not intersections:
+            return None
+
+        # Trouver le point d'intersection le plus proche
+        closest_intersection = min(intersections, key=lambda p: (p[0] - x1) ** 2 + (p[1] - y1) ** 2)
+        return closest_intersection
+
     def recognize(self, obj, potential_class):
         return isinstance(obj, self.recognize_dico.get(potential_class))
+
+
+
+
+
+    def new_wall(self, wall):
+        self.walls.add(wall)
+        self.build_window.actu_walls_chain_extremity()
 

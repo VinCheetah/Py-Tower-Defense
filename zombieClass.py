@@ -6,6 +6,7 @@ from math import inf, isinf, pi, cos, sin
 from printable import Printable
 from boundedValue import BoundedValue
 from animationClass import ParticleExplosion, CircularEffect
+import astar
 
 
 class Zombie(Printable):
@@ -79,18 +80,52 @@ class Zombie(Printable):
             self.path = self.get_path()
 
 
-    def get_path(self):
+    def get_path2(self):
         return self.find_path((self.x, self.y), (self.target.x, self.target.y))[1]
+
+    def get_path(self):
+        start = self.x, self.y
+        end = self.target.x, self.target.y
+        for wall in self.game.walls:
+            if wall.intersect(start, end):
+                break
+        else:
+            return [end]
+        intersection_wall_zone = self.game.into_walls_extremums(start, end)
+        if intersection_wall_zone is not None:
+            astar_path = astar.astar(self, intersection_wall_zone, end)
+            if astar_path is not None:
+                return self.simplify([start] + astar_path)
+            else:
+                return None
+        return self.simplify(astar.astar(self, start, end))
+
+    def simplify(self, path):
+        if path is None:
+            return path
+        i, j = 0, 1
+        n = len(path)
+        new_path = []
+        while j < n:
+            for wall in self.game.walls:
+                if wall.dist_segment(path[i], path[j]) < self.size:
+                    break
+            else:
+                j += 1
+                continue
+            new_path.append(path[j - 1])
+            i = j + 1
+            j += 1
+        new_path.append(path[-1])
+        return new_path
+
 
     def find_path(self, start, end):
         for wall in self.game.walls:
             if wall.intersect(start, end):
-                p1s, p1e = self.find_path(start, wall.p1), self.find_path(wall.p1, end)
-                p2s, p2e = self.find_path(start, wall.p2), self.find_path(wall.p2, end)
-                if p1s[0] + p1e[0] >= p2s[0] + p2e[0]:
-                    return p2s[0] + p2e[0], p2s[1] + p2e[1]
-                else:
-                    return p1s[0] + p1e[0], p1s[1] + p1e[1]
+                paths = [(self.find_path(start, border), self.find_path(border, end)) for border in wall.extremity]
+                best = min(paths, key=lambda x: x[0][0] + x[1][0])
+                return best[0][0] + best[1][0], best[0][1] + best[1][1]
         return self.game.dist(start, end), [end]
 
     def attackers_set(self):
@@ -104,9 +139,9 @@ class Zombie(Printable):
             if not self.target_lock:
                 self.find_target()
             if self.target_lock:
-                if not self.tower_reach:
+                if not self.tower_reach and self.path is not None:
                     dist = self.dist_point(*self.path[0])
-                    if dist > (self.target.size + self.range + self.size) * (len(self.path) == 1) + self.speed:
+                    if dist > (self.target.size + self.range + self.size) * (len(self.path) == 1) + self.speed * self.game.moving_action:
                         self.x += self.speed * self.game.moving_action * (self.path[0][0] - self.x) / dist
                         self.y += self.speed * self.game.moving_action * (self.path[0][1] - self.y) / dist
                     else:

@@ -252,7 +252,7 @@ title = "Py-Tower-Defense-Config"
         size=14
         value=3000
         experience=100
-            special_atk_rate=100
+            special_atk_rate=500
             special_range=100
             special_pause=0
             special_parameters=["mini_spawn_num", "maxi_spawn_num", "spawnable_zombies", "spawnable_weights"]
@@ -303,6 +303,7 @@ title = "Py-Tower-Defense-Config"
 [wall]
 
     color="BLACK"
+    basics_parameters=["p1", "p2", "p1_borders", "p2_borders"]
 
 
 [animation]
@@ -438,7 +439,11 @@ title = "Py-Tower-Defense-Config"
 
 
     [window.debug]
+
         name="Debug"
+        width=800
+        height=400
+
 
     [window.shop]
 
